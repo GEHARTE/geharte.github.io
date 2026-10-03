@@ -1,0 +1,4 @@
+{
+  "_leia-me": "Artigos selecionados pela equipe. Esquema em documentation/requisitos/estrutura-do-site.md. Artigos publicados pelo editor entram sozinhos (via indice.json); use este arquivo para textos externos ou destaques.",
+  "artigos": []
+}

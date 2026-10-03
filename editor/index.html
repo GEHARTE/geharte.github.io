@@ -16,6 +16,7 @@
       <button class="tn" disabled title="Em breve">Máquina de escrever</button>
       <button class="tn" disabled title="Em breve">Tipografia</button>
     </div>
+    <button id="btn-inventory" class="btn" title="Meu inventário: todas as páginas que você criou aqui" aria-label="Meu inventário"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="5" rx="1"/><rect x="6" y="10" width="12" height="5" rx="1"/><rect x="6" y="17" width="12" height="4" rx="1"/></svg><span>Inventário</span></button>
     <input id="title" aria-label="Título da página" placeholder="Título da página" maxlength="80">
     <span id="savestate"></span>
     <span class="spacer"></span>
@@ -48,7 +49,7 @@
     </nav>
     <aside id="lib" aria-label="Biblioteca"></aside>
     <div id="center">
-      <div id="pathbar" title="Arquivo desta página no site. O rascunho fica salvo neste navegador."><span id="pb-path"></span><i>·</i><span id="pb-name"></span><i>·</i><span id="pb-dev"></span></div>
+      <div id="pathbar" title="Qual página você está editando: tipo, estado (só no inventário / publicada) e arquivo. O rascunho fica salvo neste navegador."><span id="pb-kind" class="chip"></span><span id="pb-state" class="chip"></span><span id="pb-path"></span><i>·</i><span id="pb-name"></span><span id="pb-dev"></span></div>
       <main id="viewport">
         <div id="stage"><div id="holder"></div><div id="overlay"></div></div>
       </main>

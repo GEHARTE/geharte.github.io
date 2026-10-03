@@ -10,11 +10,13 @@
 </head>
 <body class="landing">
   <main class="page">
-    <!-- BANNER: lettering à mão da Mariane Kannup. Troque assets/lettering/geharte.svg pela arte final, se mudar. -->
+    <!-- PAINEL: lettering à mão da Mariane Kannup. Troque assets/lettering/geharte.svg pela arte final, se mudar. -->
     <section class="banner" aria-label="Geharte">
       <div class="mark">
         <h1 class="sr-only">Geharte</h1>
-        <img class="word" src="assets/lettering/geharte.svg" alt="" width="1224" height="510" decoding="async">
+        <!-- O nome SENDO ESCRITO: o próprio SVG anima uma máscara que segue o traço da caneta (~5,4 s, CSS puro, sem JS).
+             Versão estática (sem animação): assets/lettering/geharte.svg. Como foi gerado: tools/lettering/README.md -->
+        <img class="word" src="assets/lettering/geharte-escrita.svg" alt="" width="1224" height="510" decoding="async">
         <svg class="orn" viewBox="0 0 1224 510" aria-hidden="true" fill="none" stroke="#17161d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path class="tw t1" d="M800 22c2 20 8 28 28 30-20 3-26 10-28 30-3-20-9-27-30-30 21-2 27-9 30-30z"/>
           <g class="tw t2"><path d="M385 62v38M366 81h38"/></g>
@@ -26,9 +28,18 @@
       </div>
     </section>
 
-    <section class="foot">
-      <p class="texto">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas faucibus mollis interdum. Cras mattis consectetur purus sit amet fermentum. Donec ullamcorper nulla non metus auctor fringilla.</p>
-      <a class="login" id="login" href="login.html">Login</a>
+    <!-- TEXTO PROVISÓRIO (lorem ipsum, até 250 palavras): será trocado pelo texto oficial. A fonte encolhe sozinha para nada rolar. -->
+    <section class="side">
+      <div class="texto-box">
+        <div class="texto" id="texto">
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas faucibus mollis interdum. Cras mattis consectetur purus sit amet fermentum. Donec ullamcorper nulla non metus auctor fringilla.</p>
+          <p>Vestibulum id ligula porta felis euismod semper. Aenean lacinia bibendum nulla sed consectetur. Nullam quis risus eget urna mollis ornare vel eu leo. Curabitur blandit tempus porttitor, sed posuere consectetur est at lobortis. Etiam porta sem malesuada magna mollis euismod.</p>
+          <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+          <p>Nullam id dolor id nibh ultricies vehicula ut id elit. Sed posuere consectetur est at lobortis. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Integer posuere erat a ante venenatis dapibus posuere velit aliquet, donec sed odio dui. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+        </div>
+      </div>
+      <!-- Botão único: "Login" (→ login.html?next=home/) sem sessão; "Entrar" (→ home/) quando já há sessão. Ajustado por assets/js/home.js. -->
+      <a class="entrar" id="entrar" href="login.html?next=home/" aria-label="Login: entrar com a sua conta do Geharte"><span class="rot">Login</span> <span aria-hidden="true">→</span></a>
     </section>
   </main>
   <script type="module" src="assets/js/home.js"></script>

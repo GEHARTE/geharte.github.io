@@ -2,7 +2,7 @@ import { h, $, $$ } from '../core/dom.js';
 import { session, logout } from '../core/auth.js';
 import { Store } from '../core/store.js';
 import { loadAllFonts } from '../core/fonts.js';
-import { newDoc, DEV_LABEL } from '../core/model.js';
+import { newDoc, normalizeDoc, DEV_LABEL, KINDS, PROFILE_ID, STATE_LABEL, docState, publishDir, viewerQuery } from '../core/model.js';
 import { BASE } from '../core/util.js';
 import { S, on, emit, touch, loadDoc, setDevice, setTool, undo, redo, canUndo, canRedo, select, selEls, removeEls, duplicate, copy, paste, reorder, saveNow, commit } from './state.js';
 import { initStage, fit, setZoom, nudge, editText, applyAnimState } from './stage.js';
@@ -10,6 +10,7 @@ import { initPanel } from './panels.js';
 import { initLibrary } from './library.js';
 import { insertImageFile, insertSvg } from './tools.js';
 import { exportProject, importProject, openPublish, openPreview } from './publish.js';
+import { openInventory, docPath, rememberDoc, lastDocId } from './inventory.js';
 import { toast } from './ui.js';
 import { icon } from './icons.js';
 
@@ -22,7 +23,7 @@ async function loadAssetsFor(doc) {
   for (const [id, m] of Object.entries(doc.assets)) {
     if (S.assets.has(id)) continue;
     try {
-      const r = await fetch(`${BASE}perfis/${S.slug}/assets/${id}.${m.ext}`);
+      const r = await fetch(`${BASE}${publishDir(S.slug, doc)}assets/${id}.${m.ext}`);
       if (!r.ok) continue;
       const blob = await r.blob();
       await Store.putAsset(S.slug, id, blob, m);
@@ -38,19 +39,29 @@ async function main() {
   $('#who').textContent = sess.nome;
   loadAllFonts();
 
-  let doc = await Store.loadDoc(S.slug), fresh = false;
+  // qual página abrir: ?doc=<id>  >  a última editada (localStorage)  >  a mais recente do inventário
+  //  >  (inventário vazio) o perfil publicado, ou uma página nova
+  const want = new URLSearchParams(location.search).get('doc');
+  const docs = await Store.listDocs(S.slug);
+  let rec = docs.find((d) => d.id === want) || docs.find((d) => d.id === lastDocId(S.slug)) || docs[0];
+  let doc = rec?.doc, updatedAt = rec?.updatedAt || 0, fresh = false;
+  if (want && !docs.some((d) => d.id === want)) toast('Não achei essa página no seu inventário; abri outra.', 'err');
   if (!doc) {
-    try { const r = await fetch(`${BASE}perfis/${S.slug}/page.json`, { cache: 'no-cache' }); if (r.ok) doc = await r.json(); } catch { /* sem publicado */ }
+    try {
+      const r = await fetch(`${BASE}perfis/${S.slug}/page.json`, { cache: 'no-cache' });
+      if (r.ok) { doc = normalizeDoc(await r.json(), S.slug); updatedAt = doc.publishedAt ? Date.parse(doc.publishedAt) : Date.now(); await Store.saveDoc(S.slug, doc, { updatedAt }); }
+    } catch { /* sem publicado */ }
   }
   if (!doc) { doc = newDoc(S.slug, `Página de ${sess.nome}`); fresh = true; }
-  doc.assets ||= {};
+  normalizeDoc(doc, S.slug);
+  rememberDoc(S.slug, doc.id);
   await loadAssetsFor(doc);
   S.doc = doc;
 
   initStage({ vp: $('#viewport'), stage: $('#stage'), holder: $('#holder'), overlay: $('#overlay') });
   initPanel($('#props'));
   const lib = initLibrary($('#lib'));
-  loadDoc(doc);
+  loadDoc(doc, updatedAt);
   fit();
   wireTop();
   wireKeys();
@@ -64,14 +75,19 @@ async function main() {
 function wireTop() {
   const title = $('#title');
   title.value = S.doc.title;
-  // barra discreta acima do canvas: qual arquivo/página está sendo editado
+  // barra discreta acima do canvas: tipo, estado e arquivo da página que está sendo editada
   const paintPath = () => {
-    $('#pb-path').textContent = `perfis/${S.slug}/page.json`;
-    $('#pb-name').textContent = S.doc.title?.trim() || 'sem título';
+    const d = S.doc, state = docState(d, S.updatedAt, S.changed);
+    const k = $('#pb-kind'), st = $('#pb-state');
+    k.textContent = KINDS[d.kind]; k.className = `chip kind-${d.kind}`;
+    st.textContent = STATE_LABEL[state]; st.className = `chip st-${state}`;
+    $('#pb-path').textContent = docPath(S.slug, d);
+    $('#pb-name').textContent = d.title?.trim() || 'sem título';
     $('#pb-dev').textContent = 'editando: ' + DEV_LABEL[S.dev === 'm' ? 'm' : 'd'];
   };
   paintPath();
-  on('struct', paintPath); on('device', paintPath);
+  on('struct', paintPath); on('device', paintPath); on('saved', paintPath); on('dirty', paintPath); on('published', paintPath);
+  $('#btn-inventory').onclick = () => openInventory();
   title.addEventListener('input', () => { S.doc.title = title.value; paintPath(); touch(); });
   on('struct', () => { if (document.activeElement !== title) title.value = S.doc.title; });
 
@@ -122,7 +138,8 @@ function wireTop() {
     const imp = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: () => imp.files[0] && importProject(imp.files[0]) });
     const item = (ic, label, fn) => h('button', { html: icon(ic) + `<span>${label}</span>`, onclick: () => { m.remove(); fn(); } });
     const m = h('div', { id: 'menu', class: 'popover menu' },
-      item('eye', 'Ver página publicada', () => window.open(`${BASE}perfil.html?u=${S.slug}`, '_blank')),
+      item('eye', 'Ver página publicada', () => (S.doc.publishedAt ? window.open(`${BASE}perfil.html?${viewerQuery(S.slug, S.doc)}`, '_blank') : toast('Esta página ainda não foi publicada.', 'err'))),
+      item('stack', 'Meu inventário', () => openInventory()),
       item('download', 'Exportar projeto (.json)', exportProject),
       item('upload', 'Importar projeto…', () => imp.click()), imp,
       h('hr'),

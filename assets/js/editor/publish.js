@@ -2,7 +2,9 @@
 import { h } from '../core/dom.js';
 import { BASE, blobToDataURL, dataURLToBlob, downloadBlob } from '../core/util.js';
 import { Store } from '../core/store.js';
-import { S, loadDoc, saveNow, emit } from './state.js';
+import { S, saveNow, emit } from './state.js';
+import { normalizeDoc, PROFILE_ID, publishDir, viewerQuery, KINDS } from '../core/model.js';
+import { goToDoc } from './inventory.js';
 import { btn, modal, toast } from './ui.js';
 import { icon } from './icons.js';
 
@@ -15,8 +17,8 @@ export async function exportProject() {
     const a = S.assets.get(id);
     if (a) assets[id] = { ext: a.ext, mime: a.mime, w: a.w, h: a.h, data: await blobToDataURL(a.blob) };
   }
-  const out = { format: 'geharte-projeto', v: 1, slug: S.slug, doc: S.doc, assets };
-  downloadBlob(`geharte-${S.slug}-${new Date().toISOString().slice(0, 10)}.json`, new Blob([JSON.stringify(out)], { type: 'application/json' }));
+  const out = { format: 'geharte-projeto', v: 2, slug: S.slug, id: S.doc.id, kind: S.doc.kind, doc: S.doc, assets };
+  downloadBlob(`geharte-${S.slug}-${S.doc.id}-${new Date().toISOString().slice(0, 10)}.json`, new Blob([JSON.stringify(out)], { type: 'application/json' }));
 }
 
 export async function importProject(file) {
@@ -29,10 +31,18 @@ export async function importProject(file) {
     await Store.putAsset(S.slug, id, blob, meta);
     S.assets.set(id, { ...meta, blob, url: URL.createObjectURL(blob) });
   }
-  data.doc.owner = S.slug;
-  loadDoc(data.doc);
-  emit('assets'); emit('fit');
-  toast('Projeto importado.', 'ok');
+  const doc = normalizeDoc(data.doc, S.slug);
+  doc.owner = S.slug;
+  if (data.kind && KINDS[data.kind]) doc.kind = data.kind;
+  if (data.id && doc.kind === 'artigo') doc.id = String(data.id).replace(/[^a-z0-9-]/g, '') || doc.id;
+  if (doc.kind === 'perfil') doc.id = PROFILE_ID;
+  await saveNow();                                   // não perder o que está aberto agora
+  const existing = await Store.loadDoc(S.slug, doc.id);
+  if (existing && !confirm(`Já existe “${existing.title || doc.id}” no seu inventário com este mesmo identificador. Substituir pela página importada?`)) return;
+  if (doc.id === S.doc.id) S.deleted = true;           // o que está na tela vai ser substituído: não regravar por cima
+  await Store.saveDoc(S.slug, doc);
+  toast('Projeto importado para o seu inventário.', 'ok');
+  await goToDoc(doc.id);
 }
 
 // ---------- publicar no GitHub ----------
@@ -83,6 +93,7 @@ export async function openPublish() {
     go.disabled = true; log.textContent = '';
     const say = (t) => { log.textContent += t + '\n'; log.scrollTop = log.scrollHeight; };
     const base = { repo: repo.value.trim(), branch: branch.value.trim() || 'main', token: token.value.trim() };
+    const dir = publishDir(S.slug, S.doc), what = S.doc.kind === 'artigo' ? `artigo ${S.slug}/${S.doc.id}` : `perfil ${S.slug}`;
     try {
       const ids = usedAssetIds().filter((id) => S.assets.has(id));
       const meta = {};
@@ -91,14 +102,18 @@ export async function openPublish() {
         meta[id] = { ext: a.ext, mime: a.mime, w: a.w, h: a.h };
         say(`Imagem ${id}.${a.ext}…`);
         const b64 = (await blobToDataURL(a.blob)).split(',')[1];
-        const r = await putFile({ ...base, path: `perfis/${S.slug}/assets/${id}.${a.ext}`, b64, message: `perfil ${S.slug}: imagem ${id}`, skipIfExists: true });
+        const r = await putFile({ ...base, path: `${dir}assets/${id}.${a.ext}`, b64, message: `${what}: imagem ${id}`, skipIfExists: true });
         say(`  ${r}`);
       }
-      const pub = { ...S.doc, assets: meta, publishedAt: new Date().toISOString() };
+      const now = Date.now(), pub = { ...S.doc, assets: meta, publishedAt: new Date(now).toISOString() };
       say('Página (page.json)…');
-      await putFile({ ...base, path: `perfis/${S.slug}/page.json`, b64: utf8b64(JSON.stringify(pub)), message: `perfil ${S.slug}: atualização` });
+      await putFile({ ...base, path: `${dir}page.json`, b64: utf8b64(JSON.stringify(pub)), message: `${what}: atualização` });
+      // só depois do sucesso: a página passa a "Publicada" (e o carimbo local acompanha, para não parecer alterada)
+      S.doc.publishedAt = pub.publishedAt;
+      await saveNow({ updatedAt: now });
+      emit('published');
       say('Pronto! O GitHub Pages leva cerca de 1 minuto para atualizar o site.');
-      const url = new URL(`${BASE}perfil.html?u=${S.slug}`).href;
+      const url = new URL(`${BASE}perfil.html?${viewerQuery(S.slug, S.doc)}`).href;
       link.replaceChildren(h('a', { href: url, target: '_blank', rel: 'noopener' }, 'Abrir página publicada ↗'));
     } catch (e) {
       say('✗ ' + e.message);
@@ -108,7 +123,7 @@ export async function openPublish() {
 
   modal({ title: 'Publicar página', wide: true, body: [
     warn.length ? h('div', { class: 'warnbox' }, warn.map((w) => h('p', {}, '⚠ ' + w))) : null,
-    h('p', { class: 'hint' }, 'A publicação grava ', h('code', {}, `perfis/${S.slug}/`), ' no repositório do site. Quem pode publicar é quem tem permissão de escrita no repositório — por isso é preciso um token.'),
+    h('p', { class: 'hint' }, 'A publicação grava ', h('code', {}, publishDir(S.slug, S.doc)), ` no repositório do site (${KINDS[S.doc.kind].toLowerCase()}). Quem pode publicar é quem tem permissão de escrita no repositório — por isso é preciso um token.`),
     h('label', { class: 'fld' }, h('span', { class: 'fl' }, 'Repositório'), repo),
     h('label', { class: 'fld' }, h('span', { class: 'fl' }, 'Branch'), branch),
     h('label', { class: 'fld' }, h('span', { class: 'fl' }, 'Token do GitHub (fine-grained, com Contents: read/write)'), token),
@@ -122,7 +137,7 @@ export async function openPublish() {
 export async function openPreview(startDev = S.dev) {
   await saveNow();
   let dev = startDev;
-  const url = () => `${BASE}perfil.html?u=${encodeURIComponent(S.slug)}&src=draft&embed=1&t=${Date.now()}`;
+  const url = () => `${BASE}perfil.html?${viewerQuery(S.slug, S.doc)}&src=draft&embed=1&t=${Date.now()}`;
   const area = h('div', { class: 'pv-area' });
   const mk = (d, label, ic) => btn({ label, ic, cls: d === dev ? 'on' : '', onClick: () => { dev = d; draw(); bar.querySelectorAll('[data-d]').forEach((b) => b.classList.toggle('on', b.dataset.d === dev)); } });
   const bd = mk('d', 'PC', 'monitor'), bm = mk('m', 'Celular', 'phone');
@@ -130,7 +145,7 @@ export async function openPreview(startDev = S.dev) {
   const close = () => { back.remove(); removeEventListener('keydown', esc); removeEventListener('resize', draw); };
   const esc = (e) => { if (e.key === 'Escape') close(); };
   const bar = h('div', { class: 'pv-bar' }, h('b', {}, 'Visualização'), h('div', { class: 'seg2' }, bd, bm),
-    h('a', { class: 'btn', target: '_blank', rel: 'noopener', href: `${BASE}perfil.html?u=${encodeURIComponent(S.slug)}&src=draft&toolbar=1`, html: icon('link') + '<span>Abrir em outra aba</span>' }),
+    h('a', { class: 'btn', target: '_blank', rel: 'noopener', href: `${BASE}perfil.html?${viewerQuery(S.slug, S.doc)}&src=draft&toolbar=1`, html: icon('link') + '<span>Abrir em outra aba</span>' }),
     h('span', { class: 'spacer' }), btn({ label: 'Fechar', ic: 'x', onClick: close }));
   const back = h('div', { class: 'pv-back' }, bar, area);
   document.body.append(back);

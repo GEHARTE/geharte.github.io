@@ -1,7 +1,7 @@
 // Estado do editor: documento, seleção, histórico (desfazer/refazer) e autosave.
 import { clone, debounce, uid } from '../core/util.js';
 import { Store } from '../core/store.js';
-import { newDoc, cloneElement } from '../core/model.js';
+import { cloneElement } from '../core/model.js';
 
 const handlers = {};
 export const on = (ev, fn) => { (handlers[ev] ||= []).push(fn); };
@@ -9,6 +9,7 @@ export const emit = (ev, d) => (handlers[ev] || []).forEach((fn) => fn(d));
 
 export const S = {
   slug: '', user: null, doc: null, dev: 'd',
+  updatedAt: 0, changed: false,   // carimbo do último rascunho salvo / há edição ainda não salva
   sel: [], tool: 'select', shapeKind: 'rect',
   pen: { stroke: null, sw: 6 },   // stroke null = automático (contrasta com o fundo)
   zoom: 1, anim: true, editing: null,
@@ -34,18 +35,28 @@ function pushSnapshot() {
 }
 const snapSoon = debounce(pushSnapshot, 450);
 
+async function persist(opts) {
+  if (S.deleted) return;   // a página aberta foi excluída do inventário: não recriar
+  const t = await Store.saveDoc(S.slug, S.doc, opts);
+  S.updatedAt = t; S.changed = false;
+  emit('saved', t);
+}
 export const save = debounce(async () => {
-  try { await Store.saveDoc(S.slug, S.doc); emit('saved', Date.now()); } catch (e) { emit('saveerror', e); }
+  try { await persist(); } catch (e) { emit('saveerror', e); }
 }, 700);
 
-export function touch() { snapSoon(); save(); emit('dirty'); }
+export function touch() { S.changed = true; snapSoon(); save(); emit('dirty'); }
 
-export function commit() { snapSoon.cancel(); pushSnapshot(); save(); emit('dirty'); }
+export function commit() { S.changed = true; snapSoon.cancel(); pushSnapshot(); save(); emit('dirty'); }
 
-export async function saveNow() { snapSoon.flush(); save.cancel(); await Store.saveDoc(S.slug, S.doc); emit('saved', Date.now()); }
+export async function saveNow(opts) { snapSoon.flush(); save.cancel(); await persist(opts); }
 
 function restore(s) {
-  S.doc = JSON.parse(s);
+  // desfazer/refazer não mexe na identidade da página: id, tipo, dono e data de publicação continuam os atuais
+  const keep = { id: S.doc.id, kind: S.doc.kind, owner: S.doc.owner };
+  if (S.doc.publishedAt) keep.publishedAt = S.doc.publishedAt;
+  S.doc = Object.assign(JSON.parse(s), keep);
+  S.changed = true;
   S.sel = S.sel.filter((id) => byId(id));
   emit('struct');
   emit('select');
@@ -58,8 +69,9 @@ export function redo() { if (hi < hist.length - 1) { hi++; restore(hist[hi]); } 
 export const canUndo = () => hi > 0;
 export const canRedo = () => hi < hist.length - 1;
 
-export function loadDoc(doc) {
+export function loadDoc(doc, updatedAt = 0) {
   S.doc = doc;
+  S.updatedAt = updatedAt; S.changed = false;
   S.sel = [];
   hist = []; hi = -1;
   pushSnapshot();
@@ -142,4 +154,3 @@ export function paste() {
   return true;
 }
 
-export function resetDoc(owner, title) { loadDoc(newDoc(owner, title)); }

@@ -1,6 +1,13 @@
 import { login, session, loadConfig, loginWithGoogle } from './core/auth.js';
 
-if (session()) location.replace('editor/');
+// Para onde ir depois de entrar: ?next=<caminho relativo dentro do site>. Qualquer outra coisa (URL, //, :, ..) é ignorada
+// (senão viraria redirecionamento aberto). Sem next: o editor.
+const nextUrl = (() => {
+  const n = new URLSearchParams(location.search).get('next') || '';
+  return /^[a-z0-9][a-z0-9._\/-]*(\?[a-z0-9=&._-]*)?(#[a-z0-9_-]*)?$/i.test(n) && !n.includes('..') && !n.includes('//') ? n : 'editor/';
+})();
+
+if (session()) location.replace(nextUrl);
 
 const form = document.getElementById('form'), err = document.getElementById('err'), go = document.getElementById('go');
 const note = document.getElementById('g-note'), gbtn = document.getElementById('g-btn');
@@ -12,7 +19,7 @@ form.addEventListener('submit', async (e) => {
   go.disabled = true; go.textContent = 'Entrando…';
   try {
     await login(form.u.value, form.p.value);
-    location.href = 'editor/';
+    location.href = nextUrl;
   } catch (ex) {
     err.textContent = ex.message;
     go.disabled = false; go.textContent = 'Entrar';
@@ -41,7 +48,7 @@ if (!cfg.googleClientId) {
       client_id: cfg.googleClientId,
       callback: async ({ credential }) => {
         err.textContent = ''; note.textContent = 'Verificando…';
-        try { await loginWithGoogle(credential, cfg.googleClientId); location.href = 'editor/'; }
+        try { await loginWithGoogle(credential, cfg.googleClientId); location.href = nextUrl; }
         catch (ex) { note.textContent = ''; err.textContent = ex.message; }
       },
     });

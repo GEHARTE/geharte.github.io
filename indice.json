@@ -1,0 +1,23 @@
+{
+  "perfis": [
+    {
+      "slug": "adryan",
+      "nome": "Adryan Andreoli",
+      "title": "Boas-vindas, Adryan",
+      "publishedAt": "2026-10-03T21:33:35.745Z"
+    },
+    {
+      "slug": "mariane",
+      "nome": "Mariane Kannup",
+      "title": "Boas-vindas, Mariane",
+      "publishedAt": "2026-10-03T21:33:35.757Z"
+    },
+    {
+      "slug": "nicole",
+      "nome": "Nicole Cristine",
+      "title": "Boas-vindas, Nicole",
+      "publishedAt": "2026-10-03T21:33:35.750Z"
+    }
+  ],
+  "artigos": []
+}
