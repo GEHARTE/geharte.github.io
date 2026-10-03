@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice">
+  <!-- Banner provisório. Substitua por assets/banner.(jpg|png|svg) e ajuste o src em index.html. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b1830"/><stop offset="1" stop-color="#3a1f3d"/></linearGradient>
+    <filter id="b"><feGaussianBlur stdDeviation="46"/></filter>
+  </defs>
+  <rect width="1600" height="600" fill="url(#g)"/>
+  <g filter="url(#b)">
+    <circle r="190" cx="360" cy="220" fill="#e4572e" opacity=".85"><animate attributeName="cx" values="360;520;360" dur="14s" repeatCount="indefinite"/><animate attributeName="cy" values="220;330;220" dur="11s" repeatCount="indefinite"/></circle>
+    <circle r="170" cx="1180" cy="400" fill="#ffb703" opacity=".7"><animate attributeName="cx" values="1180;1020;1180" dur="16s" repeatCount="indefinite"/></circle>
+    <circle r="150" cx="820" cy="120" fill="#7b5cff" opacity=".7"><animate attributeName="cy" values="120;260;120" dur="12s" repeatCount="indefinite"/></circle>
+  </g>
+  <g fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="2">
+    <circle cx="1320" cy="140" r="90"/><circle cx="1320" cy="140" r="140"/><circle cx="1320" cy="140" r="190"/>
+    <path d="M0 520 C 300 440 500 600 800 520 S 1300 440 1600 520"/>
+  </g>
+</svg>

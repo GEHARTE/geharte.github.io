@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23e4572e%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-size=%2720%27 font-family=%27sans-serif%27 font-weight=%27700%27 text-anchor=%27middle%27 fill=%27white%27%3Eg%3C/text%3E%3C/svg%3E">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Entrar — Geharte</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+  <link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body class="login-page">
+  <form class="card" id="form" autocomplete="on" novalidate>
+    <h1>Entrar</h1>
+    <p class="sub">Acesse o editor da sua página.</p>
+    <div id="google-area">
+      <div id="g-btn"></div>
+      <p class="hint-g" id="g-note"></p>
+    </div>
+    <div class="ou" id="ou"><span>ou entre com usuário e senha</span></div>
+    <label class="f">Usuário<input name="u" autocomplete="username" autocapitalize="none" required autofocus></label>
+    <label class="f">Senha<input name="p" type="password" autocomplete="current-password" required></label>
+    <p class="err" id="err" role="alert"></p>
+    <button class="btn accent" id="go">Entrar</button>
+    <a class="back" href="./">← Voltar para o início</a>
+  </form>
+  <script type="module" src="assets/js/login.js"></script>
+</body>
+</html>

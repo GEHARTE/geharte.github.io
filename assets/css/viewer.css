@@ -1,0 +1,15 @@
+html,body{margin:0}
+body.viewer{min-height:100vh;overflow-x:hidden;font-family:system-ui,sans-serif;background:#fff}
+#root{position:relative}
+.stage{position:relative;margin:0 auto;overflow:hidden}
+.artboard{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden}
+.msg{text-align:center;padding:80px 24px;color:#666;font:16px/1.5 system-ui}
+.phone{margin:56px auto 40px;border-radius:38px;box-shadow:0 0 0 10px #17161d,0 40px 80px -20px rgba(0,0,0,.5);overflow:hidden}
+body.framed{background:#2b2a33 !important}
+#badge{position:fixed;right:12px;bottom:12px;z-index:50;font:600 11px system-ui;letter-spacing:.02em;color:#fff;background:rgba(23,22,29,.72);backdrop-filter:blur(6px);padding:6px 11px;border-radius:99px;text-decoration:none;opacity:.8}
+#badge:hover{opacity:1}
+body.embed #badge{display:none}
+#toolbar{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:60;display:flex;gap:4px;background:rgba(23,22,29,.9);padding:4px;border-radius:99px;backdrop-filter:blur(8px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+#toolbar[hidden]{display:none}
+#toolbar a{color:#cfcbe0;text-decoration:none;font:600 13px system-ui;padding:7px 16px;border-radius:99px}
+#toolbar a.on{background:#fff;color:#17161d}
