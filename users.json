@@ -11,5 +11,10 @@
   {
     "slug": "mariane",
     "nome": "Mariane Kannup"
+  },
+  {
+    "slug": "nicholas",
+    "nome": "Nicholas",
+    "emailHash": "e71f01a5b7a926537f2e8b8f3bdd1cd5b7e9161fb3439716aa6e2e5c51e48b97"
   }
 ]
