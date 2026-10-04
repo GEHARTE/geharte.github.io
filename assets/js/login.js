@@ -1,10 +1,10 @@
 import { login, session, loadConfig, loginWithGoogle } from './core/auth.js';
 
 // Para onde ir depois de entrar: ?next=<caminho relativo dentro do site>. Qualquer outra coisa (URL, //, :, ..) é ignorada
-// (senão viraria redirecionamento aberto). Sem next: o editor.
+// (senão viraria redirecionamento aberto). Sem next: a home do blog.
 const nextUrl = (() => {
   const n = new URLSearchParams(location.search).get('next') || '';
-  return /^[a-z0-9][a-z0-9._\/-]*(\?[a-z0-9=&._-]*)?(#[a-z0-9_-]*)?$/i.test(n) && !n.includes('..') && !n.includes('//') ? n : 'editor/';
+  return /^[a-z0-9][a-z0-9._\/-]*(\?[a-z0-9=&._-]*)?(#[a-z0-9_-]*)?$/i.test(n) && !n.includes('..') && !n.includes('//') ? n : 'home/';
 })();
 
 if (session()) location.replace(nextUrl);

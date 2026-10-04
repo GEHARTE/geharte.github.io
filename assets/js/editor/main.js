@@ -34,7 +34,7 @@ async function loadAssetsFor(doc) {
 
 async function main() {
   const sess = session();
-  if (!sess) { location.replace('../login.html'); return; }
+  if (!sess) { location.replace('../login.html?next=editor/'); return; }
   S.user = sess; S.slug = sess.slug;
   $('#who').textContent = sess.nome;
   loadAllFonts();

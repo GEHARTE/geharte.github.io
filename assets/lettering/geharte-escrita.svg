@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1224 510" role="img" aria-label="Geharte">
   <title>Geharte</title>
-  <!-- Lettering à mão da Mariane Kannup, vetorizado da foto do quadro (2026-10-03) — o desenho original dizia "Gehrarte"; o "r" a mais foi removido.
+  <!-- Lettering à mão da Mariane Kanupp, vetorizado da foto do quadro (2026-10-03) — o desenho original dizia "Gehrarte"; o "r" a mais foi removido.
        Versão animada: o desenho é liberado por uma máscara que segue a linha central das letras, na ordem em que a caneta passaria
        (gerada por tools/gerar-escrita.py). Sem JavaScript; funciona em <img>. -->
   <style>.c{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:var(--l);stroke-dashoffset:var(--l);animation:w var(--t) linear var(--b) forwards}@keyframes w{to{stroke-dashoffset:0}}.fin{opacity:0;animation:f .5s ease-out 5.25s forwards}@keyframes f{to{opacity:1}}

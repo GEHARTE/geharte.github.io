@@ -28,6 +28,7 @@ body.landing{background:var(--papel);color:var(--tinta);font:17px/1.6 var(--font
 .texto-box{flex:0 1 auto;min-height:0;overflow:hidden}
 .texto{font-size:var(--fs,clamp(14px,1.25vw,18px));color:var(--tinta-2);line-height:1.6;max-width:56ch}
 .texto p{margin:0 0 .8em}.texto p:last-child{margin:0}
+.texto .reuniao{margin-top:1.1em;font-size:.9em;font-style:italic;color:var(--tinta-3,var(--tinta-2));opacity:.85}
 .entrar{flex:none;align-self:flex-start;display:inline-flex;align-items:center;gap:10px;background:var(--tinta);color:var(--papel);text-decoration:none;font:600 16px/1 var(--font);padding:15px 30px;border-radius:999px;transition:transform .15s,background .15s,box-shadow .15s;box-shadow:0 8px 22px -12px rgba(23,22,29,.7)}
 .entrar:hover{background:#34303f;transform:translateY(-1px)}
 .entrar:hover span[aria-hidden]{transform:translateX(3px)}
