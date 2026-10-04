@@ -1,0 +1,153 @@
+{
+  "v": 1,
+  "id": "site-home",
+  "kind": "pagina",
+  "owner": "",
+  "title": "Home — faixa de destaque",
+  "page": {
+    "bg": {
+      "c": "#f5f0e4",
+      "g": null
+    },
+    "h": {
+      "d": 240,
+      "m": 330
+    }
+  },
+  "elements": [
+    {
+      "id": "e4hc9dqm",
+      "t": "text",
+      "name": "Rótulo",
+      "lock": false,
+      "hide": false,
+      "f": {
+        "d": {
+          "x": 150,
+          "y": 56,
+          "w": 900,
+          "h": 18,
+          "r": 0
+        },
+        "m": {
+          "x": 24,
+          "y": 40,
+          "w": 342,
+          "h": 16,
+          "r": 0,
+          "fs": 12
+        }
+      },
+      "s": {
+        "fontFamily": "Inter",
+        "fontSize": 13,
+        "fontWeight": 700,
+        "italic": false,
+        "underline": false,
+        "upper": true,
+        "align": "left",
+        "color": "#8a3b1f",
+        "lh": 1.2,
+        "ls": 0.22
+      },
+      "link": null,
+      "text": "DESTAQUE",
+      "ah": true
+    },
+    {
+      "id": "ej2e9j0v",
+      "t": "text",
+      "name": "Título",
+      "lock": false,
+      "hide": false,
+      "f": {
+        "d": {
+          "x": 150,
+          "y": 84,
+          "w": 900,
+          "h": 60,
+          "r": 0
+        },
+        "m": {
+          "x": 24,
+          "y": 64,
+          "w": 342,
+          "h": 90,
+          "r": 0,
+          "fs": 28
+        }
+      },
+      "s": {
+        "fontFamily": "Playfair Display",
+        "fontSize": 44,
+        "fontWeight": 700,
+        "italic": false,
+        "underline": false,
+        "upper": false,
+        "align": "left",
+        "color": "#1b1915",
+        "lh": 1.1,
+        "ls": 0
+      },
+      "an": {
+        "in": {
+          "k": "fade",
+          "dur": 0.7,
+          "delay": 0.1,
+          "ease": "ease-out"
+        }
+      },
+      "link": null,
+      "text": "Anuncie aqui o que merece destaque",
+      "ah": true
+    },
+    {
+      "id": "esyrjwn2",
+      "t": "text",
+      "name": "Chamada",
+      "lock": false,
+      "hide": false,
+      "f": {
+        "d": {
+          "x": 150,
+          "y": 156,
+          "w": 900,
+          "h": 60,
+          "r": 0
+        },
+        "m": {
+          "x": 24,
+          "y": 176,
+          "w": 342,
+          "h": 110,
+          "r": 0,
+          "fs": 15
+        }
+      },
+      "s": {
+        "fontFamily": "Lora",
+        "fontSize": 19,
+        "fontWeight": 400,
+        "italic": true,
+        "underline": false,
+        "upper": false,
+        "align": "left",
+        "color": "#55503f",
+        "lh": 1.5,
+        "ls": 0
+      },
+      "an": {
+        "in": {
+          "k": "fade",
+          "dur": 0.7,
+          "delay": 0.3,
+          "ease": "ease-out"
+        }
+      },
+      "link": null,
+      "text": "Uma exposição, um artigo novo, um aviso da equipe. Esta faixa aparece no topo da home, acima do sumário do periódico — edite o texto ou monte outra composição.",
+      "ah": true
+    }
+  ],
+  "assets": {}
+}

@@ -1,8 +1,8 @@
-// Página de ferramentas: o cartão do editor leva ao editor (com sessão) ou ao login, que volta ao editor.
+// Página de ferramentas: o cartão do editor leva ao painel de documentos (com sessão) ou ao login, que volta a ele.
 import { session } from './core/auth.js';
 
 const card = document.getElementById('card-editor');
 if (card && session()) {
-  card.href = '../editor/';
+  card.href = '../documentos/';
   document.getElementById('acao-editor').textContent = 'Abrir o editor';
 }

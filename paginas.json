@@ -1,0 +1,17 @@
+{
+  "v": 1,
+  "paginas": [
+    {
+      "id": "landing",
+      "titulo": "Landing page",
+      "funcao": "Porta de entrada do site: o nome do Geharte sendo escrito, o texto de apresentação do A.M.A.R. e o botão Login/Entrar. É a primeira coisa que qualquer visitante vê.",
+      "caminho": "index.html"
+    },
+    {
+      "id": "home",
+      "titulo": "Home (página principal)",
+      "funcao": "Página principal do blog. A faixa de destaque do topo é feita aqui, no editor; artigos, páginas da equipe e exposições logo abaixo são montados sozinhos a partir do que a equipe publica.",
+      "caminho": "home/index.html"
+    }
+  ]
+}

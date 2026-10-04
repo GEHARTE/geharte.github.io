@@ -162,3 +162,7 @@ a.cartao:hover .acao span{transform:translateX(4px)}
 .rodape .links{display:flex;gap:18px;flex-wrap:wrap}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* faixa de destaque da home, feita no editor (paginas/home) */
+#destaque-home:empty{display:none}
+#destaque-home{overflow:hidden;border-bottom:1px solid var(--fio)}

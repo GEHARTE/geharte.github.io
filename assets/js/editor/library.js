@@ -1,4 +1,4 @@
-// Biblioteca lateral: elementos, SVGs animados, mídia, modelos e camadas.
+// Biblioteca lateral: elementos, SVGs animados, mídia, Drive, modelos e camadas.
 import { h } from '../core/dom.js';
 import { makeElement, K, W } from '../core/model.js';
 import { sanitizeSvg } from '../core/sanitize.js';
@@ -6,6 +6,7 @@ import { SHAPE_LIST, shapeSvg } from '../core/render.js';
 import { S, on, emit, commit, select } from './state.js';
 import { createShape, addTextPreset, insertSvg, insertSvgBackground, insertImageFile, insertAsset } from './tools.js';
 import { renderLayers } from './layers.js';
+import { driveTab } from './drive.js';
 import { icon } from './icons.js';
 import { btn, toast, modal } from './ui.js';
 
@@ -116,13 +117,14 @@ function applyTemplate(t) {
 }
 
 // ---------- UI ----------
-const TABS = [['els', 'square', 'Elementos'], ['svg', 'burst', 'SVG animado'], ['media', 'image', 'Mídia'], ['tpl', 'template', 'Modelos'], ['layers', 'layers', 'Camadas']];
+const TABS = [['els', 'square', 'Elementos'], ['svg', 'burst', 'SVG animado'], ['media', 'image', 'Mídia'], ['drive', 'cloud', 'Drive'], ['tpl', 'template', 'Modelos'], ['layers', 'layers', 'Camadas']];
 
 export function initLibrary(root) {
   const tabs = h('div', { class: 'lib-tabs' });
   const body = h('div', { class: 'lib-body' });
   root.append(tabs, body);
   let cur = localStorage.getItem('geharte.libtab') || 'els';
+  let cleanup = null;   // aba que precisa limpar algo ao sair (Drive)
 
   const tabEls = {};
   for (const [id, ic, title] of TABS) {
@@ -132,11 +134,12 @@ export function initLibrary(root) {
 
   function show(id) {
     cur = id;
+    cleanup?.(); cleanup = null;
     try { localStorage.setItem('geharte.libtab', id); } catch { /* ok */ }
     for (const k in tabEls) tabEls[k].classList.toggle('on', k === id);
     body.innerHTML = '';
     body.dataset.tab = id;
-    ({ els, svg, media, tpl, layers })[id]();
+    ({ els, svg, media, drive, tpl, layers })[id]();
   }
 
   function els() {
@@ -171,6 +174,8 @@ export function initLibrary(root) {
     if (!used.length) body.append(h('p', { class: 'hint pad' }, 'Nenhuma imagem enviada ainda.'));
     body.append(h('div', { class: 'grid media' }, used.map(([id, a]) => h('button', { class: 'cell', title: 'Inserir', onclick: () => insertAsset(id) }, h('img', { src: a.url, alt: '' })))));
   }
+
+  function drive() { cleanup = driveTab(body); }
 
   function tpl() {
     body.append(h('p', { class: 'hint pad' }, 'Pontos de partida. Tudo é editável depois.'));

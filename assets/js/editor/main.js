@@ -1,17 +1,20 @@
 import { h, $, $$ } from '../core/dom.js';
-import { session, logout } from '../core/auth.js';
+import { session, logout, loadUsers } from '../core/auth.js';
 import { Store } from '../core/store.js';
 import { loadAllFonts } from '../core/fonts.js';
-import { newDoc, normalizeDoc, DEV_LABEL, KINDS, PROFILE_ID, STATE_LABEL, docState, publishDir, viewerQuery } from '../core/model.js';
+import { newDoc, normalizeDoc, DEV_LABEL, KINDS, PROFILE_ID, STATE_LABEL, docState, publishDir, viewerQuery, isSiteId, sitePageId, publisherName } from '../core/model.js';
+import { docPath, prepareSiteDoc } from '../core/docs.js';
+import { canEditSite, registryEntry } from '../core/site.js';
 import { BASE } from '../core/util.js';
 import { S, on, emit, touch, loadDoc, setDevice, setTool, undo, redo, canUndo, canRedo, select, selEls, removeEls, duplicate, copy, paste, reorder, saveNow, commit } from './state.js';
 import { initStage, fit, setZoom, nudge, editText, applyAnimState } from './stage.js';
 import { initPanel } from './panels.js';
 import { initLibrary } from './library.js';
 import { insertImageFile, insertSvg } from './tools.js';
-import { exportProject, importProject, openPublish, openPreview } from './publish.js';
-import { openInventory, docPath, rememberDoc, lastDocId } from './inventory.js';
-import { toast } from './ui.js';
+import { exportProject, buildProject, importProject, openPublish, openPreview } from './publish.js';
+import { goToDocuments } from './nav.js';
+import { saveCopyToDrive } from './drive.js';
+import { toast, modal, btn } from './ui.js';
 import { icon } from './icons.js';
 
 async function loadAssetsFor(doc) {
@@ -32,29 +35,66 @@ async function loadAssetsFor(doc) {
   }
 }
 
+// Publicaram uma versão mais nova desta página do site e há edições locais: a pessoa escolhe o que fazer.
+// Devolve true (manter o rascunho), false (abrir a versão publicada) ou null (voltar aos documentos).
+function askConflict({ remote }) {
+  return new Promise((res) => {
+    let done = false;
+    const fin = (v) => { if (done) return; done = true; m.close(); res(v); };
+    const quem = publisherName(remote) ? `por ${publisherName(remote)} ` : '';
+    const m = modal({ title: 'O site mudou desde a sua última edição', body: [
+      h('p', {}, `Esta página foi publicada ${quem}em ${new Date(remote.publishedAt).toLocaleString('pt-BR')}, depois da versão em que você estava trabalhando — e você tem alterações que ainda não foram publicadas.`),
+      h('p', { class: 'hint' }, 'Abrir a versão publicada descarta o seu rascunho neste navegador. Manter o rascunho preserva o seu trabalho, mas, ao publicar, ele substitui o que a outra pessoa fez (o editor avisa antes).'),
+    ], actions: [
+      btn({ label: 'Voltar aos documentos', onClick: () => fin(null) }),
+      btn({ label: 'Abrir a versão publicada', onClick: () => fin(false) }),
+      btn({ label: 'Manter o meu rascunho', cls: 'primary', onClick: () => fin(true) }),
+    ], onClose: () => fin(null) });
+  });
+}
+
 async function main() {
   const sess = session();
-  if (!sess) { location.replace('../login.html?next=editor/'); return; }
+  if (!sess) { location.replace('../login.html?next=documentos/'); return; }
   S.user = sess; S.slug = sess.slug;
   $('#who').textContent = sess.nome;
   loadAllFonts();
 
-  // qual página abrir: ?doc=<id>  >  a última editada (localStorage)  >  a mais recente do inventário
-  //  >  (inventário vazio) o perfil publicado, ou uma página nova
+  // o editor abre sempre uma página escolhida no painel de documentos: ?doc=<id> (perfil, artigo ou site-<pagina>)
   const want = new URLSearchParams(location.search).get('doc');
-  const docs = await Store.listDocs(S.slug);
-  let rec = docs.find((d) => d.id === want) || docs.find((d) => d.id === lastDocId(S.slug)) || docs[0];
-  let doc = rec?.doc, updatedAt = rec?.updatedAt || 0, fresh = false;
-  if (want && !docs.some((d) => d.id === want)) toast('Não achei essa página no seu inventário; abri outra.', 'err');
-  if (!doc) {
-    try {
-      const r = await fetch(`${BASE}perfis/${S.slug}/page.json`, { cache: 'no-cache' });
-      if (r.ok) { doc = normalizeDoc(await r.json(), S.slug); updatedAt = doc.publishedAt ? Date.parse(doc.publishedAt) : Date.now(); await Store.saveDoc(S.slug, doc, { updatedAt }); }
-    } catch { /* sem publicado */ }
+  if (!want) { location.replace('../documentos/'); return; }
+  const users = await loadUsers().catch(() => []);
+  S.canSite = canEditSite(users.find((u) => u.slug === sess.slug));
+
+  let doc = null, updatedAt = 0, fresh = false;
+  if (isSiteId(want)) {
+    // página do SITE (landing, home…): só quem organiza o site; vem da versão publicada, do rascunho ou do modelo
+    const entry = S.canSite ? await registryEntry(sitePageId(want)) : null;
+    if (!entry) { alert(S.canSite ? 'Essa página do site não existe.' : 'Só quem organiza o site pode editar as páginas do site.'); location.replace('../documentos/'); return; }
+    S.siteEntry = entry;
+    let r = await prepareSiteDoc(S.slug, entry.id);
+    if (r.conflict) {
+      const keep = await askConflict(r.conflict);
+      if (keep === null) { location.replace('../documentos/'); return; }
+      r = await prepareSiteDoc(S.slug, entry.id, { keepLocal: keep });
+    }
+    ({ doc, updatedAt } = r);
+    if (r.origem === 'publicada') toast(`Abri a versão publicada${publisherName(doc) ? ' por ' + publisherName(doc) : ''}.`);
+    else if (r.origem === 'modelo') toast('Esta página ainda não foi publicada pelo editor: abri o modelo inicial.');
+  } else {
+    const rec = (await Store.listDocs(S.slug)).find((d) => d.id === want);
+    doc = rec?.doc; updatedAt = rec?.updatedAt || 0;
+    if (!doc && want === PROFILE_ID) {
+      // primeira vez no perfil: traz o publicado (as boas-vindas) ou começa uma página nova
+      try {
+        const r = await fetch(`${BASE}perfis/${S.slug}/page.json`, { cache: 'no-cache' });
+        if (r.ok) { doc = normalizeDoc(await r.json(), S.slug); updatedAt = doc.publishedAt ? Date.parse(doc.publishedAt) : Date.now(); await Store.saveDoc(S.slug, doc, { updatedAt }); }
+      } catch { /* sem publicado */ }
+      if (!doc) { doc = newDoc(S.slug, `Página de ${sess.nome}`); fresh = true; }
+    }
+    if (!doc) { alert('Não achei essa página nos seus documentos.'); location.replace('../documentos/'); return; }
   }
-  if (!doc) { doc = newDoc(S.slug, `Página de ${sess.nome}`); fresh = true; }
   normalizeDoc(doc, S.slug);
-  rememberDoc(S.slug, doc.id);
   await loadAssetsFor(doc);
   S.doc = doc;
 
@@ -87,7 +127,7 @@ function wireTop() {
   };
   paintPath();
   on('struct', paintPath); on('device', paintPath); on('saved', paintPath); on('dirty', paintPath); on('published', paintPath);
-  $('#btn-inventory').onclick = () => openInventory();
+  $('#btn-inventory').onclick = () => goToDocuments();
   title.addEventListener('input', () => { S.doc.title = title.value; paintPath(); touch(); });
   on('struct', () => { if (document.activeElement !== title) title.value = S.doc.title; });
 
@@ -137,11 +177,19 @@ function wireTop() {
     const old = $('#menu'); if (old) { old.remove(); return; }
     const imp = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: () => imp.files[0] && importProject(imp.files[0]) });
     const item = (ic, label, fn) => h('button', { html: icon(ic) + `<span>${label}</span>`, onclick: () => { m.remove(); fn(); } });
+    const verPublicada = async () => {
+      if (!S.doc.publishedAt) return toast('Esta página ainda não foi publicada.', 'err');
+      // página do site: o próprio caminho dela; perfil/artigo: o visualizador
+      window.open(S.doc.kind === 'pagina' ? BASE + S.siteEntry.caminho.replace(/index\.html$/, '') : `${BASE}perfil.html?${viewerQuery(S.slug, S.doc)}`, '_blank');
+    };
     const m = h('div', { id: 'menu', class: 'popover menu' },
-      item('eye', 'Ver página publicada', () => (S.doc.publishedAt ? window.open(`${BASE}perfil.html?${viewerQuery(S.slug, S.doc)}`, '_blank') : toast('Esta página ainda não foi publicada.', 'err'))),
-      item('stack', 'Meu inventário', () => openInventory()),
+      item('eye', 'Ver página publicada', verPublicada),
+      item('stack', 'Documentos', () => goToDocuments()),
       item('download', 'Exportar projeto (.json)', exportProject),
       item('upload', 'Importar projeto…', () => imp.click()), imp,
+      item('cloud', 'Salvar cópia no Drive', async () => {
+        try { toast('Salvando no seu Drive…'); const nome = await saveCopyToDrive(await buildProject()); toast(`Cópia salva no Drive: ${nome}`, 'ok'); } catch (e) { toast(e.message, 'err'); }
+      }),
       h('hr'),
       item('x', 'Sair', () => { logout(); location.href = '../'; }));
     document.body.append(m);

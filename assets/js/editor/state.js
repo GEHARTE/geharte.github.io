@@ -9,6 +9,7 @@ export const emit = (ev, d) => (handlers[ev] || []).forEach((fn) => fn(d));
 
 export const S = {
   slug: '', user: null, doc: null, dev: 'd',
+  canSite: false, siteEntry: null,   // pode editar páginas do site / entrada de paginas.json da página aberta (só kind 'pagina')
   updatedAt: 0, changed: false,   // carimbo do último rascunho salvo / há edição ainda não salva
   sel: [], tool: 'select', shapeKind: 'rect',
   pen: { stroke: null, sw: 6 },   // stroke null = automático (contrasta com o fundo)
@@ -37,6 +38,8 @@ const snapSoon = debounce(pushSnapshot, 450);
 
 async function persist(opts) {
   if (S.deleted) return;   // a página aberta foi excluída do inventário: não recriar
+  // sem edição e sem carimbo forçado, não regrava: senão só abrir e sair faria uma página publicada parecer "com alterações locais"
+  if (!S.changed && opts?.updatedAt == null && S.updatedAt) return;
   const t = await Store.saveDoc(S.slug, S.doc, opts);
   S.updatedAt = t; S.changed = false;
   emit('saved', t);

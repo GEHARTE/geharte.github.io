@@ -2,21 +2,33 @@
   {
     "slug": "adryan",
     "nome": "Adryan Andreoli",
-    "emailHash": "44152bea75707205da9a01209046a5ae10bdd0404560b8785f19af631d499bfd"
+    "emailHash": "44152bea75707205da9a01209046a5ae10bdd0404560b8785f19af631d499bfd",
+    "funcoes": [
+      "site"
+    ]
   },
   {
     "slug": "nicole",
     "nome": "Nicole Cristine",
-    "emailHash": "e295b6a05522068dc696c1baa8cee4b5946738b03f181986de33e148b3ab3788"
+    "emailHash": "e295b6a05522068dc696c1baa8cee4b5946738b03f181986de33e148b3ab3788",
+    "funcoes": [
+      "site"
+    ]
   },
   {
     "slug": "mariane",
     "nome": "Mariane Kanupp",
-    "emailHash": "a26a4c12b85136bc33fc65bc00f17583a9b32f747242ada62fda2bf1bde1ba5a"
+    "emailHash": "a26a4c12b85136bc33fc65bc00f17583a9b32f747242ada62fda2bf1bde1ba5a",
+    "funcoes": [
+      "site"
+    ]
   },
   {
     "slug": "nicholas",
     "nome": "Nicholas",
-    "emailHash": "e71f01a5b7a926537f2e8b8f3bdd1cd5b7e9161fb3439716aa6e2e5c51e48b97"
+    "emailHash": "e71f01a5b7a926537f2e8b8f3bdd1cd5b7e9161fb3439716aa6e2e5c51e48b97",
+    "funcoes": [
+      "site"
+    ]
   }
 ]

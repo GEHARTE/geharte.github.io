@@ -1,7 +1,8 @@
 // Visualizador da página de um participante.
 //   perfil.html?u=<slug>                     página de perfil publicada
 //   perfil.html?u=<slug>&a=<id>              artigo publicado (artigos/<slug>/<id>/)
-//   &src=draft                               rascunho local (mesmo navegador do editor; com &a=<id> abre o artigo)
+//   perfil.html?u=<slug>&p=<pagina>          página do site publicada (paginas/<pagina>/); só faz sentido com &src=draft (a pública é o próprio site)
+//   &src=draft                               rascunho local (mesmo navegador do editor; com &a=<id> abre o artigo, com &p=<pagina> a página do site)
 //   &device=d|m                              força PC ou celular (senão decide pela largura da tela)
 //   &embed=1 / &toolbar=1                    sem selo / com botões PC·Celular
 import { renderArtboard, observeEntrances, usedFonts } from './core/render.js';
@@ -13,6 +14,7 @@ import { BASE } from './core/util.js';
 const q = new URLSearchParams(location.search);
 const slug = q.get('u') || '';
 const artId = q.get('a') || '';
+const pageId = q.get('p') || '';
 const root = document.getElementById('root');
 const msg = (t) => { root.innerHTML = ''; const p = document.createElement('p'); p.className = 'msg'; p.textContent = t; root.append(p); };
 
@@ -23,16 +25,16 @@ let doc = null, assetUrl = () => null;
 const objUrls = [];
 
 async function load() {
-  if (!/^[a-z0-9-]+$/.test(slug) || (artId && !/^[a-z0-9-]+$/.test(artId))) throw new Error('Página não encontrada.');
+  if (!/^[a-z0-9-]+$/.test(slug) || (artId && !/^[a-z0-9-]+$/.test(artId)) || (pageId && !/^[a-z0-9-]+$/.test(pageId))) throw new Error('Página não encontrada.');
   if (q.get('src') === 'draft') {
-    doc = await Store.loadDoc(slug, artId || 'perfil');
+    doc = await Store.loadDoc(slug, pageId ? `site-${pageId}` : artId || 'perfil');
     if (!doc) throw new Error('Não há rascunho salvo neste navegador.');
     const map = new Map();
     for (const a of await Store.listAssets(slug)) { const u = URL.createObjectURL(a.blob); objUrls.push(u); map.set(a.id, u); }
     assetUrl = (id) => map.get(id) || null;
   } else {
     // as imagens ficam na pasta ao lado do page.json
-    const dir = artId ? `${BASE}artigos/${slug}/${artId}/` : `${BASE}perfis/${slug}/`;
+    const dir = pageId ? `${BASE}paginas/${pageId}/` : artId ? `${BASE}artigos/${slug}/${artId}/` : `${BASE}perfis/${slug}/`;
     const r = await fetch(`${dir}page.json`, { cache: 'no-cache' });
     if (!r.ok) throw new Error('Esta página ainda não foi publicada.');
     doc = await r.json();

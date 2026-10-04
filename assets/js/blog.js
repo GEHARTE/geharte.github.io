@@ -3,6 +3,7 @@
 // Sem conteúdo ainda, mostra estruturas-modelo (lorem ipsum, marcadas como provisórias).
 import { h } from './core/dom.js';
 import { BASE } from './core/util.js';
+import { mountPublished } from './core/embed.js';
 
 const getJson = async (p) => { try { const r = await fetch(BASE + p, { cache: 'no-cache' }); return r.ok ? await r.json() : null; } catch { return null; } };
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
@@ -70,6 +71,10 @@ function exposicao(e, modelo) {
     e.descricao ? h('p', { class: 'desc' }, e.descricao) : null,
     h('div', { class: 'fotos' }, (e.fotos || []).map((f) => figura(f, modelo))));
 }
+
+// ---------- faixa de destaque (feita no editor) ----------
+const destaque = document.getElementById('destaque-home');
+if (destaque) mountPublished(destaque, 'home', { modo: 'largura', onBg: (bg) => { destaque.style.background = bg; } }).catch(() => {});
 
 // ---------- montagem ----------
 const [artigosJson, exposJson, indice] = await Promise.all([getJson('content/artigos.json'), getJson('content/exposicoes.json'), getJson('indice.json')]);

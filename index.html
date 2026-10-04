@@ -7,6 +7,8 @@
   <title>Geharte</title>
   <meta name="description" content="Geharte — Grupo de Estudos Históricos da Arte (UEM).">
   <link rel="stylesheet" href="assets/css/landing.css">
+  <!-- esconde o painel original só até sabermos se há uma landing publicada pelo editor (paginas/landing/page.json); 1,5 s no máximo -->
+  <script>document.documentElement.classList.add('chk');setTimeout(function(){document.documentElement.classList.remove('chk')},1500)</script>
 </head>
 <body class="landing">
   <main class="page">
@@ -40,6 +42,7 @@
       <a class="entrar" id="entrar" href="login.html?next=home/" aria-label="Login: entrar com a sua conta do Geharte"><span class="rot">Login</span> <span aria-hidden="true">→</span></a>
     </section>
   </main>
+  <div id="pagina-site" hidden></div>
   <script type="module" src="assets/js/home.js"></script>
 </body>
 </html>

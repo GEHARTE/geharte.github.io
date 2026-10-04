@@ -10,9 +10,16 @@ export const W = { d: 1200, m: 390 };
 export const K = W.m / W.d;
 export const DEV_LABEL = { d: 'PC', m: 'Celular' };
 
-// Tipos de página: 'perfil' (uma por usuário, id fixo 'perfil') e 'artigo' (quantas quiser).
-export const KINDS = { perfil: 'Página de perfil', artigo: 'Artigo' };
+// Tipos de página: 'perfil' (uma por usuário, id fixo 'perfil'), 'artigo' (quantas quiser) e
+// 'pagina' (página do SITE: landing, home… — uma só para a equipe toda, definidas em paginas.json).
+// Páginas do site têm id "site-<pagina>" (ex.: site-landing) para nunca colidir com o id de um artigo.
+export const KINDS = { perfil: 'Página de perfil', artigo: 'Artigo', pagina: 'Página do site' };
 export const PROFILE_ID = 'perfil';
+export const SITE_PREFIX = 'site-';
+export const siteDocId = (pageId) => SITE_PREFIX + pageId;
+export const isSiteId = (id) => typeof id === 'string' && id.startsWith(SITE_PREFIX);
+export const sitePageId = (id) => (isSiteId(id) ? id.slice(SITE_PREFIX.length) : null);
+const cleanId = (id) => String(id).toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^-+|-+$/g, '');
 
 export function newDoc(owner = '', title = 'Minha página', kind = 'perfil', id = null) {
   return { v: 1, id: id || (kind === 'perfil' ? PROFILE_ID : 'pagina'), kind, owner, title, page: { bg: { c: '#ffffff', g: null }, h: { d: 900, m: 1400 } }, elements: [], assets: {} };
@@ -24,16 +31,22 @@ export function normalizeDoc(doc, owner = '') {
   if (!KINDS[doc.kind]) doc.kind = 'perfil';
   if (!doc.id) doc.id = PROFILE_ID;
   if (doc.kind === 'perfil') doc.id = PROFILE_ID;
-  // o id vira parte do caminho publicado (artigos/<usuario>/<id>/): só letras minúsculas, números e hífen (nada de "../")
-  else doc.id = String(doc.id).toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^-+|-+$/g, '').slice(0, 60) || 'pagina';
+  // o id vira parte do caminho publicado (artigos/<usuario>/<id>/ ou paginas/<pagina>/): só letras minúsculas, números e hífen (nada de "../")
+  else if (doc.kind === 'pagina') doc.id = SITE_PREFIX + (cleanId(isSiteId(doc.id) ? sitePageId(doc.id) : doc.id).slice(0, 40) || 'pagina');
+  else {
+    doc.id = cleanId(doc.id).slice(0, 60) || 'pagina';
+    if (isSiteId(doc.id)) doc.id = 'artigo-' + doc.id;   // o prefixo "site-" é reservado às páginas do site
+  }
   if (owner && !doc.owner) doc.owner = owner;
   doc.assets ||= {};
   return doc;
 }
 
 // Caminho público de uma página (relativo à raiz do site) e URL do visualizador.
-export const publishDir = (slug, doc) => (doc.kind === 'artigo' ? `artigos/${slug}/${doc.id}/` : `perfis/${slug}/`);
-export const viewerQuery = (slug, doc) => `u=${encodeURIComponent(slug)}${doc.kind === 'artigo' ? `&a=${encodeURIComponent(doc.id)}` : ''}`;
+export const publishDir = (slug, doc) => (doc.kind === 'pagina' ? `paginas/${sitePageId(doc.id)}/` : doc.kind === 'artigo' ? `artigos/${slug}/${doc.id}/` : `perfis/${slug}/`);
+export const viewerQuery = (slug, doc) => (doc.kind === 'pagina'
+  ? `u=${encodeURIComponent(slug)}&p=${encodeURIComponent(sitePageId(doc.id))}`
+  : `u=${encodeURIComponent(slug)}${doc.kind === 'artigo' ? `&a=${encodeURIComponent(doc.id)}` : ''}`);
 
 // Estado: 'inventario' (nunca publicada) | 'publicada' | 'alterada' (publicada, com alterações locais).
 // updatedAt = quando o rascunho local foi salvo pela última vez (ms); changed = há edição ainda não salva.
@@ -41,7 +54,10 @@ export function docState(doc, updatedAt = 0, changed = false) {
   if (!doc?.publishedAt) return 'inventario';
   return changed || updatedAt > Date.parse(doc.publishedAt) ? 'alterada' : 'publicada';
 }
-export const STATE_LABEL = { inventario: 'Só no inventário', publicada: 'Publicada', alterada: 'Publicada · com alterações locais' };
+export const STATE_LABEL = { inventario: 'Ainda não publicada', publicada: 'Publicada', alterada: 'Publicada · com alterações locais', original: 'Versão original do site' };
+
+// Quem publicou: { slug, nome } gravado no page.json ao publicar (não é segurança, é informação para a equipe).
+export const publisherName = (doc) => doc?.publishedBy?.nome || doc?.publishedBy?.slug || '';
 
 // "Meu artigo novo!" -> "meu-artigo-novo"
 export const slugify = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'artigo';

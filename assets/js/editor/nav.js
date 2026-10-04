@@ -1,0 +1,14 @@
+// Navegação entre o editor e o painel de documentos.
+import { S, saveNow } from './state.js';
+
+// Troca de página = recarrega o editor com ?doc=<id> (estado limpo, histórico novo).
+export async function goToDoc(id) {
+  try { await saveNow(); } catch { /* segue mesmo assim */ }
+  location.href = `${location.pathname}?doc=${encodeURIComponent(id)}`;
+}
+
+// Volta ao painel de documentos (o rascunho é salvo antes).
+export async function goToDocuments() {
+  if (S.doc) { try { await saveNow(); } catch { /* segue mesmo assim */ } }
+  location.href = '../documentos/';
+}
