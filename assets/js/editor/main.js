@@ -1,5 +1,5 @@
 import { h, $, $$ } from '../core/dom.js';
-import { session, logout, loadUsers } from '../core/auth.js';
+import { session, logout, loadUsers, loadConfig } from '../core/auth.js';
 import { Store } from '../core/store.js';
 import { loadAllFonts } from '../core/fonts.js';
 import { newDoc, normalizeDoc, DEV_LABEL, KINDS, PROFILE_ID, STATE_LABEL, docState, publishDir, viewerQuery, isSiteId, sitePageId, publisherName } from '../core/model.js';
@@ -10,6 +10,10 @@ import { S, on, emit, touch, loadDoc, setDevice, setTool, undo, redo, canUndo, c
 import { initStage, fit, setZoom, nudge, editText, applyAnimState } from './stage.js';
 import { initPanel } from './panels.js';
 import { initLibrary } from './library.js';
+import { renderLayers } from './layers.js';
+import { initDock } from './dock.js';
+import { instalar as vigiarAreaVisivel } from '../core/janelas.js';
+import { trava, retomar, aplicarNoAr } from './publicacao.js';
 import { insertImageFile, insertSvg } from './tools.js';
 import { exportProject, buildProject, importProject, openPublish, openPreview } from './publish.js';
 import { goToDocuments } from './nav.js';
@@ -37,6 +41,14 @@ async function loadAssetsFor(doc) {
 
 // Publicaram uma versão mais nova desta página do site e há edições locais: a pessoa escolhe o que fazer.
 // Devolve true (manter o rascunho), false (abrir a versão publicada) ou null (voltar aos documentos).
+// Camadas como painel próprio (a mesma lista que a aba da biblioteca, mas solta ou encaixada onde a pessoa quiser).
+function initLayersPanel(el) {
+  el.classList.add('lib-body');
+  const paint = () => { if (el.isConnected) renderLayers(el); };
+  for (const ev of ['struct', 'select', 'struct-lite', 'layers']) on(ev, paint);
+  paint();
+}
+
 function askConflict({ remote }) {
   return new Promise((res) => {
     let done = false;
@@ -53,12 +65,17 @@ function askConflict({ remote }) {
   });
 }
 
+let dock = null;
+
 async function main() {
   const sess = session();
   if (!sess) { location.replace('../login.html?next=documentos/'); return; }
   S.user = sess; S.slug = sess.slug;
   $('#who').textContent = sess.nome;
   loadAllFonts();
+  // o Publicar não usa mais token do GitHub: apaga o que versões antigas deixaram guardado neste navegador
+  try { for (const k of ['geharte.ghtoken', 'geharte.repo', 'geharte.branch']) localStorage.removeItem(k); } catch { /* sem armazenamento */ }
+  vigiarAreaVisivel(window);   // --vv-*: área visível real, usada por diálogos e menus (core/janelas.js)
 
   // o editor abre sempre uma página escolhida no painel de documentos: ?doc=<id> (perfil, artigo ou site-<pagina>)
   const want = new URLSearchParams(location.search).get('doc');
@@ -74,7 +91,8 @@ async function main() {
     S.siteEntry = entry;
     let r = await prepareSiteDoc(S.slug, entry.id);
     if (r.conflict) {
-      const keep = await askConflict(r.conflict);
+      // publicação em andamento: o "conflito" é a nossa própria publicação chegando; não perguntar (o editor está travado de qualquer jeito)
+      const keep = trava.estado(S.slug, want).estado === 'travado' ? true : await askConflict(r.conflict);
       if (keep === null) { location.replace('../documentos/'); return; }
       r = await prepareSiteDoc(S.slug, entry.id, { keepLocal: keep });
     }
@@ -101,14 +119,32 @@ async function main() {
   initStage({ vp: $('#viewport'), stage: $('#stage'), holder: $('#holder'), overlay: $('#overlay') });
   initPanel($('#props'));
   const lib = initLibrary($('#lib'));
+  initLayersPanel($('#layerspane'));
   loadDoc(doc, updatedAt);
+  // painéis reorganizáveis (docks, soltos, outra janela; no celular, gavetas): ver dock.js
+  dock = initDock({
+    app: $('#app'), slug: S.slug, rotateEl: $('#rotate'),
+    panels: { rail: { el: $('#rail'), title: 'Ferramentas' }, lib: { el: $('#lib'), title: 'Biblioteca' }, props: { el: $('#props'), title: 'Propriedades' }, layers: { el: $('#layerspane'), title: 'Camadas' } },
+    onDocument: bindKeys,
+    onMode: () => fit(),
+    // com o painel Camadas à vista, a aba "Camadas" da biblioteca some (seria o mesmo conteúdo duas vezes)
+    onVisible: (id, vis) => { if (id === 'layers') { lib.setTabHidden('layers', vis); if (vis) emit('layers'); } },
+  });
+  S.dock = dock;
   fit();
   wireTop();
-  wireKeys();
+  await retomarPublicacao(doc);
   emit('zoom');   // o fit() inicial rodou antes do rótulo de zoom estar ligado
   on('fit', fit);
   if (fresh) { lib.show('tpl'); toast('Bem-vindo! Escolha um modelo ou comece do zero.'); }
   emit('history');
+}
+
+// Se esta página estava sendo publicada quando a pessoa saiu: só o diagrama, até o site responder (ou 2 min — a salvaguarda).
+async function retomarPublicacao(doc) {
+  const est = trava.estado(S.slug, doc.id);
+  if (est.estado === 'travado') retomar({ rec: est.rec, restanteMs: est.restanteMs, cfg: await loadConfig(), onNoAr: aplicarNoAr });
+  else if (est.estado === 'expirou') toast('A última publicação desta página passou de 2 minutos sem confirmação: liberei o editor. Confira se o site já mostra a mudança.');
 }
 
 // ---------- barra superior ----------
@@ -128,6 +164,10 @@ function wireTop() {
   paintPath();
   on('struct', paintPath); on('device', paintPath); on('saved', paintPath); on('dirty', paintPath); on('published', paintPath);
   $('#btn-inventory').onclick = () => goToDocuments();
+  for (const [id, ic, label] of [['lib', 'square', 'Biblioteca'], ['layers', 'layers', 'Camadas'], ['props', 'wand', 'Propriedades']]) {
+    const b = $(`#drawerseg [data-drawer="${id}"]`);
+    b.innerHTML = icon(ic, 18); b.title = b.ariaLabel = label;
+  }
   title.addEventListener('input', () => { S.doc.title = title.value; paintPath(); touch(); });
   on('struct', () => { if (document.activeElement !== title) title.value = S.doc.title; });
 
@@ -163,13 +203,14 @@ function wireTop() {
 
   // ferramentas
   const file = h('input', { type: 'file', accept: 'image/*', multiple: true, hidden: true, onchange: async () => { for (const f of file.files) await insertImageFile(f); file.value = ''; } });
-  document.body.append(file);
-  $$('#rail [data-tool]').forEach((b) => b.addEventListener('click', () => {
+  $('#rail').append(file);   // dentro do painel: o seletor de arquivos abre na janela onde o painel estiver
+  const toolBtns = $$('#rail [data-tool]');
+  toolBtns.forEach((b) => b.addEventListener('click', () => {
     const t = b.dataset.tool;
     if (t === 'image') return file.click();
     setTool(S.tool === t && t !== 'select' ? 'select' : t);
   }));
-  const syncTool = () => $$('#rail [data-tool]').forEach((b) => b.classList.toggle('on', b.dataset.tool === S.tool));
+  const syncTool = () => toolBtns.forEach((b) => b.classList.toggle('on', b.dataset.tool === S.tool));
   on('tool', syncTool); syncTool();
 
   // menu ⋯
@@ -202,12 +243,18 @@ function wireTop() {
 // ---------- atalhos ----------
 const typing = (t) => t && (t.closest?.('input,textarea,select,[contenteditable="true"],[contenteditable="plaintext-only"]'));
 
-function wireKeys() {
+// Liga os atalhos num document: o principal e o de cada painel separado em outra janela.
+const keyBound = new WeakSet();
+function bindKeys(doc) {
+  if (keyBound.has(doc)) return;
+  keyBound.add(doc);
   const vp = $('#viewport');
-  document.addEventListener('keydown', (e) => {
-    if (typing(e.target) || S.editing) return;
-    if (document.querySelector('.modal-back,.pv-back')) return;
+  doc.addEventListener('keydown', (e) => {
+    if (S.locked || typing(e.target) || S.editing) return;
+    if (doc.querySelector('.modal-back,.pv-back')) return;
     const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
+
+    if (mod && k === '\\') { e.preventDefault(); dock?.toggleAll(); return; }
 
     if (k === ' ') { S.space = true; vp.classList.add('panning'); e.preventDefault(); return; }
     if (mod) {
@@ -239,12 +286,13 @@ function wireKeys() {
     else if (k === 't') setTool('text');
     else if (k === 'r') setTool('shape');
     else if (k === 'p') setTool('pencil');
+    else if (k === 'h') setTool('hand');
   });
-  document.addEventListener('keyup', (e) => { if (e.key === ' ') { S.space = false; vp.classList.remove('panning'); } });
+  doc.addEventListener('keyup', (e) => { if (e.key === ' ') { S.space = false; vp.classList.remove('panning'); } });
 
   // colar: imagem, código SVG ou elementos copiados
-  document.addEventListener('paste', async (e) => {
-    if (typing(e.target) || S.editing) return;
+  doc.addEventListener('paste', async (e) => {
+    if (S.locked || typing(e.target) || S.editing) return;
     const files = [...(e.clipboardData?.files || [])].filter((f) => f.type.startsWith('image/'));
     const text = e.clipboardData?.getData('text/plain') || '';
     if (files.length) { e.preventDefault(); for (const f of files) await insertImageFile(f); }
@@ -252,7 +300,7 @@ function wireKeys() {
     else if (paste()) e.preventDefault();
   });
 
-  document.addEventListener('visibilitychange', () => { if (document.hidden && S.doc) saveNow(); });
+  if (doc === document) document.addEventListener('visibilitychange', () => { if (document.hidden && S.doc) saveNow(); });
 }
 
 main().catch((e) => { console.error(e); document.body.prepend(h('pre', { style: { color: '#f66', padding: '16px', whiteSpace: 'pre-wrap' } }, 'Erro ao iniciar o editor:\n' + (e?.stack || e))); });

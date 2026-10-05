@@ -54,7 +54,7 @@ export function createPublicador({
     return j;
   }
 
-  // tenta de novo só em falha de transporte (3 tentativas); erro de regra do servidor (401, 403, 409…) sobe na hora
+  // tenta de novo só em falha de transporte (4 tentativas no total); erro de regra do servidor (401, 403, 409…) sobe na hora
   async function comRetentativa(corpo) {
     let ultimo;
     for (let i = 0; i <= PAUSAS.length; i++) {

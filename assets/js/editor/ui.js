@@ -4,10 +4,13 @@ import { clamp, round } from '../core/util.js';
 import { docColors, harmonies } from '../core/model.js';
 import { S } from './state.js';
 import { icon } from './icons.js';
+import { activeDoc, winOf } from './docs.js';
+import { ancorar, caixaVisivel } from '../core/janelas.js';
 
 export function toast(msg, kind = '') {
-  let box = document.getElementById('toasts');
-  if (!box) { box = h('div', { id: 'toasts' }); document.body.append(box); }
+  const doc = activeDoc();
+  let box = doc.getElementById('toasts');
+  if (!box) { box = h('div', { id: 'toasts' }); doc.body.append(box); }
   const t = h('div', { class: 'toast ' + kind }, msg);
   box.append(t);
   setTimeout(() => t.classList.add('out'), 3200);
@@ -37,13 +40,15 @@ export function num({ label, value, min = -99999, max = 99999, step = 1, unit = 
     e.preventDefault();
     const v0 = parseFloat(inp.value) || 0, x0 = e.clientX;
     const mv = (ev) => { const v = clamp(round(v0 + (ev.clientX - x0) * step * (ev.shiftKey ? 5 : 1), 2), min, max); inp.value = fmt(v); onChange(v); };
-    const up = () => { removeEventListener('pointermove', mv); document.body.classList.remove('scrubbing'); };
-    document.body.classList.add('scrubbing');
-    addEventListener('pointermove', mv);
-    addEventListener('pointerup', up, { once: true });
+    // o campo pode estar num painel em outra janela: os eventos de ponteiro chegam na janela dele
+    const win = winOf(lab), body = lab.ownerDocument.body;
+    const up = () => { win.removeEventListener('pointermove', mv); body.classList.remove('scrubbing'); };
+    body.classList.add('scrubbing');
+    win.addEventListener('pointermove', mv);
+    win.addEventListener('pointerup', up, { once: true });
   });
   const w = h('label', { class: 'num ' + cls }, lab, inp, unit ? h('em', {}, unit) : null);
-  w.set = (v) => { if (document.activeElement !== inp) inp.value = fmt(v); };
+  w.set = (v) => { if (inp.ownerDocument.activeElement !== inp) inp.value = fmt(v); };
   return w;
 }
 
@@ -116,6 +121,7 @@ export function closePop() { pop?.remove(); pop = null; popOff?.(); popOff = nul
 
 export function openColorPop(anchor, value, onChange, { nullable = false } = {}) {
   closePop();
+  const doc = anchor.ownerDocument, win = winOf(anchor);
   let cur = /^#[0-9a-f]{6}$/i.test(value || '') ? value.toLowerCase() : '#e4572e';
   let [hh, ss, vv] = hex2hsv(cur);
   const sv = h('div', { class: 'cp-sv' }, h('i', { class: 'cp-knob' }));
@@ -155,16 +161,18 @@ export function openColorPop(anchor, value, onChange, { nullable = false } = {})
   for (const [name, list] of Object.entries(harm)) body.push(h('div', { class: 'cp-t' }, name), swatches(list));
 
   pop = h('div', { class: 'popover cp' }, body);
-  document.body.append(pop);
+  doc.body.append(pop);
   paint();
-  const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
-  pop.style.left = clamp(r.left - pw - 10, 8, innerWidth - pw - 8) + 'px';
-  pop.style.top = clamp(r.top - 10, 8, innerHeight - ph - 8) + 'px';
+  // posição lida da área VISÍVEL de verdade (teclado virtual, zoom, janela separada): abre ao lado do campo, no lado onde cabe inteiro
+  const caixa = caixaVisivel(win);
+  pop.style.maxHeight = caixa.h - 16 + 'px';
+  const p = ancorar(anchor.getBoundingClientRect(), { w: pop.offsetWidth, h: pop.offsetHeight }, caixa, { prefer: ['esquerda', 'direita', 'baixo', 'cima'], folga: 10 });
+  pop.style.left = p.x + 'px'; pop.style.top = p.y + 'px';
   const away = (e) => { if (!pop?.contains(e.target) && !anchor.contains(e.target)) closePop(); };
   const esc = (e) => { if (e.key === 'Escape') closePop(); };
-  setTimeout(() => document.addEventListener('pointerdown', away, true));
-  document.addEventListener('keydown', esc);
-  popOff = () => { document.removeEventListener('pointerdown', away, true); document.removeEventListener('keydown', esc); };
+  setTimeout(() => doc.addEventListener('pointerdown', away, true));
+  doc.addEventListener('keydown', esc);
+  popOff = () => { doc.removeEventListener('pointerdown', away, true); doc.removeEventListener('keydown', esc); };
 }
 
 export function colorField({ label, value, nullable = false, onChange }) {
@@ -177,14 +185,15 @@ export function colorField({ label, value, nullable = false, onChange }) {
 }
 
 export function modal({ title, body, actions = [], wide = false, onClose }) {
-  const close = () => { back.remove(); document.removeEventListener('keydown', esc); onClose?.(); };
+  const doc = activeDoc();
+  const close = () => { back.remove(); doc.removeEventListener('keydown', esc); onClose?.(); };
   const esc = (e) => { if (e.key === 'Escape') close(); };
   const back = h('div', { class: 'modal-back', onpointerdown: (e) => { if (e.target === back) close(); } },
     h('div', { class: 'modal' + (wide ? ' wide' : '') },
       h('header', {}, h('b', {}, title), btn({ ic: 'x', title: 'Fechar', onClick: close, cls: 'icon' })),
       h('div', { class: 'modal-b' }, body),
       actions.length ? h('footer', {}, actions) : null));
-  document.body.append(back);
-  document.addEventListener('keydown', esc);
+  doc.body.append(back);
+  doc.addEventListener('keydown', esc);
   return { close, el: back };
 }

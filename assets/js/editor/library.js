@@ -184,10 +184,15 @@ export function initLibrary(root) {
 
   function layers() { renderLayers(body); }
 
+  function setTabHidden(id, hidden) {
+    tabEls[id].hidden = hidden;
+    if (hidden && cur === id) show('els');
+  }
+
   on('assets', () => { if (cur === 'media') show('media'); });
   for (const ev of ['struct', 'select', 'struct-lite', 'layers']) on(ev, () => { if (cur === 'layers') renderLayers(body); });
   show(cur);
-  return { show };
+  return { show, setTabHidden };
 }
 
 function pasteSvg() {

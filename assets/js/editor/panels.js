@@ -306,10 +306,10 @@ export function build() {
 export function initPanel(el) {
   root = el;
   for (const ev of ['select', 'struct', 'device', 'tool']) on(ev, build);
-  on('page', () => { if (!S.sel.length && !root.contains(document.activeElement)) build(); });
+  on('page', () => { if (!S.sel.length && !root.contains(root.ownerDocument.activeElement)) build(); });
   on('geom', refreshGeom);
   on('el', ({ src }) => { if (src === 'canvas') refreshGeom(); });
-  on('focuslabel', () => setTimeout(() => document.getElementById('lbl-input')?.focus(), 30));
-  on('editsvg', () => setTimeout(() => { const t = document.getElementById('svg-code'); t?.scrollIntoView({ block: 'center' }); t?.focus(); }, 30));
+  on('focuslabel', () => setTimeout(() => root.querySelector('#lbl-input')?.focus(), 30));
+  on('editsvg', () => setTimeout(() => { const t = root.querySelector('#svg-code'); t?.scrollIntoView({ block: 'center' }); t?.focus(); }, 30));
   build();
 }

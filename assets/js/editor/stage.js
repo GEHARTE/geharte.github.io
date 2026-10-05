@@ -183,12 +183,42 @@ function guides(list) {
 }
 
 // ---------- gestos ----------
+let abortDrag = null;   // encerra o arraste em curso (o segundo dedo do gesto de pinça cancela o que o primeiro começou)
 function drag(e, onMove, onUp) {
   const move = (ev) => onMove(ev);
-  const up = (ev) => { removeEventListener('pointermove', move); removeEventListener('pointercancel', up); onUp?.(ev); };
+  const up = (ev) => { removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); abortDrag = null; onUp?.(ev); };
   addEventListener('pointermove', move);
   addEventListener('pointerup', up, { once: true });
   addEventListener('pointercancel', up, { once: true });
+  abortDrag = () => up();
+}
+
+// ---------- toque: pinça (zoom + mover com dois dedos) e arrastar com um dedo no vazio ----------
+const dedos = new Map();
+function startPinch() {
+  abortDrag?.();
+  const pts = () => [...dedos.values()];
+  const dist = ([a, b]) => Math.hypot(a[0] - b[0], a[1] - b[1]) || 1;
+  const meio = ([a, b]) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  const d0 = dist(pts()), z0 = S.zoom;
+  let last = meio(pts());
+  const move = (ev) => {
+    if (!dedos.has(ev.pointerId)) return;
+    dedos.set(ev.pointerId, [ev.clientX, ev.clientY]);
+    if (dedos.size < 2) return;
+    const m = meio(pts());
+    setZoom(z0 * dist(pts()) / d0, last[0], last[1]);          // o ponto sob os dedos fica sob os dedos...
+    vp.scrollLeft += last[0] - m[0]; vp.scrollTop += last[1] - m[1];   // ...e acompanha o movimento deles
+    last = m;
+  };
+  const fim = () => { if (dedos.size < 2) { removeEventListener('pointermove', move); removeEventListener('pointerup', fim); removeEventListener('pointercancel', fim); } };
+  addEventListener('pointermove', move); addEventListener('pointerup', fim); addEventListener('pointercancel', fim);
+}
+function startTouchPan(e) {
+  const x0 = e.clientX, y0 = e.clientY, sl = vp.scrollLeft, st = vp.scrollTop;
+  let moved = false;
+  drag(e, (ev) => { if (!moved && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6) return; moved = true; vp.scrollLeft = sl - (ev.clientX - x0); vp.scrollTop = st - (ev.clientY - y0); },
+    () => { if (!moved) select([]); });   // toque rápido no vazio = desmarcar
 }
 
 function snapBox(box, others) {
@@ -440,12 +470,22 @@ export function initStage(refs) {
   on('tool', () => { vp.dataset.tool = S.tool; });
   on('assets', () => S.doc.elements.filter((e) => e.t === 'image').forEach((e) => rerender(e.id)));
 
+  // dedos na tela: o 2º dedo vira pinça e o resto do tratamento do ponteiro nem chega a ver o evento
+  const largaDedo = (e) => dedos.delete(e.pointerId);
+  vp.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'touch') return;
+    dedos.set(e.pointerId, [e.clientX, e.clientY]);
+    if (dedos.size === 2) { e.stopImmediatePropagation(); e.preventDefault(); startPinch(); }
+    else if (dedos.size > 2) e.stopImmediatePropagation();
+  }, true);
+  addEventListener('pointerup', largaDedo); addEventListener('pointercancel', largaDedo);
+
   vp.addEventListener('pointerdown', (e) => {
     if (e.button === 2) return;
     if (S.editing) { if (e.target.closest('.is-editing')) return; document.activeElement?.blur(); }
     if (e.target.closest('.floatbar')) return;
     if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur?.();
-    if (e.button === 1 || S.space) return startPan(e);
+    if (e.button === 1 || S.space || S.tool === 'hand') return startPan(e);
     const hd = e.target.closest('[data-h]');
     if (hd) { e.preventDefault(); const k = hd.dataset.h; return k === 'rot' ? startRotate(e) : S.sel.length > 1 ? startGroupScale(k, e) : startResize(k, e); }
     if (S.tool !== 'select') { e.preventDefault(); return startDraw(e); }
@@ -458,6 +498,7 @@ export function initStage(refs) {
       startMove(e, id);
     } else {
       e.preventDefault();
+      if (e.pointerType === 'touch') return startTouchPan(e);   // no celular, arrastar no vazio move a vista (a seleção em área fica para o mouse)
       if (!e.shiftKey) select([]);
       startMarquee(e);
     }
