@@ -30,5 +30,10 @@
     "funcoes": [
       "site"
     ]
+  },
+  {
+    "slug": "luiz-fernando",
+    "nome": "Luiz Fernando",
+    "emailHash": "425d96448198e9c9deb11ce6000f03b8e8340bb187e8a09b152f9fc4315b7d3c"
   }
 ]
