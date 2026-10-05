@@ -6,6 +6,7 @@ import { S, saveNow, emit } from './state.js';
 import { normalizeDoc, PROFILE_ID, publishDir, viewerQuery, publisherName, KINDS } from '../core/model.js';
 import { goToDoc } from './nav.js';
 import { publishedUrl, siteHost } from '../core/site.js';
+import { createPublicador } from '../core/publicador.js';
 import { btn, modal, toast } from './ui.js';
 import { icon } from './icons.js';
 
@@ -125,7 +126,53 @@ export async function openPublish() {
     row('Última publicação', last));
 
   let confirmedClash = false;
+  // Com o publicador configurado (config.json: "publicador"), o artista só confirma com o Google: nada de token do GitHub.
+  // "Avançado" aberto = usa o token do GitHub direto (plano B, se o publicador estiver fora do ar).
+  const servidor = !!cfg.publicador;
+  const pub = servidor ? createPublicador({ url: cfg.publicador, clientId: cfg.googleClientId, slug: S.slug }) : null;
+
+  const mostraConflito = (atual) => {
+    clash.replaceChildren(
+      h('p', {}, h('b', {}, '⚠ Outra versão foi publicada depois da que você abriu.')),
+      h('p', {}, `${publisherName(atual || {}) ? publisherName(atual) + ' publicou' : 'Alguém publicou'} esta página${atual?.publishedAt ? ' em ' + fmtWhen(atual.publishedAt) : ''}. Publicar agora substitui o trabalho dessa pessoa. Para ver a versão dela antes, exporte o seu projeto (menu ⋯), descarte o seu rascunho local no painel de documentos e abra a página de novo.`));
+    clash.hidden = false; confirmedClash = true;
+    go.querySelector('span').textContent = 'Publicar mesmo assim';
+  };
+
+  async function publicarPeloServidor() {
+    go.disabled = true; log.textContent = '';
+    const say = (t) => { log.textContent += t + '\n'; log.scrollTop = log.scrollHeight; };
+    const alvo = { kind: S.doc.kind, ...(S.doc.kind === 'artigo' ? { id: S.doc.id } : {}), ...(S.doc.kind === 'pagina' ? { pageId: S.doc.id.replace(/^site-/, '') } : {}) };
+    try {
+      say('Confirmando com o Google (pode abrir uma janelinha)…');
+      await pub.confirmar();
+      say('Conferindo o que já está no site…');
+      const prep = await pub.preparar(alvo);
+      const meta = {}, novas = {};
+      for (const id of usedAssetIds()) {
+        const a = S.assets.get(id), m = a || S.doc.assets[id];
+        if (!m) continue;
+        meta[id] = { ext: m.ext, mime: m.mime, w: m.w, h: m.h };
+        if (a && !prep.existentes.includes(id)) { say(`Imagem ${id}.${a.ext}…`); novas[id] = { ext: a.ext, data: (await blobToDataURL(a.blob)).split(',')[1] }; }
+      }
+      say('Publicando…');
+      const r = await pub.publicar({ ...alvo, page: { ...S.doc, assets: meta }, assets: novas, baseAt: S.doc.publishedAt || null, force: confirmedClash });
+      // só depois do sucesso: a página passa a "Publicada" (carimbo local = o do servidor, para não parecer alterada)
+      S.doc.publishedAt = r.publishedAt; S.doc.publishedBy = r.publishedBy;
+      await saveNow({ updatedAt: Date.parse(r.publishedAt) });
+      emit('published');
+      say(`Pronto! Publicado em ${host}. O GitHub leva cerca de 1 a 2 minutos para o site mostrar a mudança.`);
+      link.replaceChildren(h('a', { href: url, target: '_blank', rel: 'noopener' }, 'Abrir a página publicada ↗'));
+      go.querySelector('span').textContent = 'Publicar agora';
+      confirmedClash = false; clash.hidden = true;
+    } catch (e) {
+      if (e.codigo === 'conflito') mostraConflito(e.extra?.atual);
+      else say('✗ ' + e.message);
+    } finally { go.disabled = false; }
+  }
+
   const go = btn({ label: 'Publicar agora', cls: 'primary', ic: 'upload', onClick: async () => {
+    if (servidor && !creds.open) return publicarPeloServidor();
     if (!/^[\w.-]+\/[\w.-]+$/.test(repo.value.trim())) { toast('Informe o repositório no formato dono/nome.', 'err'); return; }
     if (!token.value.trim()) { toast('Cole o token do GitHub.', 'err'); creds.open = true; return; }
     ls(KEY.repo, repo.value.trim()); ls(KEY.branch, branch.value.trim() || 'main');
@@ -139,11 +186,7 @@ export async function openPublish() {
       if (pagina && !confirmedClash) {
         const atual = await getRepoJson({ ...base, path: `${dir}page.json` });
         if (atual?.publishedAt && atual.publishedAt !== S.doc.publishedAt) {
-          clash.replaceChildren(
-            h('p', {}, h('b', {}, '⚠ Outra versão foi publicada depois da que você abriu.')),
-            h('p', {}, `${publisherName(atual) ? publisherName(atual) + ' publicou' : 'Alguém publicou'} esta página em ${fmtWhen(atual.publishedAt)}. Publicar agora substitui o trabalho dessa pessoa. Para ver a versão dela antes, exporte o seu projeto (menu ⋯), descarte o seu rascunho local no painel de documentos e abra a página de novo.`));
-          clash.hidden = false; confirmedClash = true;
-          go.querySelector('span').textContent = 'Publicar mesmo assim';
+          mostraConflito(atual);
           go.disabled = false;
           return;
         }
@@ -176,9 +219,9 @@ export async function openPublish() {
     } finally { go.disabled = false; }
   } });
 
-  const creds = h('details', { class: 'creds', open: !ls(KEY.token) },
-    h('summary', {}, 'Credenciais do GitHub'),
-    h('p', { class: 'hint' }, 'Quem pode publicar é quem tem permissão de escrita no repositório do site — por isso é preciso um token.'),
+  const creds = h('details', { class: 'creds', open: servidor ? false : !ls(KEY.token) },
+    h('summary', {}, servidor ? 'Avançado: publicar com um token do GitHub' : 'Credenciais do GitHub'),
+    h('p', { class: 'hint' }, servidor ? 'Normalmente não precisa: o botão Publicar confirma com a sua conta do Google. Abra isto só se o publicador estiver fora do ar — com esta seção aberta, o editor usa o token.' : 'Quem pode publicar é quem tem permissão de escrita no repositório do site — por isso é preciso um token.'),
     h('label', { class: 'fld' }, h('span', { class: 'fl' }, 'Repositório'), repo),
     h('label', { class: 'fld' }, h('span', { class: 'fl' }, 'Branch'), branch),
     h('label', { class: 'fld' }, h('span', { class: 'fl' }, 'Token do GitHub (fine-grained, com Contents: read/write)'), token),

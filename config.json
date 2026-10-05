@@ -3,5 +3,6 @@
   "branch": "main",
   "googleClientId": "125562223501-e48tmgmpalflbv1qudqf1g7j8hai69qh.apps.googleusercontent.com",
   "loginSenha": false,
-  "siteUrl": "https://geharte.github.io"
+  "siteUrl": "https://geharte.github.io",
+  "publicador": "https://script.google.com/macros/s/AKfycbw-Sty96OefzrIWk1iQ4iQ7hgZ_MDB-iYkbqx_h88zximdCqBRBW4P2i5vsekiiuMBY4Q/exec"
 }
