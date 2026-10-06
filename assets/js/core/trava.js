@@ -3,9 +3,10 @@
 //
 // SALVAGUARDA: a trava NUNCA dura mais que TRAVA_MS (2 minutos). Passou disso, ou o vigia desistiu, ou qualquer coisa deu errado
 // (registro ilegível, relógio estranho): o editor é liberado. Melhor liberar cedo do que deixar alguém sem conseguir editar.
+import './migracao.js';
 export const TRAVA_MS = 120000;
 
-const chave = (slug, docId) => `geharte.publicando.${slug}.${docId}`;
+const chave = (slug, docId) => `gehrarte.publicando.${slug}.${docId}`;
 const seguro = (fn, d = null) => { try { return fn(); } catch { return d; } };
 
 export function criarTrava({ storage = seguro(() => localStorage), now = () => Date.now(), ttl = TRAVA_MS } = {}) {

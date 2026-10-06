@@ -62,7 +62,7 @@ function draw() {
   root.innerHTML = '';
   root.append(stage);
   observeEntrances(root);
-  document.title = `${doc.title || 'Página'} — Geharte`;
+  document.title = `${doc.title || 'Página'} — Gehrarte`;
   return dev;
 }
 

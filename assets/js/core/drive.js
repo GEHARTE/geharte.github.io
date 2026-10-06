@@ -1,14 +1,15 @@
 // Google Drive: os materiais dos artistas (imagens, fontes, PSD, PDF…) ficam no Drive da conta Google
-// INSTITUCIONAL de cada um, numa pasta "Geharte — materiais", e ficam à mão durante a edição.
+// INSTITUCIONAL de cada um, numa pasta "Gehrarte — materiais", e ficam à mão durante a edição.
 //
 // Escopo `drive.file`: o aplicativo só enxerga o que ele mesmo criou (a pasta e o que for enviado por aqui).
-// Não é escopo sensível — não exige verificação do Google — e o Geharte nunca vê o resto do Drive de ninguém.
+// Não é escopo sensível — não exige verificação do Google — e o Gehrarte nunca vê o resto do Drive de ninguém.
 // Sem servidor: o navegador fala direto com a API do Drive usando um token de acesso de ~1 h (Google Identity Services).
 //
 // createDrive() recebe tudo que toca o navegador/rede como parâmetro (requestToken, fetchImpl, put, storage),
 // então a lógica é testável em Node (tests/drive.test.mjs).
+import './migracao.js';
 export const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
-export const FOLDER_NAME = 'Geharte — materiais';
+export const FOLDER_NAME = 'Gehrarte — materiais';
 export const FOLDER_MIME = 'application/vnd.google-apps.folder';
 const API = 'https://www.googleapis.com/drive/v3';
 const UPLOAD = 'https://www.googleapis.com/upload/drive/v3';
@@ -20,7 +21,7 @@ export class DriveError extends Error {
 
 export const folderUrl = (id) => `https://drive.google.com/drive/folders/${id}`;
 export const isImage = (mime) => /^image\/(png|jpe?g|webp|gif|svg\+xml)$/.test(mime || '');
-export const isProject = (f) => /^geharte-.+\.json$/i.test(f?.name || '');
+export const isProject = (f) => /^gehr?arte-.+\.json$/i.test(f?.name || '');
 export const humanSize = (n) => {
   n = Number(n);
   if (!Number.isFinite(n) || n < 0) return '';
@@ -39,7 +40,7 @@ export async function toDriveError(r) {
   const msg = j?.error?.message || '';
   const reason = j?.error?.errors?.[0]?.reason || j?.error?.status || '';
   if (reason === 'accessNotConfigured' || /has not been used in project|is disabled|API has not been enabled/i.test(msg)) {
-    return new DriveError('A API do Google Drive ainda não foi ativada no projeto do Geharte. Quem administra precisa ativar “Google Drive API” no Google Cloud (passo a passo em documentation/gestao/drive.md).', r.status, 'accessNotConfigured');
+    return new DriveError('A API do Google Drive ainda não foi ativada no projeto do Gehrarte. Quem administra precisa ativar “Google Drive API” no Google Cloud (passo a passo em documentation/gestao/drive.md).', r.status, 'accessNotConfigured');
   }
   if (reason === 'storageQuotaExceeded') return new DriveError('O seu Drive está cheio. Libere espaço (ou apague arquivos grandes) e tente de novo.', r.status, reason);
   if (r.status === 403 && /insufficient|scope/i.test(msg + reason)) return new DriveError('Sem permissão para usar o Drive. Conecte de novo e aceite o acesso.', r.status, 'insufficientPermissions');
@@ -98,7 +99,7 @@ export function createDrive({
   now = () => Date.now(),
   revoke = (t) => safe(() => google.accounts.oauth2.revoke(t, () => {})),
 } = {}) {
-  const K = { token: `geharte.drive.token.${slug}`, folder: `geharte.drive.folder.${slug}`, on: `geharte.drive.on.${slug}` };
+  const K = { token: `gehrarte.drive.token.${slug}`, folder: `gehrarte.drive.folder.${slug}`, on: `gehrarte.drive.on.${slug}` };
   let tok = safe(() => JSON.parse(session.getItem(K.token) || 'null'));
   let folderId = null;
 
@@ -118,7 +119,7 @@ export function createDrive({
     isConnected: () => valid(),
     wasConnected: () => local.getItem(K.on) === '1',
 
-    // Conecta (clique do usuário). `expectedHash` = hash do e-mail da conta com que a pessoa entrou no Geharte:
+    // Conecta (clique do usuário). `expectedHash` = hash do e-mail da conta com que a pessoa entrou no Gehrarte:
     // o Drive tem de ser da MESMA conta. Devolve { email, nome, cota }.
     async connect({ expectedHash, hashEmail } = {}) {
       if (!clientId) throw new DriveError('O login com Google ainda não foi configurado neste site.');
@@ -128,7 +129,7 @@ export function createDrive({
       if (expectedHash && hashEmail && (await hashEmail(info.email)) !== expectedHash) {
         const t = tok.access_token;
         saveTok(null); revoke(t);
-        throw new DriveError(`A conta do Google que você escolheu (${info.email}) não é a conta com que entrou no Geharte. Conecte com a sua conta institucional.`, 0, 'wrongAccount');
+        throw new DriveError(`A conta do Google que você escolheu (${info.email}) não é a conta com que entrou no Gehrarte. Conecte com a sua conta institucional.`, 0, 'wrongAccount');
       }
       local.setItem(K.on, '1');
       return info;
@@ -141,7 +142,7 @@ export function createDrive({
       return { email: j.user?.emailAddress || '', nome: j.user?.displayName || '', cota: { usado: Number(q.usage) || 0, limite: q.limit ? Number(q.limit) : null } };
     },
 
-    // A pasta "Geharte — materiais": reaproveita a lembrada/encontrada ou cria. Devolve o id.
+    // A pasta "Gehrarte — materiais": reaproveita a lembrada/encontrada ou cria. Devolve o id.
     async ensureFolder() {
       if (folderId) return folderId;
       const cached = local.getItem(K.folder);
@@ -192,7 +193,7 @@ export function createDrive({
       const q = `'${parent}' in parents and name='${esc(name)}' and trashed=false`;
       const found = await json(`${API}/files?${new URLSearchParams({ q, fields: 'files(id)', pageSize: '1' })}`);
       const id = found.files?.[0]?.id;
-      const boundary = 'geharte' + now().toString(36);
+      const boundary = 'gehrarte' + now().toString(36);
       const meta = JSON.stringify(id ? { name } : { name, parents: [parent], mimeType: mime });
       const body = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${mime}; charset=UTF-8\r\n\r\n${text}\r\n--${boundary}--`;
       return json(`${UPLOAD}/files${id ? `/${encodeURIComponent(id)}` : ''}?uploadType=multipart&fields=${FILE_FIELDS}`, {

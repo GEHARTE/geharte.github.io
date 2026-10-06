@@ -1,12 +1,13 @@
 // Login estático. IMPORTANTE: isto é uma "porta" de interface, não segurança real.
 // users.json é público (só guarda hashes PBKDF2). Quem de fato protege a publicação
 // é a permissão de escrita no repositório (token do GitHub) — ver README.
+import './migracao.js';
 import { BASE } from './util.js';
 import { pbkdf2Sha256 } from './sha.js';
 import { verifyGoogleIdToken } from './google.js';
 import { sha256Hex } from './util.js';
 
-const SKEY = 'geharte.session';
+const SKEY = 'gehrarte.session';
 const DAYS = 7;
 const enc = new TextEncoder();
 const b64ToBytes = (b) => Uint8Array.from(atob(b), (c) => c.charCodeAt(0));
@@ -54,7 +55,7 @@ export async function loginWithGoogle(credential, clientId, verify = verifyGoogl
   const pl = await verify(credential, clientId);
   const h = await hashEmail(pl.email);
   const u = (await loadUsers()).find((x) => x.emailHash === h);
-  if (!u) throw new Error('Este e-mail do Google não está liberado no Geharte. Fale com o administrador.');
+  if (!u) throw new Error('Este e-mail do Google não está liberado no Gehrarte. Fale com o administrador.');
   const s = { slug: u.slug, nome: u.nome, via: 'google', exp: Date.now() + DAYS * 864e5 };
   localStorage.setItem(SKEY, JSON.stringify(s));
   return s;

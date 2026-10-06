@@ -21,18 +21,18 @@ export async function buildProject() {
     const a = S.assets.get(id);
     if (a) assets[id] = { ext: a.ext, mime: a.mime, w: a.w, h: a.h, data: await blobToDataURL(a.blob) };
   }
-  return { format: 'geharte-projeto', v: 2, slug: S.slug, id: S.doc.id, kind: S.doc.kind, doc: S.doc, assets };
+  return { format: 'gehrarte-projeto', v: 2, slug: S.slug, id: S.doc.id, kind: S.doc.kind, doc: S.doc, assets };
 }
 
 export async function exportProject() {
   const out = await buildProject();
-  downloadBlob(`geharte-${S.slug}-${S.doc.id}-${new Date().toISOString().slice(0, 10)}.json`, new Blob([JSON.stringify(out)], { type: 'application/json' }));
+  downloadBlob(`gehrarte-${S.slug}-${S.doc.id}-${new Date().toISOString().slice(0, 10)}.json`, new Blob([JSON.stringify(out)], { type: 'application/json' }));
 }
 
 export async function importProject(file) {
   let data;
   try { data = JSON.parse(await file.text()); } catch { toast('Esse arquivo não é um projeto válido.', 'err'); return; }
-  if (data.format !== 'geharte-projeto' || !data.doc) { toast('Esse arquivo não é um projeto do Geharte.', 'err'); return; }
+  if (!['gehrarte-projeto', 'geharte-projeto'].includes(data.format) || !data.doc) { toast('Esse arquivo não é um projeto do Gehrarte.', 'err'); return; }
   for (const [id, a] of Object.entries(data.assets || {})) {
     const blob = await dataURLToBlob(a.data);
     const meta = { ext: a.ext, mime: a.mime, w: a.w, h: a.h };
@@ -74,7 +74,7 @@ export async function openPublish() {
   const derived = S.doc.elements.filter((e) => !e.f.m).length;
   const empty = !S.doc.elements.length;
   const dir = publishDir(S.slug, S.doc);
-  const host = siteHost(cfg) || 'o site do Geharte';
+  const host = siteHost(cfg) || 'o site do Gehrarte';
   const url = publishedUrl(cfg, S.slug, S.doc, S.siteEntry);
   // config.json "googleFake": só o ambiente de homologação (tools/homologacao) usa — pula a janelinha do Google; o Publicador de verdade recusaria o token
   const pub = cfg.publicador ? createPublicador({ url: cfg.publicador, clientId: cfg.googleClientId, slug: S.slug, ...(cfg.googleFake ? { requestToken: async () => ({ access_token: 'homologacao', expires_in: 3600 }) } : {}) }) : null;
@@ -89,7 +89,7 @@ export async function openPublish() {
     : pagina ? 'ainda não — hoje o site mostra a versão original' : 'ainda não foi publicada';
 
   const destino = h('div', { class: 'pubbox' },
-    h('p', { class: 'pub-head', html: icon('upload', 15) + `<span>Esta publicação vai para <b>${host}</b> — o site público do Geharte.</span>` }),
+    h('p', { class: 'pub-head', html: icon('upload', 15) + `<span>Esta publicação vai para <b>${host}</b> — o site público do Gehrarte.</span>` }),
     h('p', { class: 'pub-sub' }, pagina ? 'Qualquer pessoa na internet verá a mudança, não só a equipe.' : 'Qualquer pessoa na internet poderá ver esta página, não só a equipe.'),
     row('Onde', h('a', { href: url, target: '_blank', rel: 'noopener' }, url.replace(/^https?:\/\//, ''))),
     pagina && S.siteEntry ? row('O que é', S.siteEntry.funcao) : null,

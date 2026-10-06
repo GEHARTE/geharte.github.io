@@ -1,6 +1,7 @@
 // Painéis do editor que a pessoa organiza do jeito que quiser: arrastar entre as laterais, empilhar, redimensionar,
 // soltar sobre o canvas, separar em outra janela do navegador — e, no celular (horizontal), gavetas sobre o canvas.
 // O que está onde vem de dock-layout.js (puro, testado); aqui só se desenha e se trata o ponteiro.
+import '../core/migracao.js';
 import { h } from '../core/dom.js';
 import { clamp, debounce } from '../core/util.js';
 import * as D from './dock-layout.js';
@@ -9,7 +10,7 @@ import { addDoc, dropDoc, setActiveDoc, activeDoc, winOf } from './docs.js';
 import { toast } from './ui.js';
 import { ajustar, ancorar, caixaVisivel, telaDisponivel, posicaoJanela, corrigirJanela, retanguloJanela, instalar } from '../core/janelas.js';
 
-const KEY = (slug) => `geharte.layout.${slug}`;
+const KEY = (slug) => `gehrarte.layout.${slug}`;
 const COMPACT_Q = '(max-width: 720px), (pointer: coarse) and (max-height: 560px)';
 const DRAWER_SIDE = { lib: 'left', layers: 'left', props: 'right', rail: 'left' };
 const WHERE = { left: 'à esquerda', right: 'à direita' };
@@ -353,13 +354,13 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
     const w = Math.round(clamp(r.width < 120 ? L.panels[id].box.w : r.width, 220, 900)), hh = Math.round(clamp(r.height || L.panels[id].box.h, 160, 1000));
     // posição em coordenadas da TELA, ajustada à área útil do monitor (nunca "muito abaixo", nunca com a barra de título fora)
     const pos = posicaoJanela({ left: at ? at.x - 40 : screenX + 80, top: at ? at.y - 20 : screenY + 120, width: w, height: hh }, telaDisponivel(window));
-    const win = open('', 'geharte-painel-' + id, `popup=yes,width=${pos.width},height=${pos.height},left=${pos.left},top=${pos.top}`);
+    const win = open('', 'gehrarte-painel-' + id, `popup=yes,width=${pos.width},height=${pos.height},left=${pos.left},top=${pos.top}`);
     if (!win) { toast('O navegador bloqueou a nova janela. Permita pop-ups para este site e tente de novo.', 'err'); render(); return false; }
     const d = win.document;
     d.open();
     d.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title></title><style>html,body{margin:0;height:100%;background:#1b1a22}body{visibility:hidden}</style></head><body class="pnl-window"></body></html>');
     d.close();
-    d.title = `${panels[id].title || D.panelTitle(id)} — Geharte`;
+    d.title = `${panels[id].title || D.panelTitle(id)} — Gehrarte`;
     let pend = 0;
     const reveal = () => { if (!pend) d.body.style.visibility = 'visible'; };
     for (const n of document.head.querySelectorAll('link[rel=stylesheet],style')) pend += cloneStyle(n, d, () => { pend--; reveal(); });

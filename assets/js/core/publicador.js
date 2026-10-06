@@ -1,6 +1,7 @@
 // Cliente do PUBLICADOR (publicador/): o editor manda a página para o servidor, que grava no GitHub no lugar da pessoa.
 // A pessoa só confirma com o Google (token de acesso "openid email", ~1 h, guardado só na aba); nada de token do GitHub.
 // O corpo vai como text/plain (pedido "simples": sem preflight de CORS, e é o que o Google Apps Script aceita).
+import './migracao.js';
 import { gsiRequestToken } from './drive.js';
 
 export const PUB_SCOPE = 'openid email';
@@ -26,7 +27,7 @@ export function createPublicador({
   now = () => Date.now(),
   espera = (ms) => new Promise((r) => setTimeout(r, ms)),
 } = {}) {
-  const K = `geharte.pub.token.${slug}`;
+  const K = `gehrarte.pub.token.${slug}`;
   let tok = safe(() => JSON.parse(session.getItem(K) || 'null'));
   const valido = () => !!tok && tok.exp > now() + 60e3;
   const guarda = (t) => { tok = t; if (t) session.setItem(K, JSON.stringify(t)); else session.removeItem(K); };

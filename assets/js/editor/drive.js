@@ -1,4 +1,4 @@
-// Aba "Drive" da biblioteca: os materiais da pessoa, na pasta "Geharte — materiais" do Google Drive dela.
+// Aba "Drive" da biblioteca: os materiais da pessoa, na pasta "Gehrarte — materiais" do Google Drive dela.
 // Enviar (botão ou arrastar), ver, inserir imagem na página, importar projeto (.json) e abrir o resto no Drive.
 import { h } from '../core/dom.js';
 import { S } from './state.js';
@@ -31,7 +31,7 @@ export function driveTab(body) {
     view.replaceChildren(
       h('div', { class: 'pad drv-intro' },
         h('p', {}, h('b', {}, 'Seus materiais, sempre à mão.'), ' Imagens, fontes, PSD e PDF ficam no ', h('b', {}, 'seu Google Drive institucional'), `, na pasta “${FOLDER_NAME}” — e aparecem aqui enquanto você edita.`),
-        h('p', { class: 'hint' }, 'O Geharte só enxerga o que for enviado por aqui. O resto do seu Drive continua invisível para o site.'),
+        h('p', { class: 'hint' }, 'O Gehrarte só enxerga o que for enviado por aqui. O resto do seu Drive continua invisível para o site.'),
         erro ? h('p', { class: 'hint bad' }, erro) : null,
         btn({ label: drive?.wasConnected() ? 'Reconectar ao Drive' : 'Conectar ao Google Drive', ic: 'cloud', cls: 'primary', onClick: connect })));
   }
@@ -124,11 +124,11 @@ export function driveTab(body) {
   return () => { alive = false; };   // chamado ao trocar de aba
 }
 
-// "Salvar cópia no Drive" (menu ⋯): grava o projeto como geharte-<usuário>-<id>.json na pasta de materiais.
+// "Salvar cópia no Drive" (menu ⋯): grava o projeto como gehrarte-<usuário>-<id>.json na pasta de materiais.
 export async function saveCopyToDrive(project) {
   const drive = await getDrive(S.slug);
   if (!drive.isConnected()) await drive.connectAs();
-  const nome = `geharte-${S.slug}-${S.doc.id}.json`;
+  const nome = `gehrarte-${S.slug}-${S.doc.id}.json`;
   await drive.saveText(nome, JSON.stringify(project));
   return nome;
 }

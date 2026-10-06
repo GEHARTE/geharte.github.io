@@ -1,3 +1,4 @@
+import '../core/migracao.js';
 import { h, $, $$ } from '../core/dom.js';
 import { session, logout, loadUsers, loadConfig } from '../core/auth.js';
 import { Store } from '../core/store.js';
@@ -74,7 +75,7 @@ async function main() {
   $('#who').textContent = sess.nome;
   loadAllFonts();
   // o Publicar não usa mais token do GitHub: apaga o que versões antigas deixaram guardado neste navegador
-  try { for (const k of ['geharte.ghtoken', 'geharte.repo', 'geharte.branch']) localStorage.removeItem(k); } catch { /* sem armazenamento */ }
+  try { for (const k of ['gehrarte.ghtoken', 'gehrarte.repo', 'gehrarte.branch']) localStorage.removeItem(k); } catch { /* sem armazenamento */ }
   vigiarAreaVisivel(window);   // --vv-*: área visível real, usada por diálogos e menus (core/janelas.js)
 
   // o editor abre sempre uma página escolhida no painel de documentos: ?doc=<id> (perfil, artigo ou site-<pagina>)

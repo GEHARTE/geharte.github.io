@@ -8,7 +8,7 @@ const host = document.getElementById('pagina-site');
 try {
   host.hidden = false;
   const doc = await mountPublished(host, 'landing', { modo: 'tela', onBg: (bg) => { document.body.style.background = bg; } });
-  if (doc) { document.body.classList.add('landing-doc'); document.title = `${doc.title || 'Geharte'} — Geharte`; }
+  if (doc) { document.body.classList.add('landing-doc'); document.title = `${doc.title || 'Gehrarte'} — Gehrarte`; }
   else host.hidden = true;
 } catch { host.hidden = true; }
 document.documentElement.classList.remove('chk');
@@ -16,7 +16,7 @@ document.documentElement.classList.remove('chk');
 const a = document.getElementById('entrar');
 if (a && session()) {
   a.href = 'home/';
-  a.setAttribute('aria-label', 'Entrar no blog do Geharte');
+  a.setAttribute('aria-label', 'Entrar no blog do Gehrarte');
   a.querySelector('.rot').textContent = 'Entrar';
 }
 

@@ -1,4 +1,4 @@
-/* Landing do Geharte: um painel só, sem rolagem. Lettering + enfeites de um lado; texto e "Entrar" do outro. */
+/* Landing do Gehrarte: um painel só, sem rolagem. Lettering + enfeites de um lado; texto e "Entrar" do outro. */
 :root{ --papel:#f1ead9; --papel-2:#e8dcc1; --tinta:#17161d; --tinta-2:#4f4a40; --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; --pad:clamp(16px,3vw,44px) }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden}

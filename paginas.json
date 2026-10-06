@@ -4,7 +4,7 @@
     {
       "id": "landing",
       "titulo": "Landing page",
-      "funcao": "Porta de entrada do site: o nome do Geharte sendo escrito, o texto de apresentação do A.M.A.R. e o botão Login/Entrar. É a primeira coisa que qualquer visitante vê.",
+      "funcao": "Porta de entrada do site: o nome do Gehrarte sendo escrito, o texto de apresentação do A.M.A.R. e o botão Login/Entrar. É a primeira coisa que qualquer visitante vê.",
       "caminho": "index.html"
     },
     {

@@ -1,4 +1,5 @@
 // Biblioteca lateral: elementos, SVGs animados, mídia, Drive, modelos e camadas.
+import '../core/migracao.js';
 import { h } from '../core/dom.js';
 import { makeElement, K, W } from '../core/model.js';
 import { sanitizeSvg } from '../core/sanitize.js';
@@ -82,7 +83,7 @@ const TPL = [
         E('shape', { name: 'Foto', shape: 'ellipse', s: { fill: null, grad: { a: 135, c1: '#e4572e', c2: '#7b5cff' } }, an: { in: { k: 'zoom-in', dur: 0.8, delay: 0, ease: 'ease-out' } } }, { x: 110, y: 150, w: 280, h: 280 }, { x: 105, y: 260, w: 180, h: 180 }),
         E('text', { name: 'Etiqueta', text: 'Olá, eu sou', s: { fontFamily: 'Inter', fontSize: 16, fontWeight: 700, upper: true, ls: 0.16, color: '#ffb703', lh: 1.2 }, an: { in: { k: 'fade-up', dur: 0.7, delay: 0.1, ease: 'ease-out' } } }, { x: 450, y: 170, w: 400, h: 24 }, { x: 24, y: 470, w: 342, h: 20, fs: 13 }),
         E('text', { name: 'Nome', text: 'Seu Nome', s: { fontFamily: 'Space Grotesk', fontSize: 96, fontWeight: 700, color: '#ffffff', lh: 1, ls: -0.035 }, an: { in: { k: 'fade-up', dur: 0.8, delay: 0.2, ease: 'ease-out' } } }, { x: 450, y: 205, w: 640, h: 100 }, { x: 24, y: 498, w: 342, h: 54, fs: 52 }),
-        E('text', { name: 'Resumo', text: 'Escreva aqui uma frase sobre você, o que estuda e no que está trabalhando no Geharte.', s: { fontFamily: 'Inter', fontSize: 22, fontWeight: 400, color: '#cfcbe0', lh: 1.55 }, an: { in: { k: 'fade-up', dur: 0.8, delay: 0.35, ease: 'ease-out' } } }, { x: 450, y: 335, w: 560, h: 100 }, { x: 24, y: 566, w: 342, h: 100, fs: 17 }),
+        E('text', { name: 'Resumo', text: 'Escreva aqui uma frase sobre você, o que estuda e no que está trabalhando no Gehrarte.', s: { fontFamily: 'Inter', fontSize: 22, fontWeight: 400, color: '#cfcbe0', lh: 1.55 }, an: { in: { k: 'fade-up', dur: 0.8, delay: 0.35, ease: 'ease-out' } } }, { x: 450, y: 335, w: 560, h: 100 }, { x: 24, y: 566, w: 342, h: 100, fs: 17 }),
         E('shape', { name: 'Botão', shape: 'rect', label: 'Fale comigo', link: { href: 'mailto:', blank: false }, s: { fill: '#e4572e', radius: 9999 }, ls: { fontFamily: 'Inter', fontSize: 20, fontWeight: 600, color: '#ffffff' }, an: { hover: { k: 'lift' }, in: { k: 'bounce-in', dur: 0.8, delay: 0.55, ease: 'ease-out' } } }, { x: 450, y: 480, w: 220, h: 60 }, { x: 24, y: 690, w: 200, h: 54, fs: 18 }),
       ],
     }),
@@ -96,7 +97,7 @@ const TPL = [
         E('text', { name: 'Título', text: 'Meus projetos', s: { fontFamily: 'Space Grotesk', fontSize: 88, fontWeight: 700, color: '#17161d', lh: 1, ls: -0.035 }, an: { in: { k: 'fade-up', dur: 0.8, delay: 0, ease: 'ease-out' } } }, { x: 100, y: 120, w: 720, h: 90 }, { x: 24, y: 120, w: 342, h: 100, fs: 46 }),
         E('text', { name: 'Subtítulo', text: 'Um pouco do que eu faço, aprendo e crio.', s: { fontFamily: 'Inter', fontSize: 26, fontWeight: 400, color: '#5a5766', lh: 1.4 }, an: { in: { k: 'fade-up', dur: 0.8, delay: 0.15, ease: 'ease-out' } } }, { x: 100, y: 245, w: 640, h: 40 }, { x: 24, y: 245, w: 342, h: 60, fs: 18 }),
         ...[0, 1, 2].map((i) => E('shape', { name: `Cartão ${i + 1}`, shape: 'rect', label: `Projeto ${i + 1}`, s: { fill: ['#e4572e', '#7b5cff', '#1f9d8b'][i], radius: 28, shadow: { x: 0, y: 18, b: 30, c: '#17161d33' } }, ls: { fontFamily: 'Space Grotesk', fontSize: 34, fontWeight: 700, color: '#ffffff' }, an: { in: { k: 'fade-up', dur: 0.7, delay: 0.2 + i * 0.15, ease: 'ease-out' }, hover: { k: 'lift' } } }, { x: 100 + i * 340, y: 370, w: 300, h: 380 }, { x: 24, y: 340 + i * 210, w: 342, h: 190, fs: 26 })),
-        E('text', { name: 'Rodapé', text: 'Feito no Geharte · UEM', s: { fontFamily: 'Inter', fontSize: 16, fontWeight: 500, color: '#8a8799', lh: 1.4, align: 'center' } }, { x: 100, y: 900, w: 1000, h: 24 }, { x: 24, y: 1000, w: 342, h: 20, fs: 14 }),
+        E('text', { name: 'Rodapé', text: 'Feito no Gehrarte · UEM', s: { fontFamily: 'Inter', fontSize: 16, fontWeight: 500, color: '#8a8799', lh: 1.4, align: 'center' } }, { x: 100, y: 900, w: 1000, h: 24 }, { x: 24, y: 1000, w: 342, h: 20, fs: 14 }),
       ],
     }),
   },
@@ -123,7 +124,7 @@ export function initLibrary(root) {
   const tabs = h('div', { class: 'lib-tabs' });
   const body = h('div', { class: 'lib-body' });
   root.append(tabs, body);
-  let cur = localStorage.getItem('geharte.libtab') || 'els';
+  let cur = localStorage.getItem('gehrarte.libtab') || 'els';
   let cleanup = null;   // aba que precisa limpar algo ao sair (Drive)
 
   const tabEls = {};
@@ -135,7 +136,7 @@ export function initLibrary(root) {
   function show(id) {
     cur = id;
     cleanup?.(); cleanup = null;
-    try { localStorage.setItem('geharte.libtab', id); } catch { /* ok */ }
+    try { localStorage.setItem('gehrarte.libtab', id); } catch { /* ok */ }
     for (const k in tabEls) tabEls[k].classList.toggle('on', k === id);
     body.innerHTML = '';
     body.dataset.tab = id;
