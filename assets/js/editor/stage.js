@@ -6,9 +6,11 @@ import { clamp, round } from '../core/util.js';
 import { S, on, emit, byId, selEls, select, mutateGeom, mutate, commit, touch, assetUrl, setTool, removeEls, duplicate, reorder } from './state.js';
 import { createShape, createText, createPath, insertImageFile, ensureHeight, defaultShapeSize, inkColor } from './tools.js';
 import { icon } from './icons.js';
+import { guiasDe, candidatosDeGuias } from '../core/reguas.js';
 
 const PAD = 48;
-let vp, stage, holder, selLayer, fxLayer, ab;
+let vp, stage, holder, selLayer, fxLayer, guiasLayer, ab;
+let previaGuia = null;   // guia sendo arrastada a partir da régua (editor/reguas.js)
 
 const ctx = () => ({ dev: S.dev, assetUrl, editing: true, doc: S.doc });
 export const nodeOf = (id) => ab?.querySelector(`:scope > [data-id="${id}"]`);
@@ -42,6 +44,21 @@ function layout() {
   stage.style.height = hh * z + PAD * 2 + 'px';
   Object.assign(holder.style, { left: PAD + 'px', top: PAD + 'px', width: w * z + 'px', height: hh * z + 'px' });
   if (ab) { ab.style.transform = `scale(${z})`; ab.style.width = w + 'px'; ab.style.height = hh + 'px'; }
+  desenharGuias();
+}
+
+// Guias do usuário (azul-piscina): as do documento neste dispositivo + a que está sendo arrastada da régua.
+function desenharGuias() {
+  if (!guiasLayer || !S.doc) return;
+  const g = guiasDe(S.doc, S.dev), z = S.zoom, w = pageW(S.doc, S.dev) * z, hh = pageH(S.doc, S.dev) * z;
+  const linha = (eixo, pos, extra = '') => h('i', { class: `guia-u ${eixo === 'x' ? 'v' : 'hz'}${extra}`, 'data-eixo': eixo, 'data-pos': pos,
+    style: eixo === 'x' ? { left: sx(pos) + 'px', top: PAD + 'px', height: hh + 'px' } : { top: sx(pos) + 'px', left: PAD + 'px', width: w + 'px' } });
+  const filhos = [...g.x.map((p) => linha('x', p)), ...g.y.map((p) => linha('y', p))];
+  if (previaGuia) {
+    const sr = stage.getBoundingClientRect();
+    filhos.push(linha(previaGuia.eixo, previaGuia.pos, ' previa'), h('span', { class: 'guia-rot', style: { left: previaGuia.cx - sr.left + 14 + 'px', top: previaGuia.cy - sr.top + 14 + 'px' } }, previaGuia.rotulo));
+  }
+  guiasLayer.replaceChildren(...filhos);
 }
 
 export function renderAll() {
@@ -223,7 +240,8 @@ function startTouchPan(e) {
 
 function snapBox(box, others) {
   const T = 6 / S.zoom, w = pageW(S.doc, S.dev), hh = pageH(S.doc, S.dev);
-  const xs = [0, w / 2, w], ys = [0, hh / 2, hh];
+  const gu = candidatosDeGuias(S.doc, S.dev);                      // as guias do usuário também "grudam"
+  const xs = [0, w / 2, w, ...gu.xs], ys = [0, hh / 2, hh, ...gu.ys];
   for (const o of others) { xs.push(o.x, o.x + o.w / 2, o.x + o.w); ys.push(o.y, o.y + o.h / 2, o.y + o.h); }
   const best = (mine, cands) => {
     let d = null;
@@ -453,7 +471,10 @@ export function initStage(refs) {
   ({ vp, stage, holder } = refs);
   selLayer = h('div', { class: 'ov-sel' });
   fxLayer = h('div', { class: 'ov-fx' });
-  refs.overlay.append(selLayer, fxLayer);
+  guiasLayer = h('div', { class: 'ov-guias' });
+  refs.overlay.append(guiasLayer, selLayer, fxLayer);
+  on('guias', desenharGuias);
+  on('guia-previa', (p) => { previaGuia = p; desenharGuias(); });
 
   S.viewCenter = () => {
     const r = vp.getBoundingClientRect(), p = toDocRaw(r.left + r.width / 2, r.top + r.height / 2);

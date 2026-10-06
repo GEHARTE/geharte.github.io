@@ -21,6 +21,7 @@ import { exportProject, exportHtml, buildProject, importProject, openPublish, op
 import { goToDocuments } from './nav.js';
 import { saveCopyToDrive } from './drive.js';
 import { initAbas } from './abas.js';
+import { initReguas, alternarReguas, reguasVisiveis } from './reguas.js';
 import { rotuloDaPagina } from '../core/formatos.js';
 import { toast, modal, btn } from './ui.js';
 import { icon } from './icons.js';
@@ -128,6 +129,7 @@ async function main() {
   initLayersPanel($('#layerspane'));
   loadDoc(doc, updatedAt);
   initAbas($('#abas-bar'));   // só aparece em projetos de site
+  initReguas({ wrap: $('#vpwrap'), canto: $('#reg-canto'), ch: $('#reg-h'), cv: $('#reg-v'), vp: $('#viewport'), holder: $('#holder'), overlay: $('#overlay') });
   // painéis reorganizáveis (docks, soltos, outra janela; no celular, gavetas): ver dock.js
   dock = initDock({
     app: $('#app'), slug: S.slug, rotateEl: $('#rotate'),
@@ -240,6 +242,7 @@ function wireTop() {
     const m = h('div', { id: 'menu', class: 'popover menu' },
       S.host.capacidades.publicar ? item('eye', 'Ver página publicada', verPublicada) : null,
       item('stack', 'Documentos', () => goToDocuments()),
+      item('layers', reguasVisiveis() ? 'Ocultar réguas (Alt+R)' : 'Mostrar réguas (Alt+R)', () => alternarReguas()),
       item('download', 'Exportar projeto (.json)', exportProject),
       item('code', S.doc.kind === 'site' ? 'Exportar site em HTML (.html)' : 'Exportar página em HTML (.html)', async () => { try { toast('Montando o arquivo HTML…'); const r = await exportHtml(); toast(`HTML salvo na pasta de Downloads (${r.paginas} ${r.paginas > 1 ? 'páginas' : 'página'}, ${(r.bytes / 1024).toFixed(0)} KB).`, 'ok'); } catch (e) { toast(e.message || String(e), 'err'); } }),
       item('upload', 'Importar projeto…', () => imp.click()), imp,
@@ -284,6 +287,7 @@ function bindKeys(doc) {
       else if (k === '-') { e.preventDefault(); setZoom(S.zoom / 1.2); }
       return;
     }
+    if (e.altKey && k === 'r') { e.preventDefault(); alternarReguas(); return; }
     if (k === 'escape') { if (S.tool !== 'select') setTool('select'); else select([]); return; }
     if (k === 'delete' || k === 'backspace') { const ids = selEls().filter((x) => !x.lock).map((x) => x.id); if (ids.length) { e.preventDefault(); removeEls(ids); } return; }
     if (k.startsWith('arrow')) {

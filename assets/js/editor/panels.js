@@ -3,6 +3,8 @@ import { h } from '../core/dom.js';
 import { debounce, round } from '../core/util.js';
 import { W, K, frameOf, setFrame, pageH, fontOwner, DEV_LABEL, ABAS_PADRAO, ehUnico, ehFixa } from '../core/model.js';
 import { rotuloDaPagina } from '../core/formatos.js';
+import { medidasDoFrame } from '../core/reguas.js';
+import { unidadeAtual } from './reguas.js';
 import { marcarComum } from '../core/sites.js';
 import { FONTS, fontStack } from '../core/fonts.js';
 import { SHAPE_LIST } from '../core/render.js';
@@ -43,15 +45,28 @@ function secGeom(el) {
     r: num({ label: '°', value: fr.r, min: -360, max: 360, step: 1, onChange: (v) => patch({ r: v }) }),
   };
   if (el.t === 'text') geom.h.querySelector('input').disabled = true;
-  const body = [row(geom.x, geom.y), row(geom.w, geom.h), row(geom.r)];
+  const medidas = h('p', { class: 'hint', id: 'geom-un', title: 'Medidas na unidade da régua (troque no canto das réguas)' });
+  geom.un = medidas;
+  const body = [row(geom.x, geom.y), row(geom.w, geom.h), row(geom.r), medidas];
+  pintaMedidas(fr);
   if (S.dev === 'm' && !el.f.m) body.push(hint('Este elemento ainda segue o layout do PC. Mexer nele aqui cria o ajuste do celular.'));
   return section('Posição e tamanho', body);
+}
+// Posição e tamanho na unidade da régua (px, cm…), abaixo dos campos em px.
+function pintaMedidas(fr) {
+  if (!geom.un) return;
+  const u = unidadeAtual();
+  if (u === 'px') { geom.un.textContent = ''; geom.un.hidden = true; return; }
+  const m = medidasDoFrame(fr, u);
+  geom.un.hidden = false;
+  geom.un.textContent = `${m.x}, ${m.y} · ${m.w} × ${m.h} ${m.unidade}`;
 }
 function refreshGeom() {
   const el = selEls()[0];
   if (!el || S.sel.length !== 1 || !geom.x) return;
   const fr = boxNow(el);
   geom.x.set(fr.x); geom.y.set(fr.y); geom.w.set(fr.w); geom.h.set(fr.h); geom.r.set(fr.r);
+  pintaMedidas(fr);
 }
 
 // ---------- alinhar ----------
@@ -353,6 +368,7 @@ export function initPanel(el) {
   for (const ev of ['select', 'struct', 'device', 'tool']) on(ev, build);
   on('page', () => { if (!S.sel.length && !root.contains(root.ownerDocument.activeElement)) build(); });
   on('geom', refreshGeom);
+  on('regua', () => { const el = selEls()[0]; if (el && S.sel.length === 1) pintaMedidas(boxNow(el)); });
   on('el', ({ src }) => { if (src === 'canvas') refreshGeom(); });
   on('focuslabel', () => setTimeout(() => root.querySelector('#lbl-input')?.focus(), 30));
   on('editsvg', () => setTimeout(() => { const t = root.querySelector('#svg-code'); t?.scrollIntoView({ block: 'center' }); t?.focus(); }, 30));

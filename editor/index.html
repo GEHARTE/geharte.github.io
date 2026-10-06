@@ -49,9 +49,14 @@
     <div id="center">
       <div id="pathbar" title="Qual página você está editando: tipo, estado (só no inventário / publicada) e arquivo. O rascunho fica salvo neste navegador."><span id="pb-kind" class="chip"></span><span id="pb-state" class="chip"></span><span id="pb-path"></span><i>·</i><span id="pb-name"></span><span id="pb-dev"></span></div>
       <div id="abas-bar" class="abas-bar" hidden role="tablist" aria-label="Abas do projeto"></div>
-      <main id="viewport">
-        <div id="stage"><div id="holder"></div><div id="overlay"></div></div>
-      </main>
+      <div id="vpwrap">
+        <button id="reg-canto" type="button" title="Unidade e guias das réguas" aria-label="Unidade e guias das réguas" aria-haspopup="menu">px</button>
+        <canvas id="reg-h" aria-hidden="true" title="Arraste para baixo para criar uma guia"></canvas>
+        <canvas id="reg-v" aria-hidden="true" title="Arraste para a direita para criar uma guia"></canvas>
+        <main id="viewport">
+          <div id="stage"><div id="holder"></div><div id="overlay"></div></div>
+        </main>
+      </div>
     </div>
     <div id="dock-right" class="dock" data-side="right"></div>
     <div id="floats"></div>

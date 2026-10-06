@@ -171,7 +171,7 @@ body.pnl-window .pnl{position:absolute;inset:0;width:auto;height:auto;border:0;b
 #pb-name{color:#8e8ba1;overflow:hidden;text-overflow:ellipsis}
 #pb-dev{margin-left:auto;opacity:.8;flex:none}
 #pb-name{min-width:0}
-#center #viewport{flex:1;min-height:0}
+#center #vpwrap{flex:1;min-height:0}
 #viewport{position:relative;overflow:auto;background:#0e0d13;background-image:radial-gradient(#23222c 1px,transparent 1px);background-size:22px 22px}
 #viewport{touch-action:none}
 #viewport[data-tool="hand"]{cursor:grab}
@@ -429,3 +429,23 @@ body.compact .pv-diagram svg.pd{max-height:52vh;margin:0 auto}
 .abas-bar .ab.on{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.18)}
 .abas-bar .ab-rot{flex:none;font:600 10px var(--f);letter-spacing:.06em;text-transform:uppercase;color:#6f6c80;margin-right:4px}
 .abas-bar .ab-mais{margin-left:auto}
+
+/* réguas (cm/mm/px…), guias e canto de unidade */
+#vpwrap{position:relative;display:grid;grid-template-columns:22px minmax(0,1fr);grid-template-rows:22px minmax(0,1fr)}
+#vpwrap #viewport{grid-column:2;grid-row:2;min-width:0;min-height:0}
+#reg-canto{grid-column:1;grid-row:1;border:0;border-right:1px solid #2a2938;border-bottom:1px solid #2a2938;background:#15141c;color:#a8a5bb;font:700 9.5px var(--f);padding:0;cursor:pointer}
+#reg-canto:hover{color:#fff;background:#1c1b26}
+#reg-h{grid-column:2;grid-row:1;width:100%;height:22px;display:block;background:#15141c;border-bottom:1px solid #2a2938;cursor:s-resize;touch-action:none}
+#reg-v{grid-column:1;grid-row:2;width:22px;height:100%;display:block;background:#15141c;border-right:1px solid #2a2938;cursor:e-resize;touch-action:none}
+#vpwrap.sem-reguas{grid-template-columns:0 minmax(0,1fr);grid-template-rows:0 minmax(0,1fr)}
+#vpwrap.sem-reguas #reg-canto,#vpwrap.sem-reguas #reg-h,#vpwrap.sem-reguas #reg-v{display:none}
+body.compact #vpwrap{grid-template-columns:0 minmax(0,1fr);grid-template-rows:0 minmax(0,1fr)}
+body.compact #reg-canto,body.compact #reg-h,body.compact #reg-v{display:none}
+.ov-guias{position:absolute;inset:0;pointer-events:none}
+.guia-u{position:absolute;background:#22d3ee;pointer-events:auto;z-index:2}
+.guia-u.v{width:1px;margin-left:-.5px;cursor:col-resize} .guia-u.hz{height:1px;margin-top:-.5px;cursor:row-resize}
+.guia-u::before{content:"";position:absolute;inset:-5px}
+.guia-u.previa{pointer-events:none;opacity:.85}
+.guia-rot{position:absolute;pointer-events:none;background:#0e7490;color:#fff;font:600 10.5px var(--f);padding:2px 6px;border-radius:5px;white-space:nowrap;z-index:3}
+#menu-regua{min-width:200px}
+#menu-regua button.on span::after{content:" ✓"}
