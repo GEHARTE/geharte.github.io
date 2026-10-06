@@ -2,8 +2,7 @@
 // Regras: copia a chave antiga para a nova SÓ se a nova ainda não existe (nunca sobrescreve) e só então apaga a antiga.
 // As chaves do token do GitHub (ghtoken/repo/branch) morreram com o Publicador sem token: são apagadas, não copiadas.
 // Roda uma vez por página ao importar este módulo; é idempotente e nunca lança (sem armazenamento = não faz nada).
-// O banco do IndexedDB ("geharte-v1", core/store.js) NÃO é renomeado de propósito: não existe "renomear" em IndexedDB e
-// recriar exigiria copiar todas as páginas e imagens; o nome é interno e invisível.
+// O banco do IndexedDB ("geharte-v1" → "gehrarte-v1") é migrado por core/store.js: copia páginas e imagens e só então apaga o antigo.
 export const PREFIXO_ANTIGO = 'geharte.';
 export const PREFIXO_NOVO = 'gehrarte.';
 const MORTAS = ['ghtoken', 'repo', 'branch'].map((k) => PREFIXO_ANTIGO + k);
