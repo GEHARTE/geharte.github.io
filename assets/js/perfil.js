@@ -5,12 +5,16 @@
 //   &src=draft                               rascunho local (mesmo navegador do editor; com &a=<id> abre o artigo, com &p=<pagina> a página do site)
 //   &device=d|m                              força PC ou celular (senão decide pela largura da tela)
 //   &embed=1 / &toolbar=1                    sem selo / com botões PC·Celular
-import { renderArtboard, observeEntrances, usedFonts } from './core/render.js';
+//   &print=1 / &print=auto                   modo PDF: estado final, escala 1, papel do tamanho da página (auto = já abre a janela de impressão)
+//   &sangria=1 &marcas=1                     (PDF de papel) inclui a sangria e/ou as marcas de corte; a folha cresce em volta da página final
+import { renderArtboard, renderArtboardRecortado, observeEntrances, usedFonts } from './core/render.js';
+import { larguraFinal, alturaFinal } from './core/gabarito.js';
 import { loadFonts } from './core/fonts.js';
-import { W, pageH, pageW, ehUnico, bgCss } from './core/model.js';
+import { W, pageH, pageW, ehUnico, ehFixa, bgCss } from './core/model.js';
 import { Store } from './core/store.js';
 import { docDeAba, abaDoHash } from './core/sites.js';
 import { BASE } from './core/util.js';
+import { tamanhoPagina, cssPagina, folhaPdf, congelarSvgsDasImagens, esperarPronto } from './core/pdf.js';
 
 const q = new URLSearchParams(location.search);
 const slug = q.get('u') || '';
@@ -19,7 +23,9 @@ const pageId = q.get('p') || '';
 const root = document.getElementById('root');
 const msg = (t) => { root.innerHTML = ''; const p = document.createElement('p'); p.className = 'msg'; p.textContent = t; root.append(p); };
 
-document.documentElement.classList.add('js-anim');
+// Modo PDF: nada de "esperar aparecer" (js-anim esconde o que ainda não rolou) e tudo no estado final.
+const modoPdf = q.get('print') || '';
+document.documentElement.classList.add(modoPdf ? 'print-mode' : 'js-anim');
 if (q.get('embed')) document.body.classList.add('embed');
 
 let doc = null, assetUrl = () => null;
@@ -50,22 +56,59 @@ function vista() {
   return docDeAba(doc, id);
 }
 
+// PDF de PAPEL (A5, A4…): uma folha do tamanho do papel (ou maior, com sangria e marcas de corte). Geometria em core/pdf.js › folhaPdf.
+function desenharFolha(view) {
+  const f = folhaPdf(view, { sangria: q.get('sangria') === '1', marcas: q.get('marcas') === '1' });
+  const ctx = { dev: 'd', assetUrl, editing: false };
+  document.body.style.background = '#fff';
+  const stage = document.createElement('div');
+  stage.className = 'stage folha';
+  Object.assign(stage.style, { width: f.folha.w + 'px', height: f.folha.h + 'px', background: '#fff', position: 'relative', overflow: 'hidden', margin: '0' });
+  const caixa = document.createElement('div');
+  Object.assign(caixa.style, { position: 'absolute', left: f.caixa.x + 'px', top: f.caixa.y + 'px', width: f.caixa.w + 'px', height: f.caixa.h + 'px', overflow: 'hidden' });
+  caixa.append(f.caixa.sangria ? renderArtboard(view, ctx) : renderArtboardRecortado(view, ctx));   // com sangria: a página inteira; sem: só a página final
+  stage.append(caixa);
+  if (f.marcas.length) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'marcas'); svg.setAttribute('width', f.folha.w); svg.setAttribute('height', f.folha.h); svg.setAttribute('viewBox', `0 0 ${f.folha.w} ${f.folha.h}`);
+    Object.assign(svg.style, { position: 'absolute', left: '0', top: '0', pointerEvents: 'none' });
+    for (const l of f.marcas) {
+      const ln = document.createElementNS(NS, 'line');
+      for (const [k, v] of Object.entries({ x1: l.x1, y1: l.y1, x2: l.x2, y2: l.y2, stroke: '#000', 'stroke-width': 0.5 })) ln.setAttribute(k, v);
+      svg.append(ln);
+    }
+    const t = document.createElementNS(NS, 'text');
+    for (const [k, v] of Object.entries({ x: f.folha.w / 2, y: f.folha.h - 6, 'text-anchor': 'middle', 'font-size': 8, fill: '#555', 'font-family': 'system-ui, sans-serif' })) t.setAttribute(k, v);
+    t.textContent = f.rotulo;
+    svg.append(t);
+    stage.append(svg);
+  }
+  root.innerHTML = '';
+  root.append(stage);
+  let pg = document.getElementById('pg'); if (!pg) { pg = document.createElement('style'); pg.id = 'pg'; document.head.append(pg); }
+  pg.textContent = cssPagina(f.folha);
+  document.title = `${doc.title || 'Arquivo'} — Gehrarte`;
+  return 'd';
+}
+
 let lastVw = 0;
 function draw() {
   const view = vista();
+  if (modoPdf && ehFixa(view)) { loadFonts(usedFonts(view)); return desenharFolha(view); }
   const forced = q.get('device') === 'm' || q.get('device') === 'd' ? q.get('device') : null;
-  const dev = ehUnico(view) ? 'd' : forced || (matchMedia('(max-width:720px)').matches ? 'm' : 'd');
-  const framed = !ehUnico(view) && forced === 'm' && innerWidth > 520;
+  const dev = ehUnico(view) ? 'd' : modoPdf ? (forced || 'd') : forced || (matchMedia('(max-width:720px)').matches ? 'm' : 'd');
+  const framed = !modoPdf && !ehUnico(view) && forced === 'm' && innerWidth > 520;
   document.body.classList.toggle('framed', framed);
   document.body.style.background = framed ? '' : bgCss(view.page.bg);
 
   const vw = lastVw = document.documentElement.clientWidth;
-  const s = framed ? 1 : Math.min(vw / pageW(view, dev), dev === 'd' ? 1.5 : 2);
+  const s = framed || modoPdf ? 1 : Math.min(vw / larguraFinal(view, dev), dev === 'd' ? 1.5 : 2);   // PDF: escala 1, o papel é que tem o tamanho da página
   const stage = document.createElement('div');
   stage.className = 'stage' + (framed ? ' phone' : '');
-  stage.style.width = pageW(view, dev) * s + 'px';
-  stage.style.height = pageH(view, dev) * s + 'px';
-  const ab = renderArtboard(view, { dev, assetUrl, editing: false });
+  stage.style.width = larguraFinal(view, dev) * s + 'px';
+  stage.style.height = alturaFinal(view, dev) * s + 'px';
+  const ab = renderArtboardRecortado(view, { dev, assetUrl, editing: false });
   ab.style.transform = `scale(${s})`;
   stage.append(ab);
   root.innerHTML = '';
@@ -74,7 +117,21 @@ function draw() {
   const aba = view.kind === 'site' ? view.abas.find((a) => a.id === view.abaAtiva) : null;
   document.title = aba ? `${aba.titulo} — ${doc.title || 'Site'}` : `${doc.title || 'Página'} — Gehrarte`;
   loadFonts(usedFonts(view));
+  if (modoPdf) {
+    let pg = document.getElementById('pg'); if (!pg) { pg = document.createElement('style'); pg.id = 'pg'; document.head.append(pg); }
+    pg.textContent = cssPagina(tamanhoPagina(view, dev));
+  }
   return dev;
+}
+
+// Barra só da tela (some na impressão): explica o que fazer e repete o botão.
+function barraPdf(dev) {
+  const b = document.createElement('div'); b.id = 'pdfbar';
+  const t = document.createElement('span');
+  const papel = q.get('marcas') === '1' || q.get('sangria') === '1';
+  t.textContent = `PDF${papel ? ' para gráfica' : dev === 'm' ? ' do celular' : ' do computador'} — na janela de impressão escolha “Salvar como PDF” e desligue “Cabeçalhos e rodapés” e as margens.`;
+  const bt = document.createElement('button'); bt.type = 'button'; bt.textContent = 'Salvar como PDF'; bt.onclick = () => print();
+  b.append(t, bt); document.body.prepend(b);
 }
 
 function toolbar(dev) {
@@ -89,13 +146,22 @@ try {
   await load();
   loadFonts(usedFonts(doc));
   let dev = draw();
-  // a barra de rolagem aparece depois que o conteúdo entra: se a largura útil mudou, redesenha (senão 15px da direita ficam cortados)
-  for (let i = 0; i < 2 && lastVw !== document.documentElement.clientWidth; i++) dev = draw();
-  toolbar(dev);
-  let t;
-  addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { dev = draw(); toolbar(dev); }, 120); });
-  // navegação entre abas do projeto de site
-  addEventListener('hashchange', () => { if (doc.kind === 'site') { dev = draw(); toolbar(dev); scrollTo(0, 0); } });
+  if (modoPdf) {
+    // PDF: tamanho fixo (sem resize nem toolbar); congela SVGs de <img>, espera fontes e imagens, e só então libera a impressão
+    await congelarSvgsDasImagens(root);
+    await esperarPronto(root);
+    document.documentElement.dataset.pdfPronto = '1';   // sinal para testes e automações
+    barraPdf(dev);
+    if (modoPdf === 'auto') setTimeout(() => print(), 150);
+  } else {
+    // a barra de rolagem aparece depois que o conteúdo entra: se a largura útil mudou, redesenha (senão 15px da direita ficam cortados)
+    for (let i = 0; i < 2 && lastVw !== document.documentElement.clientWidth; i++) dev = draw();
+    toolbar(dev);
+    let t;
+    addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { dev = draw(); toolbar(dev); }, 120); });
+    // navegação entre abas do projeto de site
+    addEventListener('hashchange', () => { if (doc.kind === 'site') { dev = draw(); toolbar(dev); scrollTo(0, 0); } });
+  }
 } catch (e) {
   msg(e.message);
 }

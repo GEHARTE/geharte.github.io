@@ -1,0 +1,13 @@
+/* Modo PDF do visualizador (perfil.html?print=1|auto) — REQ-AK, AK-40/42. Só vale com <html class="print-mode">; o resto do site não muda.
+   O tamanho do papel (@page) é escrito pelo perfil.js, porque depende da página. A regra de "estado final" repete core/pdf.js › CSS_FINAL
+   (um teste confere que as duas dizem o mesmo). */
+html.print-mode *,html.print-mode *::before,html.print-mode *::after{animation-duration:.001s!important;animation-delay:0s!important;animation-iteration-count:1!important;animation-fill-mode:forwards!important;transition:none!important}
+html.print-mode,html.print-mode body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html.print-mode body.viewer{min-height:0;overflow:visible}
+html.print-mode .stage{margin:0}
+html.print-mode #badge,html.print-mode #toolbar{display:none}
+
+/* barra da tela: explica o que fazer; não vai para o papel */
+#pdfbar{position:fixed;top:0;left:0;right:0;z-index:90;display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;padding:10px 16px;background:#17161d;color:#e8e6ef;font:500 13px/1.4 system-ui}
+#pdfbar button{font:600 13px system-ui;color:#17161d;background:#fff;border:0;border-radius:99px;padding:7px 16px;cursor:pointer}
+@media print{#pdfbar{display:none!important}}

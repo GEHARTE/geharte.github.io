@@ -4,16 +4,17 @@ import { debounce, round } from '../core/util.js';
 import { W, K, frameOf, setFrame, pageH, fontOwner, DEV_LABEL, ABAS_PADRAO, ehUnico, ehFixa } from '../core/model.js';
 import { rotuloDaPagina } from '../core/formatos.js';
 import { medidasDoFrame } from '../core/reguas.js';
+import { sangriaMm, margemMm, sangriaPx, aplicarSangria, aplicarMargem, avisosDeImpressao, SANGRIA_GRAFICA_MM, MARGEM_SEGURA_MM } from '../core/gabarito.js';
 import { unidadeAtual } from './reguas.js';
 import { marcarComum } from '../core/sites.js';
 import { FONTS, fontStack } from '../core/fonts.js';
 import { SHAPE_LIST } from '../core/render.js';
 import { sanitizeSvg } from '../core/sanitize.js';
-import { S, on, emit, selEls, mutate, mutateGeom, commit, touch, setPage, byId } from './state.js';
+import { S, on, emit, selEls, mutate, mutateGeom, commit, touch, setPage, byId, select as selecionar } from './state.js';
 import { inkColor, alignSel, distribute, autoStack, resetMobile, fitPageHeight, replaceImage } from './tools.js';
 import { measureAll, playEntrance, nodeOf } from './stage.js';
 import { icon } from './icons.js';
-import { btn, section, row, hint, num, range, select, seg, toggle, textInput, colorField } from './ui.js';
+import { toast, btn, section, row, hint, num, range, select, seg, toggle, textInput, colorField } from './ui.js';
 
 let root;
 let geom = {};   // inputs de geometria, para atualizar durante arrastes
@@ -56,8 +57,9 @@ function secGeom(el) {
 function pintaMedidas(fr) {
   if (!geom.un) return;
   const u = unidadeAtual();
-  if (u === 'px') { geom.un.textContent = ''; geom.un.hidden = true; return; }
-  const m = medidasDoFrame(fr, u);
+  if (u === 'px' && !sangriaMm(S.doc)) { geom.un.textContent = ''; geom.un.hidden = true; return; }
+  const b = sangriaPx(S.doc);                                  // com sangria, as medidas são a partir do corte (como as réguas)
+  const m = medidasDoFrame({ ...fr, x: fr.x - b, y: fr.y - b }, u);
   geom.un.hidden = false;
   geom.un.textContent = `${m.x}, ${m.y} · ${m.w} × ${m.h} ${m.unidade}`;
 }
@@ -291,9 +293,30 @@ function secAnim() {
 }
 
 // ---------- página ----------
+// Sangria e margem segura (papel). Mudar a sangria cresce/encolhe a página dos 4 lados e desloca tudo, mantendo cada elemento no mesmo lugar do corte.
+function secGabarito() {
+  const aplicar = (fn, valor) => { const r = fn(S.doc, valor); if (!r.ok) { toast(r.motivo, 'err'); return; } emit('struct'); emit('page'); commit(); build(); };
+  const aplicarDepois = debounce((fn, v) => aplicar(fn, v), 450);
+  const av = avisosDeImpressao(S.doc);
+  const linhas = [
+    ['foraDaMargem', 'texto dentro da margem segura (pode ser cortado)'],
+    ['semSangria', 'fundo que encosta no corte sem passar pela sangria (pode sobrar fio branco)'],
+    ['foraDaPagina', 'fora da página (não sai na impressão)'],
+  ].filter(([k]) => av[k].length).map(([k, t]) => h('div', { class: 'aviso-imp' }, h('span', {}, `${av[k].length} ${av[k].length > 1 ? 'itens' : 'item'}: ${t}`), btn({ label: 'Selecionar', onClick: () => selecionar(av[k]) })));
+  return section('Sangria e margem segura', [
+    hint('Para gráfica: a SANGRIA é a área além do corte que o fundo e as imagens de borda devem cobrir; a MARGEM SEGURA é a faixa dentro do corte onde nada importante deve ficar. As réguas medem a partir do corte.'),
+    seg({ value: [0, SANGRIA_GRAFICA_MM, 5].includes(sangriaMm(S.doc)) ? String(sangriaMm(S.doc)) : '', options: [['0', 'Sem'], [String(SANGRIA_GRAFICA_MM), `${SANGRIA_GRAFICA_MM} mm`], ['5', '5 mm']], onChange: (v) => aplicar(aplicarSangria, Number(v)) }),
+    row(num({ label: 'Sangria', value: sangriaMm(S.doc), min: 0, max: 10, step: 0.5, unit: 'mm', onChange: (v) => aplicarDepois(aplicarSangria, v) }),
+      num({ label: 'Margem', value: margemMm(S.doc), min: 0, max: 30, step: 0.5, unit: 'mm', onChange: (v) => aplicarDepois(aplicarMargem, v) })),
+    h('div', { class: 'btnrow' }, btn({ label: `Margem de ${MARGEM_SEGURA_MM} mm`, onClick: () => aplicar(aplicarMargem, MARGEM_SEGURA_MM) }), btn({ label: 'Sem margem', onClick: () => aplicar(aplicarMargem, 0) })),
+    ...(linhas.length ? linhas : (sangriaMm(S.doc) || margemMm(S.doc) ? [hint('Conferência: tudo certo para a gráfica.')] : [])),
+  ]);
+}
+
 function pagePanel() {
   const bg = S.doc.page.bg;
   const out = [];
+  if (ehFixa(S.doc)) out.push(secGabarito());
   out.push(section('Página', [
     textInput({ label: 'Título', value: S.doc.title, onChange: (v) => { S.doc.title = v; touch(); emit('title'); } }),
     seg({ value: bg.g ? 'g' : 'c', options: [['c', 'Cor'], ['g', 'Degradê']], onChange: (v) => { setPage((p) => { if (v === 'g') p.bg.g = p.bg.g || { a: 160, c1: p.bg.c, c2: '#7b5cff' }; else p.bg.g = null; }); build(); } }),

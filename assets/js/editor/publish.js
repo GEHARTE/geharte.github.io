@@ -2,7 +2,8 @@
 import { h } from '../core/dom.js';
 import { BASE, blobToDataURL, dataURLToBlob, downloadBlob } from '../core/util.js';
 import { todosOsElementos, todasAsPaginas, guardarAbaAtual } from '../core/sites.js';
-import { renderArtboard, usedFonts } from '../core/render.js';
+import { renderArtboardRecortado, usedFonts } from '../core/render.js';
+import { larguraFinal, alturaFinal } from '../core/gabarito.js';
 import { urlDasFontes } from '../core/fonts.js';
 import { montarHtml, nomeDoArquivoHtml } from '../core/exportar-html.js';
 import { Store } from '../core/store.js';
@@ -48,8 +49,8 @@ export async function exportHtml() {
   const paginas = paginas0.map(({ id, titulo, doc: d }) => {
     const dispositivos = {};
     for (const dev of ehUnico(d) ? ['d'] : ['d', 'm']) {
-      const ab = renderArtboard(d, { dev, assetUrl, editing: false });
-      dispositivos[dev] = { w: pageW(d, dev), h: pageH(d, dev), html: ab.outerHTML };
+      const ab = renderArtboardRecortado(d, { dev, assetUrl, editing: false });   // papel com sangria: só a página final
+      dispositivos[dev] = { w: larguraFinal(d, dev), h: alturaFinal(d, dev), html: ab.outerHTML };
     }
     usedFonts(d).forEach((n) => nomes.add(n));
     return { id, titulo, bg: bgCss(d.page.bg), dispositivos };

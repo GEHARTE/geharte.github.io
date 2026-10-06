@@ -8,12 +8,13 @@ import { h } from '../core/dom.js';
 import { frameOf, aabb, pageW, pageH } from '../core/model.js';
 import { marcasDaRegua, UNIDADES, formatar, dePx } from '../core/medidas.js';
 import { UNIDADES_REGUA, unidadePadrao, posNaTela, posNoDoc, faixaVisivel, guiasDe, adicionarGuia, moverGuia, removerGuia, limparGuias, totalDeGuias, textoParaPx } from '../core/reguas.js';
+import { sangriaPx, larguraFinal, alturaFinal } from '../core/gabarito.js';
 import { S, on, emit, selEls, commit } from './state.js';
 import { modal, btn, toast } from './ui.js';
 
 const CHAVE = 'artatk.regua';
 const TAM = 22;                                   // espessura das réguas (px de tela)
-const COR = { fundo: '#15141c', pagina: '#222130', tinta: '#8e8ba1', tique: '#56546d', sel: 'rgba(79,140,255,.38)', ponteiro: '#e4572e' };
+const COR = { fundo: '#15141c', sangria: 'rgba(255,59,107,.22)', pagina: '#222130', tinta: '#8e8ba1', tique: '#56546d', sel: 'rgba(79,140,255,.38)', ponteiro: '#e4572e' };
 
 let el = {};                                      // { wrap, canto, ch, cv, vp, holder, overlay }
 let pref = { visivel: true, unidade: { papel: null, tela: null } };
@@ -58,10 +59,16 @@ function regua(canvas, horizontal) {
   if (!comprimento) return;
   const c = prepara(canvas, horizontal ? comprimento : TAM, horizontal ? TAM : comprimento);
   const origem = horizontal ? origemX() : origemY(), z = S.zoom, un = unidadeAtual();
-  const larg = horizontal ? pageW(S.doc, S.dev) : pageH(S.doc, S.dev);
+  const off = sangriaPx(S.doc);                                                 // sangria: o 0 da régua fica no CORTE
+  const larg = horizontal ? larguraFinal(S.doc, S.dev) : alturaFinal(S.doc, S.dev), cheia = horizontal ? pageW(S.doc, S.dev) : pageH(S.doc, S.dev);
   c.fillStyle = COR.fundo; c.fillRect(0, 0, horizontal ? comprimento : TAM, horizontal ? TAM : comprimento);
 
-  const p0 = posNaTela(0, origem, z), p1 = posNaTela(larg, origem, z);          // a página na régua
+  if (off > 0) {                                                                // faixa da sangria (rosada), antes e depois do corte
+    const q0 = posNaTela(0, origem, z), q1 = posNaTela(cheia, origem, z);
+    c.fillStyle = COR.sangria;
+    if (horizontal) c.fillRect(q0, 0, q1 - q0, TAM); else c.fillRect(0, q0, TAM, q1 - q0);
+  }
+  const p0 = posNaTela(off, origem, z), p1 = posNaTela(off + larg, origem, z);  // a página final na régua
   c.fillStyle = COR.pagina;
   if (horizontal) c.fillRect(p0, 0, p1 - p0, TAM); else c.fillRect(0, p0, TAM, p1 - p0);
 
@@ -75,7 +82,7 @@ function regua(canvas, horizontal) {
 
   const { inicio, fim } = faixaVisivel(origem, comprimento, z);
   let marcas;
-  try { marcas = marcasDaRegua(inicio, fim, z, un); } catch { return; }
+  try { marcas = marcasDaRegua(inicio, fim, z, un, { origemPx: off }); } catch { return; }
   c.strokeStyle = COR.tique; c.fillStyle = COR.tinta; c.font = '600 9.5px system-ui, sans-serif'; c.lineWidth = 1;
   c.textBaseline = 'alphabetic';
   for (const m of marcas) {
@@ -108,7 +115,7 @@ export function desenhar() {
 
 // ---------- guias (arrastar da régua, mover, apagar) ----------
 const dentroDe = (canvas, cx, cy) => { const r = canvas.getBoundingClientRect(); return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom; };
-const rotuloPos = (px) => formatar(dePx(px, unidadeAtual()), unidadeAtual());
+const rotuloPos = (px) => formatar(dePx(px - sangriaPx(S.doc), unidadeAtual()), unidadeAtual());   // a partir do corte
 
 // Arrasta uma guia (nova ou existente). `eixo`: 'x' = linha vertical, 'y' = horizontal. `de` = posição atual (null se nova).
 function arrastarGuia(e, eixo, de) {
@@ -140,7 +147,8 @@ function adicionarPorTexto() {
   const eixo = h('select', { 'aria-label': 'Direção da guia' }, h('option', { value: 'x' }, 'Vertical (posição na horizontal)'), h('option', { value: 'y' }, 'Horizontal (posição na vertical)'));
   const pos = h('input', { type: 'text', inputmode: 'decimal', placeholder: `ex.: 2,5 ${UNIDADES[un].rotulo}`, 'aria-label': 'Posição da guia' });
   const fim = () => {
-    const px = textoParaPx(pos.value, un);
+    const bruto = textoParaPx(pos.value, un);
+    const px = bruto == null ? null : bruto + sangriaPx(S.doc);                   // o que se digita é a partir do corte
     if (px == null) { toast('Não entendi a medida. Exemplos: 40, 2,5cm, 10mm.', 'err'); pos.focus(); return; }
     if (!adicionarGuia(S.doc, S.dev, eixo.value, px)) { toast('A guia precisa ficar dentro da página (e não repetir uma que já existe).', 'err'); return; }
     m.close(); commit(); emit('guias');

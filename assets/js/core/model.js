@@ -65,7 +65,7 @@ export function garantirSite(doc) {
 export const publishDir = (slug, doc) => (doc.kind === 'site' ? `projetos/${slug}/${doc.id}/` : doc.kind === 'arquivo' ? `arquivos/${slug}/${doc.id}/` : doc.kind === 'pagina' ? `paginas/${sitePageId(doc.id)}/` : doc.kind === 'artigo' ? `artigos/${slug}/${doc.id}/` : `perfis/${slug}/`);
 export const viewerQuery = (slug, doc) => (doc.kind === 'pagina'
   ? `u=${encodeURIComponent(slug)}&p=${encodeURIComponent(sitePageId(doc.id))}`
-  : `u=${encodeURIComponent(slug)}${doc.kind === 'artigo' ? `&a=${encodeURIComponent(doc.id)}` : ''}`);
+  : `u=${encodeURIComponent(slug)}${['artigo', 'arquivo', 'site'].includes(doc.kind) ? `&a=${encodeURIComponent(doc.id)}` : ''}`);   // perfil = só u; artigo, arquivo e projeto de site = u + a=<id>
 
 // Estado: 'inventario' (nunca publicada) | 'publicada' | 'alterada' (publicada, com alterações locais).
 // updatedAt = quando o rascunho local foi salvo pela última vez (ms); changed = há edição ainda não salva.

@@ -66,3 +66,5 @@ dialog.gal-dlg.larga { width: min(1040px, 96vw); }
 .na-esq .gal.compacta .gal-grade { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 .na-esq .gal-thumb { aspect-ratio: 4 / 3; }
 .na-esq .gal-corpo { padding: 7px 8px 8px; }
+.gal-dlg label.na-sel { flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; font-weight: 500; }
+.na-sel select { flex: 1; max-width: 170px; }

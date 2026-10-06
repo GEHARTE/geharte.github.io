@@ -1,7 +1,8 @@
 // Galeria de modelos do ArtAtk: grade com miniatura real (a própria página, renderizada pequena), busca e categorias.
 // Serve ao editor (aba Modelos) e ao painel de documentos (Novo a partir de um modelo). Quem usa decide o que "Usar" faz.
 import { h } from './dom.js';
-import { renderArtboard, usedFonts } from './render.js';
+import { renderArtboardRecortado, usedFonts } from './render.js';
+import { larguraFinal } from './gabarito.js';
 import { loadFonts } from './fonts.js';
 import { pageW, bgCss } from './model.js';
 import { downloadBlob } from './util.js';
@@ -15,11 +16,11 @@ export function miniaturaModelo(modelo) {
   const doc = paginaDoModelo(modelo);
   box.style.background = bgCss(doc.page.bg);
   loadFonts(usedFonts(doc));
-  const ab = renderArtboard(doc, { dev: 'd', assetUrl: () => null, editing: false });
+  const ab = renderArtboardRecortado(doc, { dev: 'd', assetUrl: () => null, editing: false });
   ab.querySelectorAll('.an-pre').forEach((n) => n.classList.remove('an-pre'));
   Object.assign(ab.style, { position: 'absolute', left: '0', top: '0', transformOrigin: '0 0' });
   box.append(ab);
-  const fit = () => { const w = box.clientWidth; if (w) ab.style.transform = `scale(${w / pageW(doc, 'd')})`; };
+  const fit = () => { const w = box.clientWidth; if (w) ab.style.transform = `scale(${w / larguraFinal(doc, 'd')})`; };
   if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(box);
   fit();
   return box;

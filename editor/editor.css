@@ -449,3 +449,8 @@ body.compact #reg-canto,body.compact #reg-h,body.compact #reg-v{display:none}
 .guia-rot{position:absolute;pointer-events:none;background:#0e7490;color:#fff;font:600 10.5px var(--f);padding:2px 6px;border-radius:5px;white-space:nowrap;z-index:3}
 #menu-regua{min-width:200px}
 #menu-regua button.on span::after{content:" ✓"}
+.ov-gabarito{position:absolute;inset:0;pointer-events:none}
+.gab-sangria{position:absolute;background:rgba(255,59,107,.2)}
+.gab-corte{position:absolute;outline:1px dashed #ff3b6b;box-sizing:border-box}
+.gab-margem{position:absolute;outline:1px dashed #22c55e;box-sizing:border-box}
+.aviso-imp{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:#f0b4c0;background:rgba(255,59,107,.1);border-radius:8px;padding:6px 8px}

@@ -8,7 +8,8 @@ import { h } from './core/dom.js';
 import { loadUsers, loadConfig } from './core/auth.js';
 import { carregarHost } from './core/host.js';
 import { Store } from './core/store.js';
-import { renderArtboard, usedFonts } from './core/render.js';
+import { renderArtboardRecortado, usedFonts } from './core/render.js';
+import { larguraFinal } from './core/gabarito.js';
 import { loadFonts } from './core/fonts.js';
 import { pageW, KINDS, STATE_LABEL, PROFILE_ID, docState, siteDocId, publisherName, publishDir, bgCss } from './core/model.js';
 import { BASE } from './core/util.js';
@@ -44,11 +45,11 @@ function miniatura(c) {
   if (!doc) { box.append(h('div', { class: 'thumb-vazio' }, 'Sem prévia ainda')); return box; }
   box.style.background = bgCss(doc.page.bg);
   loadFonts(usedFonts(doc));
-  const ab = renderArtboard(doc, { dev: 'd', assetUrl: c.assetUrl, editing: false });
+  const ab = renderArtboardRecortado(doc, { dev: 'd', assetUrl: c.assetUrl, editing: false });
   ab.querySelectorAll('.an-pre').forEach((n) => n.classList.remove('an-pre'));
   Object.assign(ab.style, { position: 'absolute', left: '0', top: '0', transformOrigin: '0 0', pointerEvents: 'none' });
   box.append(ab);
-  const fit = () => { const w = box.clientWidth; if (w) ab.style.transform = `scale(${w / pageW(doc, 'd')})`; };
+  const fit = () => { const w = box.clientWidth; if (w) ab.style.transform = `scale(${w / larguraFinal(doc, 'd')})`; };
   new ResizeObserver(fit).observe(box);
   fit();
   return box;
@@ -275,7 +276,7 @@ const EXTRAS_NOVO = [
 
 function abrirNovoArquivo(slug) {
   const meus = criarMeusModelos();
-  let escolhido = EXTRAS_NOVO[0], formato = FORMATO_PADRAO, orientacao = 'retrato';
+  let escolhido = EXTRAS_NOVO[0], formato = FORMATO_PADRAO, orientacao = 'retrato', sangria = 0, margem = 0;
   const titulo = h('input', { type: 'text', value: '', placeholder: 'Nome do arquivo (opcional)', maxlength: '80', 'aria-label': 'Nome do arquivo' });
   const lugar = h('div'), lado = h('div', { class: 'na-lado' }), erro = h('p', { class: 'gal-msg erro', hidden: true, role: 'alert' });
   const pers = { w: h('input', { type: 'text', inputmode: 'decimal', value: '21', 'aria-label': 'Largura' }), h: h('input', { type: 'text', inputmode: 'decimal', value: '29,7', 'aria-label': 'Altura' }),
@@ -296,7 +297,12 @@ function abrirNovoArquivo(slug) {
           h('span', { class: 'na-nome' }, rotuloDoItem(f)), h('small', {}, medidasDoItem(f, orientacao)))))),
       ehDual ? null : h('div', { class: 'na-orient', role: 'group', 'aria-label': 'Orientação' },
         ...[['retrato', 'Em pé'], ['paisagem', 'Deitado']].map(([v, r]) => h('button', { type: 'button', class: 'gal-btn', 'aria-pressed': String(orientacao === v), onclick: () => { orientacao = v; pintaLado(); } }, r))),
-      ehPers ? h('div', { class: 'na-pers' }, h('label', {}, 'Largura', pers.w), h('label', {}, 'Altura', pers.h), h('label', {}, 'Unidade', pers.u)) : null);
+      ehPers ? h('div', { class: 'na-pers' }, h('label', {}, 'Largura', pers.w), h('label', {}, 'Altura', pers.h), h('label', {}, 'Unidade', pers.u)) : null,
+      // papel: sangria e margem segura para gráfica (a página inclui a sangria; as réguas medem a partir do corte)
+      (formatoPorId(formato)?.papel || ehPers) ? h('fieldset', { class: 'na-grupo' }, h('legend', {}, 'Para gráfica (opcional)'),
+        h('label', { class: 'na-sel' }, 'Sangria', h('select', { 'aria-label': 'Sangria', onchange: (e) => { sangria = Number(e.target.value); } }, [[0, 'Sem sangria'], [3, '3 mm (padrão das gráficas)'], [5, '5 mm']].map(([v, r]) => h('option', { value: v, selected: sangria === v }, r)))),
+        h('label', { class: 'na-sel' }, 'Margem segura', h('select', { 'aria-label': 'Margem segura', onchange: (e) => { margem = Number(e.target.value); } }, [[0, 'Sem margem'], [5, '5 mm'], [10, '10 mm']].map(([v, r]) => h('option', { value: v, selected: margem === v }, r)))),
+        h('small', { class: 'fraco' }, ehPers ? 'Vale para tamanhos em cm, mm ou polegadas.' : 'A página inclui a sangria; a margem segura aparece como guia.')) : null);
   }
 
   async function criar(modeloEscolhido) {
@@ -305,7 +311,7 @@ function abrirNovoArquivo(slug) {
     try {
       let id;
       const m = modeloEscolhido || escolhido;
-      if (m.id === '__branco') id = await createArquivoEmBranco(slug, nome || 'Novo arquivo', formato, { orientacao, w: pers.w.value, h: pers.h.value, unidade: pers.u.value });
+      if (m.id === '__branco') id = await createArquivoEmBranco(slug, nome || 'Novo arquivo', formato, { orientacao, w: pers.w.value, h: pers.h.value, unidade: pers.u.value, sangria, margem });
       else if (m.id === '__site') id = await createDoc(slug, 'site', nome || 'Meu site');
       else if (m.id === '__artigo') id = await createDoc(slug, 'artigo', nome || 'Novo artigo');
       else id = await createDocFromModelo(slug, m, nome);

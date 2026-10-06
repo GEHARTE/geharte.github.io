@@ -4,7 +4,7 @@
 //   `w` (px)    formato ÚNICO: uma só versão, nessa largura (sem versão de celular);
 //   `fixa`      a altura é fixa (papel): a página não cresce nem é "ajustada" ao conteúdo;
 //   `fmt`       o id do formato (para mostrar "A4 · 21 × 29,7 cm" e reabrir o diálogo igual).
-import { tamanhoPagina, tamanhoPersonalizado, ALVOS, dePx, formatar } from './medidas.js';
+import { tamanhoPagina, tamanhoPersonalizado, ALVOS, dePx, paraPx, formatar } from './medidas.js';
 
 export const FORMATO_PADRAO = 'web';
 
@@ -30,7 +30,8 @@ const int = (n) => Math.max(1, Math.round(n));
 
 // Página (doc.page) de um formato. `opcoes`: { orientacao:'retrato'|'paisagem', w, h, unidade } (w/h/unidade só no personalizado).
 // Lança Error com mensagem para a pessoa se o tamanho personalizado for inválido.
-export function paginaDoFormato(id, { orientacao, w, h, unidade = 'cm' } = {}) {
+// `sangria` e `margem` (mm) só valem para papel: a página passa a incluir a sangria dos 4 lados (ver core/gabarito.js).
+export function paginaDoFormato(id, { orientacao, w, h, unidade = 'cm', sangria = 0, margem = 0 } = {}) {
   const f = formatoPorId(id);
   if (!f) throw new Error(`Formato desconhecido: ${id}`);
   orientacao ||= orientacaoNatural(f);   // sem orientação explícita, vale a natural do formato
@@ -45,7 +46,10 @@ export function paginaDoFormato(id, { orientacao, w, h, unidade = 'cm' } = {}) {
     pw = t.px.w; ph = t.px.h; fixa = unidade !== 'px';
     if (pw < 100 || ph < 100 || pw > 6000 || ph > 12000) throw new Error('O tamanho personalizado deve ficar entre 100 px e 6000 × 12000 px (aprox. 2,6 cm a 159 cm de largura).');
   }
-  return { bg: { ...BG }, w: int(pw), h: { d: int(ph) }, fixa, fmt: id, ...(orientacao === 'paisagem' ? { orient: 'paisagem' } : {}) };
+  const s = fixa ? Math.max(0, Math.min(Number(sangria) || 0, 10)) : 0, m = fixa ? Math.max(0, Math.min(Number(margem) || 0, 30)) : 0;
+  const sp = s > 0 ? Math.round(paraPx(s, 'mm') * 100) / 100 : 0;
+  return { bg: { ...BG }, w: s > 0 ? Math.round((int(pw) + 2 * sp) * 100) / 100 : int(pw), h: { d: s > 0 ? Math.round((int(ph) + 2 * sp) * 100) / 100 : int(ph) }, fixa, fmt: id,
+    ...(s > 0 ? { sangria: s } : {}), ...(m > 0 ? { margem: m } : {}), ...(orientacao === 'paisagem' ? { orient: 'paisagem' } : {}) };
 }
 
 // Medidas de um item da lista, para mostrar ao lado do nome: "14,8 × 21 cm", "390 × 844 px".
@@ -61,8 +65,10 @@ export function rotuloDaPagina(page) {
   if (!page?.w) return 'PC e celular';
   const f = formatoPorId(page.fmt);
   const nome = f ? rotuloDoItem(f) : 'Tamanho personalizado';
-  const alt = page.h.d;
-  return page.fixa
-    ? `${nome} · ${formatar(dePx(page.w, 'cm'), 'cm', { comUnidade: false, casas: 1 })} × ${formatar(dePx(alt, 'cm'), 'cm', { comUnidade: false, casas: 1 })} cm`
-    : `${nome} · ${page.w} px`;
+  if (!page.fixa) return `${nome} · ${page.w} px`;
+  // papel: mostra o tamanho FINAL (depois do corte), não o da página com sangria
+  const b = page.sangria > 0 ? paraPx(page.sangria, 'mm') : 0;
+  const cm = (px) => formatar(dePx(px - 2 * b, 'cm'), 'cm', { comUnidade: false, casas: 1 });
+  const extra = [page.sangria > 0 ? `sangria ${formatar(page.sangria, 'mm', { comUnidade: false, casas: 1 })} mm` : '', page.margem > 0 ? `margem ${formatar(page.margem, 'mm', { comUnidade: false, casas: 1 })} mm` : ''].filter(Boolean);
+  return `${nome} · ${cm(page.w)} × ${cm(page.h.d)} cm${extra.length ? ` (${extra.join(', ')})` : ''}`;
 }

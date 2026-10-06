@@ -7,9 +7,10 @@ import { S, on, emit, byId, selEls, select, mutateGeom, mutate, commit, touch, a
 import { createShape, createText, createPath, insertImageFile, ensureHeight, defaultShapeSize, inkColor } from './tools.js';
 import { icon } from './icons.js';
 import { guiasDe, candidatosDeGuias } from '../core/reguas.js';
+import { temGabarito, margemMm, sangriaPx, caixaDeCorte, caixaSegura, candidatosDeGabarito } from '../core/gabarito.js';
 
 const PAD = 48;
-let vp, stage, holder, selLayer, fxLayer, guiasLayer, ab;
+let vp, stage, holder, selLayer, fxLayer, guiasLayer, gabLayer, ab;
 let previaGuia = null;   // guia sendo arrastada a partir da régua (editor/reguas.js)
 
 const ctx = () => ({ dev: S.dev, assetUrl, editing: true, doc: S.doc });
@@ -45,6 +46,21 @@ function layout() {
   Object.assign(holder.style, { left: PAD + 'px', top: PAD + 'px', width: w * z + 'px', height: hh * z + 'px' });
   if (ab) { ab.style.transform = `scale(${z})`; ab.style.width = w + 'px'; ab.style.height = hh + 'px'; }
   desenharGuias();
+  desenharGabarito();
+}
+
+// Gabarito de impressão (papel): faixa da SANGRIA (rosa, além do corte), linha do CORTE (tracejada) e MARGEM SEGURA (verde, dentro do corte).
+function desenharGabarito() {
+  if (!gabLayer || !S.doc) return;
+  gabLayer.replaceChildren();
+  if (!temGabarito(S.doc) || S.dev !== 'd') return;
+  const z = S.zoom, w = pageW(S.doc, 'd') * z, hh = pageH(S.doc, 'd') * z, b = sangriaPx(S.doc) * z, c = caixaDeCorte(S.doc), s = caixaSegura(S.doc);
+  const caixa = (r, cls) => h('i', { class: cls, style: { left: sx(r.x) + 'px', top: sx(r.y) + 'px', width: r.w * z + 'px', height: r.h * z + 'px' } });
+  if (b > 0) {
+    const buraco = `polygon(evenodd, 0 0, ${w}px 0, ${w}px ${hh}px, 0 ${hh}px, 0 0, ${b}px ${b}px, ${b}px ${hh - b}px, ${w - b}px ${hh - b}px, ${w - b}px ${b}px, ${b}px ${b}px)`;
+    gabLayer.append(h('i', { class: 'gab-sangria', title: 'Sangria: o fundo e as imagens de borda devem chegar até aqui', style: { left: PAD + 'px', top: PAD + 'px', width: w + 'px', height: hh + 'px', clipPath: buraco } }), caixa(c, 'gab-corte'));
+  }
+  if (margemMm(S.doc) > 0) gabLayer.append(caixa(s, 'gab-margem'));
 }
 
 // Guias do usuário (azul-piscina): as do documento neste dispositivo + a que está sendo arrastada da régua.
@@ -241,7 +257,8 @@ function startTouchPan(e) {
 function snapBox(box, others) {
   const T = 6 / S.zoom, w = pageW(S.doc, S.dev), hh = pageH(S.doc, S.dev);
   const gu = candidatosDeGuias(S.doc, S.dev);                      // as guias do usuário também "grudam"
-  const xs = [0, w / 2, w, ...gu.xs], ys = [0, hh / 2, hh, ...gu.ys];
+  const gb = candidatosDeGabarito(S.doc, S.dev);                    // corte e margem segura (papel)
+  const xs = [0, w / 2, w, ...gu.xs, ...gb.xs], ys = [0, hh / 2, hh, ...gu.ys, ...gb.ys];
   for (const o of others) { xs.push(o.x, o.x + o.w / 2, o.x + o.w); ys.push(o.y, o.y + o.h / 2, o.y + o.h); }
   const best = (mine, cands) => {
     let d = null;
@@ -472,7 +489,8 @@ export function initStage(refs) {
   selLayer = h('div', { class: 'ov-sel' });
   fxLayer = h('div', { class: 'ov-fx' });
   guiasLayer = h('div', { class: 'ov-guias' });
-  refs.overlay.append(guiasLayer, selLayer, fxLayer);
+  gabLayer = h('div', { class: 'ov-gabarito' });
+  refs.overlay.append(gabLayer, guiasLayer, selLayer, fxLayer);
   on('guias', desenharGuias);
   on('guia-previa', (p) => { previaGuia = p; desenharGuias(); });
 

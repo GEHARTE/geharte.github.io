@@ -5,6 +5,7 @@ import { sha256Hex, clamp, round } from '../core/util.js';
 import { Store } from '../core/store.js';
 import { S, addEls, byId, selEls, mutate, mutateGeom, commit, emit, setPage, select, touch } from './state.js';
 import { toast } from './ui.js';
+import { caixaDeCorte } from '../core/gabarito.js';
 
 // ---------- posicionamento ----------
 // Coloca o elemento com o frame dado no dispositivo atual; o outro dispositivo é derivado.
@@ -208,7 +209,7 @@ export function alignSel(mode) {
   const els = selEls();
   if (!els.length) return;
   const boxes = els.map((e) => aabb(frameOf(e, S.dev)));
-  const ref = els.length === 1 ? { x: 0, y: 0, w: pageW(), h: pageH(S.doc, S.dev) } : unionBox(boxes);
+  const ref = els.length === 1 ? caixaDeCorte(S.doc, S.dev) : unionBox(boxes);   // com sangria, "a página" é a página final (corte)
   const ids = els.map((e) => e.id);
   move(ids, (b) => ({
     dx: mode === 'left' ? ref.x - b.x : mode === 'center' ? ref.x + ref.w / 2 - (b.x + b.w / 2) : mode === 'right' ? ref.x + ref.w - (b.x + b.w) : 0,

@@ -9,6 +9,7 @@
 import { h } from './dom.js';
 import { W, frameOf, pageH, pageW, bgCss, ABAS_PADRAO } from './model.js';
 import { abasDaBarra, hrefDaAba } from './sites.js';
+import { sangriaPx, larguraFinal, alturaFinal } from './gabarito.js';
 import { sanitizeSvg } from './sanitize.js';
 import { safeHref } from './util.js';
 import { fontStack } from './fonts.js';
@@ -217,6 +218,19 @@ export function renderArtboard(doc, ctx) {
   const c = ctx.doc ? ctx : { ...ctx, doc };   // a barra de abas precisa saber as abas do documento
   for (const el of doc.elements) if (ctx.editing || !el.hide) ab.append(renderElement(el, c));
   return ab;
+}
+
+// Como renderArtboard, mas mostra só a página FINAL: arquivo de papel com sangria é recortado no corte (a sangria é para a gráfica,
+// não para quem vê). Sem sangria é igual a renderArtboard. Use no visualizador, na exportação e nas miniaturas; o editor usa renderArtboard.
+export function renderArtboardRecortado(doc, ctx) {
+  const b = sangriaPx(doc);
+  const inner = renderArtboard(doc, ctx);
+  if (!b) return inner;
+  Object.assign(inner.style, { position: 'absolute', left: -b + 'px', top: -b + 'px' });
+  const outer = h('div', { class: 'artboard', 'data-dev': ctx.dev });
+  Object.assign(outer.style, { width: larguraFinal(doc, ctx.dev) + 'px', height: alturaFinal(doc, ctx.dev) + 'px', overflow: 'hidden', background: bgCss(doc.page.bg) });
+  outer.append(inner);
+  return outer;
 }
 
 // Dispara as animações de entrada quando cada elemento entra na tela (página pública).
