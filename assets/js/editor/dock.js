@@ -360,7 +360,7 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
     d.open();
     d.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title></title><style>html,body{margin:0;height:100%;background:#1b1a22}body{visibility:hidden}</style></head><body class="pnl-window"></body></html>');
     d.close();
-    d.title = `${panels[id].title || D.panelTitle(id)} — Gehrarte`;
+    d.title = `${panels[id].title || D.panelTitle(id)} — ArtAtk`;
     let pend = 0;
     const reveal = () => { if (!pend) d.body.style.visibility = 'visible'; };
     for (const n of document.head.querySelectorAll('link[rel=stylesheet],style')) pend += cloneStyle(n, d, () => { pend--; reveal(); });

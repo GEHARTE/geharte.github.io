@@ -32,7 +32,7 @@ export async function exportProject() {
 export async function importProject(file) {
   let data;
   try { data = JSON.parse(await file.text()); } catch { toast('Esse arquivo não é um projeto válido.', 'err'); return; }
-  if (!['gehrarte-projeto', 'geharte-projeto'].includes(data.format) || !data.doc) { toast('Esse arquivo não é um projeto do Gehrarte.', 'err'); return; }
+  if (!['gehrarte-projeto', 'geharte-projeto'].includes(data.format) || !data.doc) { toast('Esse arquivo não é um projeto do ArtAtk.', 'err'); return; }
   for (const [id, a] of Object.entries(data.assets || {})) {
     const blob = await dataURLToBlob(a.data);
     const meta = { ext: a.ext, mime: a.mime, w: a.w, h: a.h };
