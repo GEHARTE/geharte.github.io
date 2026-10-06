@@ -18,7 +18,7 @@ const NOS = [
   ['google', 2, 0, 'external', 'Google', 'quem é você'],
   ['commit', 1, 1, 'database', 'Commit', 'repo privado'],
   ['deploy', 2, 1, 'cloud', 'Deploy', 'testes + cópia'],
-  ['copia', 3, 2, 'database', 'Site público', 'geharte.github.io'],
+  ['copia', 3, 2, 'database', 'Site público', 'gehrarte.github.io'],
   ['pages', 4, 2, 'cloud', 'GitHub Pages', 'monta o site'],
   ['site', 5, 2, 'external', 'No ar', 'página nova'],
 ];
