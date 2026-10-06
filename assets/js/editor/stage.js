@@ -7,10 +7,12 @@ import { S, on, emit, byId, selEls, select, mutateGeom, mutate, commit, touch, a
 import { createShape, createText, createPath, insertImageFile, ensureHeight, defaultShapeSize, inkColor } from './tools.js';
 import { icon } from './icons.js';
 import { guiasDe, candidatosDeGuias } from '../core/reguas.js';
+import { cabeNaTela, ajustarNaGrade } from '../core/grade.js';
+import { gradeAtual } from './reguas.js';
 import { temGabarito, margemMm, sangriaPx, caixaDeCorte, caixaSegura, candidatosDeGabarito } from '../core/gabarito.js';
 
 const PAD = 48;
-let vp, stage, holder, selLayer, fxLayer, guiasLayer, gabLayer, ab;
+let vp, stage, holder, selLayer, fxLayer, guiasLayer, gabLayer, gradeLayer, ab;
 let previaGuia = null;   // guia sendo arrastada a partir da régua (editor/reguas.js)
 
 const ctx = () => ({ dev: S.dev, assetUrl, editing: true, doc: S.doc });
@@ -45,8 +47,20 @@ function layout() {
   stage.style.height = hh * z + PAD * 2 + 'px';
   Object.assign(holder.style, { left: PAD + 'px', top: PAD + 'px', width: w * z + 'px', height: hh * z + 'px' });
   if (ab) { ab.style.transform = `scale(${z})`; ab.style.width = w + 'px'; ab.style.height = hh + 'px'; }
+  desenharGrade();
   desenharGuias();
   desenharGabarito();
+}
+
+// Grade de apoio (RG-08): um só elemento com duas camadas de linhas repetidas (barata mesmo em A0). Parte do 0 da régua (o corte).
+// Com o passo apertado demais para o zoom (< 5 px de tela) some, mas o ímã continua valendo.
+function desenharGrade() {
+  if (!gradeLayer || !S.doc) return;
+  gradeLayer.replaceChildren();
+  const g = gradeAtual(), z = S.zoom;
+  if (!g.visivel || !cabeNaTela(g.passoPx, z)) return;
+  const s = g.passoPx * z, o = g.origemPx * z;
+  gradeLayer.append(h('i', { class: 'grade-u', style: { left: PAD + 'px', top: PAD + 'px', width: pageW(S.doc, S.dev) * z + 'px', height: pageH(S.doc, S.dev) * z + 'px', backgroundSize: `${s}px ${s}px`, backgroundPosition: `${o}px ${o}px` } }));
 }
 
 // Gabarito de impressão (papel): faixa da SANGRIA (rosa, além do corte), linha do CORTE (tracejada) e MARGEM SEGURA (verde, dentro do corte).
@@ -265,8 +279,10 @@ function snapBox(box, others) {
     for (const m of mine) for (const c of cands) { const v = c - m; if (Math.abs(v) <= T && (d == null || Math.abs(v) < Math.abs(d))) d = v; }
     return d;
   };
-  const dx = best([box.x, box.x + box.w / 2, box.x + box.w], xs) ?? 0;
-  const dy = best([box.y, box.y + box.h / 2, box.y + box.h], ys) ?? 0;
+  let dx = best([box.x, box.x + box.w / 2, box.x + box.w], xs), dy = best([box.y, box.y + box.h / 2, box.y + box.h], ys);
+  const grade = gradeAtual();                                       // ímã na grade: só quando nenhuma guia, borda ou vizinho está ao alcance
+  if (grade.ima && (dx == null || dy == null)) { const gd = ajustarNaGrade(box, grade.passoPx, grade.origemPx, grade.origemPx); dx ??= gd.dx; dy ??= gd.dy; }
+  dx ??= 0; dy ??= 0;
   const out = [];
   for (const m of [box.x + dx, box.x + box.w / 2 + dx, box.x + box.w + dx]) { const c = xs.find((c) => Math.abs(c - m) < 0.5); if (c != null) out.push({ x: c }); }
   for (const m of [box.y + dy, box.y + box.h / 2 + dy, box.y + box.h + dy]) { const c = ys.find((c) => Math.abs(c - m) < 0.5); if (c != null) out.push({ y: c }); }
@@ -490,8 +506,10 @@ export function initStage(refs) {
   fxLayer = h('div', { class: 'ov-fx' });
   guiasLayer = h('div', { class: 'ov-guias' });
   gabLayer = h('div', { class: 'ov-gabarito' });
-  refs.overlay.append(gabLayer, guiasLayer, selLayer, fxLayer);
+  gradeLayer = h('div', { class: 'ov-grade' });
+  refs.overlay.append(gradeLayer, gabLayer, guiasLayer, selLayer, fxLayer);
   on('guias', desenharGuias);
+  on('grade', desenharGrade);
   on('guia-previa', (p) => { previaGuia = p; desenharGuias(); });
 
   S.viewCenter = () => {

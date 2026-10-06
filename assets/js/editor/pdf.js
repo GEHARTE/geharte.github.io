@@ -8,6 +8,7 @@ import { BASE } from '../core/util.js';
 import { viewerQuery, pageH, ehFixa, ehUnico } from '../core/model.js';
 import { tamanhoPagina, folhaPdf, urlImpressao, ALTURA_MAX } from '../core/pdf.js';
 import { sangriaMm, margemMm, avisosDeImpressao } from '../core/gabarito.js';
+import { imagensDeBaixaResolucao } from '../core/resolucao.js';
 import { rotuloDaPagina } from '../core/formatos.js';
 import { S, saveNow } from './state.js';
 import { modal, seg, toast, btn, toggle } from './ui.js';
@@ -26,8 +27,8 @@ export function openExportPdf() {
       info.textContent = marcas || comSangria
         ? `${base}${comSangria ? ', com a sangria' : ''}${marcas ? ' e marcas de corte nos 4 cantos' : ''}.`
         : `${base} (só a página final, recortada no corte).`;
-      const av = avisosDeImpressao(S.doc), n = av.foraDaMargem.length + av.semSangria.length + av.foraDaPagina.length;
-      avisos.replaceChildren(n ? h('p', { class: 'aviso-imp' }, `A conferência para a gráfica tem ${n} ${n > 1 ? 'avisos' : 'aviso'} (painel “Sangria e margem segura”, com a página selecionada). Dá para exportar assim, mas vale resolver antes.`) : '');
+      const av = avisosDeImpressao(S.doc), baixas = imagensDeBaixaResolucao(S.doc).length, n = av.foraDaMargem.length + av.semSangria.length + av.foraDaPagina.length + baixas;
+      avisos.replaceChildren(n ? h('p', { class: 'aviso-imp' }, `A conferência para a gráfica tem ${n} ${n > 1 ? 'avisos' : 'aviso'} (painel “Sangria e margem segura”, com a página selecionada). Dá para exportar assim, mas vale resolver antes.${baixas ? (baixas === 1 ? ' Uma imagem tem resolução baixa e pode sair borrada.' : ` ${baixas} imagens têm resolução baixa e podem sair borradas.`) : ''}`) : '');
     } else {
       const { w, h: alt } = tamanhoPagina(S.doc, dev);
       const real = Math.round(pageH(S.doc, dev === 'm' && !ehUnico(S.doc) ? 'm' : 'd'));

@@ -9,6 +9,7 @@ import { frameOf, aabb, pageW, pageH } from '../core/model.js';
 import { marcasDaRegua, UNIDADES, formatar, dePx } from '../core/medidas.js';
 import { UNIDADES_REGUA, unidadePadrao, posNaTela, posNoDoc, faixaVisivel, guiasDe, adicionarGuia, moverGuia, removerGuia, limparGuias, totalDeGuias, textoParaPx } from '../core/reguas.js';
 import { sangriaPx, larguraFinal, alturaFinal } from '../core/gabarito.js';
+import { familiaDaMedida, PASSOS, PASSO_PADRAO, passoValido, passoEmPx, rotuloDoPasso } from '../core/grade.js';
 import { S, on, emit, selEls, commit } from './state.js';
 import { modal, btn, toast } from './ui.js';
 
@@ -17,16 +18,33 @@ const TAM = 22;                                   // espessura das réguas (px d
 const COR = { fundo: '#15141c', sangria: 'rgba(255,59,107,.22)', pagina: '#222130', tinta: '#8e8ba1', tique: '#56546d', sel: 'rgba(79,140,255,.38)', ponteiro: '#e4572e' };
 
 let el = {};                                      // { wrap, canto, ch, cv, vp, holder, overlay }
-let pref = { visivel: true, unidade: { papel: null, tela: null } };
+const gradePadrao = () => ({ papel: { visivel: false, ima: false, passo: PASSO_PADRAO.papel }, tela: { visivel: false, ima: false, passo: PASSO_PADRAO.tela } });
+let pref = { visivel: true, unidade: { papel: null, tela: null }, grade: gradePadrao() };
 let ponteiro = null;                              // { x, y } em px do documento, só enquanto o mouse está sobre o canvas
 let quadro = 0;
 
-const lerPref = () => { try { const p = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (p) pref = { visivel: p.visivel !== false, unidade: { papel: null, tela: null, ...(p.unidade || {}) } }; } catch { /* padrão */ } };
+const lerPref = () => {
+  try {
+    const p = JSON.parse(localStorage.getItem(CHAVE) || 'null');
+    if (!p) return;
+    const grade = gradePadrao();
+    for (const f of ['papel', 'tela']) { const g = p.grade?.[f]; if (g) grade[f] = { visivel: g.visivel === true, ima: g.ima === true, passo: passoValido(f, g.passo) ? Number(g.passo) : PASSO_PADRAO[f] }; }
+    pref = { visivel: p.visivel !== false, unidade: { papel: null, tela: null, ...(p.unidade || {}) }, grade };
+  } catch { /* padrão */ }
+};
 const gravarPref = () => { try { localStorage.setItem(CHAVE, JSON.stringify(pref)); } catch { /* sem armazenamento */ } };
-const familia = () => (S.doc?.page?.fixa ? 'papel' : 'tela');
+const familia = () => familiaDaMedida(S.doc);
 
 export const unidadeAtual = () => { const u = pref.unidade[familia()]; return UNIDADES_REGUA.includes(u) ? u : unidadePadrao(S.doc); };
 export const reguasVisiveis = () => pref.visivel;
+
+// Grade (RG-08): preferência de quem edita, uma por tipo de documento (papel em mm, telas em px). O desenho e o ímã ficam no palco.
+export function gradeAtual() {
+  const f = familia(), g = pref.grade[f];
+  return { familia: f, visivel: g.visivel, ima: g.ima, passo: g.passo, passoPx: passoEmPx(f, g.passo), origemPx: sangriaPx(S.doc) };   // a grade parte do 0 da régua (o corte)
+}
+export function definirGrade(patch) { Object.assign(pref.grade[familia()], patch); gravarPref(); emit('grade'); }
+export const alternarGrade = () => definirGrade({ visivel: !gradeAtual().visivel });
 
 function definirUnidade(u) { pref.unidade[familia()] = u; gravarPref(); emit('regua'); }
 export function alternarReguas(v = !pref.visivel) { pref.visivel = v; gravarPref(); aplicar(); }
@@ -161,10 +179,14 @@ function adicionarPorTexto() {
 
 function menuCanto(ancora) {
   const old = document.querySelector('#menu-regua'); if (old) { old.remove(); return; }
-  const un = unidadeAtual(), n = totalDeGuias(S.doc);
+  const un = unidadeAtual(), n = totalDeGuias(S.doc), g = gradeAtual();
   const item = (rot, fn, ligado = false, off = false) => h('button', { class: ligado ? 'on' : '', disabled: off || null, onclick: () => { m.remove(); fn(); } }, h('span', {}, rot));
   const m = h('div', { id: 'menu-regua', class: 'popover menu', role: 'menu' },
     ...UNIDADES_REGUA.map((u) => item(`${UNIDADES[u].nome} (${UNIDADES[u].rotulo})`, () => definirUnidade(u), u === un)),
+    h('hr'),
+    item('Mostrar grade (Alt+G)', () => alternarGrade(), g.visivel),
+    item('Encaixar na grade', () => definirGrade({ ima: !g.ima }), g.ima),
+    ...PASSOS[g.familia].map((p) => item(`Grade de ${rotuloDoPasso(g.familia, p)}`, () => definirGrade({ passo: p }), p === g.passo)),
     h('hr'),
     item('Adicionar guia…', adicionarPorTexto),
     item(`Limpar guias${n ? ` (${n})` : ''}`, () => { if (limparGuias(S.doc)) { commit(); emit('guias'); } }, false, !n),

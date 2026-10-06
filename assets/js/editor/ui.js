@@ -2,6 +2,7 @@
 import { h } from '../core/dom.js';
 import { clamp, round } from '../core/util.js';
 import { docColors, harmonies } from '../core/model.js';
+import { lerCampo, ehSoNumero } from '../core/medidas.js';
 import { S } from './state.js';
 import { icon } from './icons.js';
 import { activeDoc, winOf } from './docs.js';
@@ -34,17 +35,43 @@ export function section(title, body) {
 export const row = (...k) => h('div', { class: 'row' }, ...k);
 export const hint = (t) => h('p', { class: 'hint' }, t);
 
-export function num({ label, value, min = -99999, max = 99999, step = 1, unit = '', onChange, cls = '' }) {
+// Campo numérico. Com `medida: 'px'|'mm'` aceita unidade ("2,5cm", "12pt", "1,5rem"): o número sem unidade vale na unidade do campo,
+// com unidade o valor é convertido ao concluir (Enter ou sair do campo) e o campo volta a mostrar a unidade dele.
+const DICA_MEDIDA = 'Aceita unidade: 40, 2,5cm, 10mm, 12pt, 1,5rem, 1pol';
+export function num({ label, value, min = -99999, max = 99999, step = 1, unit = '', medida = null, onChange, cls = '' }) {
   const fmt = (v) => (v == null ? '' : String(round(v, 2)));
-  const inp = h('input', { type: 'number', class: 'num-in', step, value: fmt(value), placeholder: value == null ? '—' : null });
-  inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (!Number.isNaN(v)) onChange(clamp(v, min, max)); });
+  const inp = h('input', { type: medida ? 'text' : 'number', inputmode: medida ? 'decimal' : null, step: medida ? null : step, class: 'num-in', value: fmt(value), placeholder: value == null ? '—' : null });
+  let ultimo = value;                                                    // último valor bom, para voltar se a pessoa digitar bobagem
+  const aplicar = (v) => { ultimo = round(clamp(v, min, max), 2); onChange(ultimo); return ultimo; };
+  if (!medida) {
+    inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (!Number.isNaN(v)) onChange(clamp(v, min, max)); });
+  } else {
+    inp.title = DICA_MEDIDA;
+    inp.addEventListener('input', () => { if (ehSoNumero(inp.value)) aplicar(parseFloat(inp.value.replace(',', '.'))); });   // só número: aplica na hora, como sempre
+    const concluir = () => {
+      const v = lerCampo(inp.value, medida);
+      if (v == null) { if (inp.value.trim() !== '') toast('Não entendi a medida. Exemplos: 40, 2,5cm, 10mm, 12pt.', 'err'); inp.value = fmt(ultimo); return; }
+      const c = round(clamp(v, min, max), 2);
+      if (c !== ultimo) aplicar(c);
+      inp.value = fmt(c);
+    };
+    inp.addEventListener('change', concluir);
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); concluir(); inp.select(); }
+      else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {                   // o campo é de texto: as setas fazem o papel do "spinner"
+        e.preventDefault();
+        const base = lerCampo(inp.value, medida) ?? ultimo ?? 0;
+        inp.value = fmt(aplicar(base + (e.key === 'ArrowUp' ? 1 : -1) * step * (e.shiftKey ? 10 : 1)));
+      }
+    });
+  }
   inp.addEventListener('focus', () => inp.select());
   const lab = h('span', { class: 'num-lab' }, label);
   // arrastar o rótulo muda o valor (como em editores de design)
   lab.addEventListener('pointerdown', (e) => {
     e.preventDefault();
-    const v0 = parseFloat(inp.value) || 0, x0 = e.clientX;
-    const mv = (ev) => { const v = clamp(round(v0 + (ev.clientX - x0) * step * (ev.shiftKey ? 5 : 1), 2), min, max); inp.value = fmt(v); onChange(v); };
+    const v0 = parseFloat(inp.value.replace(',', '.')) || 0, x0 = e.clientX;
+    const mv = (ev) => { const v = clamp(round(v0 + (ev.clientX - x0) * step * (ev.shiftKey ? 5 : 1), 2), min, max); inp.value = fmt(v); ultimo = v; onChange(v); };
     // o campo pode estar num painel em outra janela: os eventos de ponteiro chegam na janela dele
     const win = winOf(lab), body = lab.ownerDocument.body;
     const up = () => { win.removeEventListener('pointermove', mv); body.classList.remove('scrubbing'); };
@@ -53,7 +80,7 @@ export function num({ label, value, min = -99999, max = 99999, step = 1, unit = 
     win.addEventListener('pointerup', up, { once: true });
   });
   const w = h('label', { class: 'num ' + cls }, lab, inp, unit ? h('em', {}, unit) : null);
-  w.set = (v) => { if (inp.ownerDocument.activeElement !== inp) inp.value = fmt(v); };
+  w.set = (v) => { ultimo = v; if (inp.ownerDocument.activeElement !== inp) inp.value = fmt(v); };
   return w;
 }
 

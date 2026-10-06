@@ -22,7 +22,7 @@ import { goToDocuments } from './nav.js';
 import { saveCopyToDrive } from './drive.js';
 import { initAbas } from './abas.js';
 import { openExportPdf } from './pdf.js';
-import { initReguas, alternarReguas, reguasVisiveis } from './reguas.js';
+import { initReguas, alternarReguas, reguasVisiveis, alternarGrade, gradeAtual } from './reguas.js';
 import { rotuloDaPagina } from '../core/formatos.js';
 import { toast, modal, btn } from './ui.js';
 import { icon } from './icons.js';
@@ -244,6 +244,7 @@ function wireTop() {
       S.host.capacidades.publicar ? item('eye', 'Ver página publicada', verPublicada) : null,
       item('stack', 'Documentos', () => goToDocuments()),
       item('layers', reguasVisiveis() ? 'Ocultar réguas (Alt+R)' : 'Mostrar réguas (Alt+R)', () => alternarReguas()),
+      item('layers', gradeAtual().visivel ? 'Ocultar grade (Alt+G)' : 'Mostrar grade (Alt+G)', () => alternarGrade()),
       item('download', 'Exportar PDF…', openExportPdf),
       item('download', 'Exportar projeto (.json)', exportProject),
       item('code', S.doc.kind === 'site' ? 'Exportar site em HTML (.html)' : 'Exportar página em HTML (.html)', async () => { try { toast('Montando o arquivo HTML…'); const r = await exportHtml(); toast(`HTML salvo na pasta de Downloads (${r.paginas} ${r.paginas > 1 ? 'páginas' : 'página'}, ${(r.bytes / 1024).toFixed(0)} KB).`, 'ok'); } catch (e) { toast(e.message || String(e), 'err'); } }),
@@ -290,6 +291,7 @@ function bindKeys(doc) {
       return;
     }
     if (e.altKey && k === 'r') { e.preventDefault(); alternarReguas(); return; }
+    if (e.altKey && k === 'g') { e.preventDefault(); alternarGrade(); return; }
     if (k === 'escape') { if (S.tool !== 'select') setTool('select'); else select([]); return; }
     if (k === 'delete' || k === 'backspace') { const ids = selEls().filter((x) => !x.lock).map((x) => x.id); if (ids.length) { e.preventDefault(); removeEls(ids); } return; }
     if (k.startsWith('arrow')) {

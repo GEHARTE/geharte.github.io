@@ -6,13 +6,14 @@ import { rotuloDaPagina } from '../core/formatos.js';
 import { medidasDoFrame } from '../core/reguas.js';
 import { sangriaMm, margemMm, sangriaPx, aplicarSangria, aplicarMargem, avisosDeImpressao, SANGRIA_GRAFICA_MM, MARGEM_SEGURA_MM } from '../core/gabarito.js';
 import { unidadeAtual } from './reguas.js';
+import { infoDaImagem, imagensDeBaixaResolucao } from '../core/resolucao.js';
 import { marcarComum } from '../core/sites.js';
 import { FONTS, fontStack } from '../core/fonts.js';
 import { SHAPE_LIST } from '../core/render.js';
 import { sanitizeSvg } from '../core/sanitize.js';
 import { S, on, emit, selEls, mutate, mutateGeom, commit, touch, setPage, byId, select as selecionar } from './state.js';
 import { inkColor, alignSel, distribute, autoStack, resetMobile, fitPageHeight, replaceImage } from './tools.js';
-import { measureAll, playEntrance, nodeOf } from './stage.js';
+import { measureAll, playEntrance, nodeOf, refreshOverlay } from './stage.js';
 import { icon } from './icons.js';
 import { toast, btn, section, row, hint, num, range, select, seg, toggle, textInput, colorField } from './ui.js';
 
@@ -36,19 +37,19 @@ function boxNow(el) {
   return fr;
 }
 function secGeom(el) {
-  const patch = (p) => { mutateGeom([el.id], (e) => setFrame(e, S.dev, p)); touch(); };
+  const patch = (p) => { mutateGeom([el.id], (e) => setFrame(e, S.dev, p)); refreshOverlay(); touch(); };   // as alças de seleção acompanham o que foi digitado
   const fr = boxNow(el);
   geom = {
-    x: num({ label: 'X', value: fr.x, step: 1, onChange: (v) => patch({ x: v }) }),
-    y: num({ label: 'Y', value: fr.y, step: 1, onChange: (v) => patch({ y: v }) }),
-    w: num({ label: 'L', value: fr.w, min: 4, step: 1, onChange: (v) => patch({ w: v }) }),
-    h: num({ label: 'A', value: fr.h, min: 4, step: 1, onChange: (v) => patch({ h: v }) }),
+    x: num({ label: 'X', value: fr.x, step: 1, medida: 'px', onChange: (v) => patch({ x: v }) }),
+    y: num({ label: 'Y', value: fr.y, step: 1, medida: 'px', onChange: (v) => patch({ y: v }) }),
+    w: num({ label: 'L', value: fr.w, min: 4, step: 1, medida: 'px', onChange: (v) => patch({ w: v }) }),
+    h: num({ label: 'A', value: fr.h, min: 4, step: 1, medida: 'px', onChange: (v) => patch({ h: v }) }),
     r: num({ label: '°', value: fr.r, min: -360, max: 360, step: 1, onChange: (v) => patch({ r: v }) }),
   };
   if (el.t === 'text') geom.h.querySelector('input').disabled = true;
   const medidas = h('p', { class: 'hint', id: 'geom-un', title: 'Medidas na unidade da régua (troque no canto das réguas)' });
   geom.un = medidas;
-  const body = [row(geom.x, geom.y), row(geom.w, geom.h), row(geom.r), medidas];
+  const body = [row(geom.x, geom.y), row(geom.w, geom.h), row(geom.r), medidas, hint('Os campos aceitam unidade: 2,5cm, 10mm, 12pt, 1,5rem. Sem unidade, vale px.' + (sangriaMm(S.doc) ? ' X e Y contam desde a borda da página (com a sangria); a medida logo acima conta desde o corte.' : ''))];
   pintaMedidas(fr);
   if (S.dev === 'm' && !el.f.m) body.push(hint('Este elemento ainda segue o layout do PC. Mexer nele aqui cria o ajuste do celular.'));
   return section('Posição e tamanho', body);
@@ -69,6 +70,7 @@ function refreshGeom() {
   const fr = boxNow(el);
   geom.x.set(fr.x); geom.y.set(fr.y); geom.w.set(fr.w); geom.h.set(fr.h); geom.r.set(fr.r);
   pintaMedidas(fr);
+  pintaResolucao(el);
 }
 
 // ---------- alinhar ----------
@@ -98,7 +100,7 @@ function secText() {
   if (S.sel.length === 1) body.push(textInput({ label: 'Texto', value: selEls()[0].text, multiline: true, rows: 3, onChange: (v) => set((e) => { e.text = v; }) }));
   body.push(
     select({ label: 'Fonte', value: fo((s) => s.fontFamily), options: FONTS.map((f) => [f.name, f.name, fontStack(f.name)]), onChange: mk('fontFamily') }),
-    row(num({ label: 'Tam', value: fsNow, min: 6, max: 600, onChange: (v) => set((e) => setFrame(e, S.dev, { fs: v })) }),
+    row(num({ label: 'Tam', value: fsNow, min: 6, max: 600, medida: 'px', onChange: (v) => set((e) => setFrame(e, S.dev, { fs: v })) }),
       select({ value: fo((s) => s.fontWeight), options: WEIGHTS, onChange: (v) => set((e) => { e.s.fontWeight = +v; }) })),
     row(
       h('div', { class: 'seg' },
@@ -151,7 +153,7 @@ function secShape() {
     lb.input.id = 'lbl-input';
     out.push(section('Texto na forma', [lb,
       row(colorField({ label: 'Cor', value: val((e) => e.ls.color), onChange: (v) => set((e) => { e.ls.color = v; }) }),
-        num({ label: 'Tam', value: val((e) => round(frameOf(e, S.dev).fs, 1)), min: 6, max: 300, onChange: (v) => set((e) => setFrame(e, S.dev, { fs: v })) })),
+        num({ label: 'Tam', value: val((e) => round(frameOf(e, S.dev).fs, 1)), min: 6, max: 300, medida: 'px', onChange: (v) => set((e) => setFrame(e, S.dev, { fs: v })) })),
       select({ label: 'Fonte', value: val((e) => e.ls.fontFamily), options: FONTS.map((f) => [f.name, f.name, fontStack(f.name)]), onChange: (v) => set((e) => { e.ls.fontFamily = v; }) }),
     ]));
   }
@@ -166,10 +168,24 @@ function secPath() {
   ]);
 }
 
+// Resolução da imagem no papel (RG-13): "212 ppi · Boa", o tamanho da imagem e o espaço que ela ocupa. Só em arquivo de papel.
+let resEl = null;
+const nBR = (n) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+function pintaResolucao(el) {
+  if (!resEl) return;
+  const i = ehFixa(S.doc) && S.sel.length === 1 ? infoDaImagem(S.doc, el) : null;
+  resEl.hidden = !i;
+  if (!i) return;
+  resEl.classList.toggle('bad', i.faixa.id === 'baixa');
+  resEl.replaceChildren(h('strong', {}, `Resolução no papel: ${i.ppi} ppi · ${i.faixa.rotulo}`), h('br'), `${i.faixa.texto} Imagem de ${i.px.w} × ${i.px.h} px, ocupando ${nBR(i.cm.w)} × ${nBR(i.cm.h)} cm.`);
+}
 function secImage() {
   const el = selEls()[0];
+  resEl = h('p', { class: 'hint res-img', id: 'img-res' });
+  pintaResolucao(el);
   const file = h('input', { type: 'file', accept: 'image/*', hidden: true, onchange: async () => { if (file.files[0] && el) await replaceImage(el, file.files[0]); } });
   return section('Imagem', [
+    resEl,
     seg({ value: val((e) => e.s.fit), options: [['cover', 'Preencher'], ['contain', 'Conter'], ['fill', 'Esticar']], onChange: (v) => set((e) => { e.s.fit = v; }) }),
     range({ label: 'Cantos', value: val((e) => e.s.radius), min: 0, max: 600, onChange: (v) => set((e) => { e.s.radius = v; }), fmt: (v) => v + 'px' }),
     h('div', { class: 'btnrow' }, btn({ label: 'Círculo', onClick: () => { set((e) => { e.s.radius = 9999; e.s.fit = 'cover'; }); build(); } }),
@@ -297,17 +313,18 @@ function secAnim() {
 function secGabarito() {
   const aplicar = (fn, valor) => { const r = fn(S.doc, valor); if (!r.ok) { toast(r.motivo, 'err'); return; } emit('struct'); emit('page'); commit(); build(); };
   const aplicarDepois = debounce((fn, v) => aplicar(fn, v), 450);
-  const av = avisosDeImpressao(S.doc);
+  const av = { ...avisosDeImpressao(S.doc), resolucaoBaixa: imagensDeBaixaResolucao(S.doc) };
   const linhas = [
     ['foraDaMargem', 'texto dentro da margem segura (pode ser cortado)'],
     ['semSangria', 'fundo que encosta no corte sem passar pela sangria (pode sobrar fio branco)'],
     ['foraDaPagina', 'fora da página (não sai na impressão)'],
+    ['resolucaoBaixa', 'imagem de baixa resolução para o papel (pode sair borrada)'],
   ].filter(([k]) => av[k].length).map(([k, t]) => h('div', { class: 'aviso-imp' }, h('span', {}, `${av[k].length} ${av[k].length > 1 ? 'itens' : 'item'}: ${t}`), btn({ label: 'Selecionar', onClick: () => selecionar(av[k]) })));
   return section('Sangria e margem segura', [
     hint('Para gráfica: a SANGRIA é a área além do corte que o fundo e as imagens de borda devem cobrir; a MARGEM SEGURA é a faixa dentro do corte onde nada importante deve ficar. As réguas medem a partir do corte.'),
     seg({ value: [0, SANGRIA_GRAFICA_MM, 5].includes(sangriaMm(S.doc)) ? String(sangriaMm(S.doc)) : '', options: [['0', 'Sem'], [String(SANGRIA_GRAFICA_MM), `${SANGRIA_GRAFICA_MM} mm`], ['5', '5 mm']], onChange: (v) => aplicar(aplicarSangria, Number(v)) }),
-    row(num({ label: 'Sangria', value: sangriaMm(S.doc), min: 0, max: 10, step: 0.5, unit: 'mm', onChange: (v) => aplicarDepois(aplicarSangria, v) }),
-      num({ label: 'Margem', value: margemMm(S.doc), min: 0, max: 30, step: 0.5, unit: 'mm', onChange: (v) => aplicarDepois(aplicarMargem, v) })),
+    row(num({ label: 'Sangria', value: sangriaMm(S.doc), min: 0, max: 10, step: 0.5, unit: 'mm', medida: 'mm', onChange: (v) => aplicarDepois(aplicarSangria, v) }),
+      num({ label: 'Margem', value: margemMm(S.doc), min: 0, max: 30, step: 0.5, unit: 'mm', medida: 'mm', onChange: (v) => aplicarDepois(aplicarMargem, v) })),
     h('div', { class: 'btnrow' }, btn({ label: `Margem de ${MARGEM_SEGURA_MM} mm`, onClick: () => aplicar(aplicarMargem, MARGEM_SEGURA_MM) }), btn({ label: 'Sem margem', onClick: () => aplicar(aplicarMargem, 0) })),
     ...(linhas.length ? linhas : (sangriaMm(S.doc) || margemMm(S.doc) ? [hint('Conferência: tudo certo para a gráfica.')] : [])),
   ]);
@@ -325,7 +342,7 @@ function pagePanel() {
         range({ label: 'Ângulo', value: bg.g.a, min: 0, max: 360, fmt: (v) => v + '°', onChange: (v) => setPage((p) => { p.bg.g.a = v; }) })]
       : colorField({ label: 'Cor de fundo', value: bg.c, onChange: (v) => setPage((p) => { p.bg.c = v; }) }),
     ehUnico(S.doc) ? h('p', { class: 'hint' }, `Formato: ${rotuloDaPagina(S.doc.page)}${ehFixa(S.doc) ? ' (tamanho fixo)' : ''}`) : null,
-    ehFixa(S.doc) ? null : row(num({ label: 'Altura', value: pageH(S.doc, S.dev), min: 300, max: 12000, step: 10, unit: 'px', onChange: (v) => setPage((p) => { p.h[S.dev] = Math.round(v); }) }),
+    ehFixa(S.doc) ? null : row(num({ label: 'Altura', value: pageH(S.doc, S.dev), min: 300, max: 12000, step: 10, unit: 'px', medida: 'px', onChange: (v) => setPage((p) => { p.h[S.dev] = Math.round(v); }) }),
       btn({ label: 'Ajustar', title: 'Ajustar a altura ao conteúdo', ic: 'fit', onClick: () => { fitPageHeight(); build(); } })),
     hint('Dica: fundos animados ficam na aba SVG animado, em “Fundos”.'),
   ]));

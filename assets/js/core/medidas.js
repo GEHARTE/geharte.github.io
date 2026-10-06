@@ -57,6 +57,15 @@ export function interpretar(texto, unidadePadrao = 'px', opts) {
   return { valor, unidade: u, px: paraPx(valor, u, opts) };
 }
 
+// Campo numérico do painel que aceita unidade: "2,5cm", "12pt", "40" (sem unidade = a própria unidade do campo, `saida`).
+// Devolve o número NA unidade do campo (px no X/Y/L/A, mm na sangria) ou null se não entender.
+export function lerCampo(texto, saida = 'px', opts) {
+  const r = interpretar(texto, saida, opts);
+  return r ? dePx(r.px, saida, opts) : null;
+}
+// Só dígitos (sem unidade): enquanto a pessoa digita assim, o campo aplica na hora; com unidade, espera Enter ou sair do campo.
+export const ehSoNumero = (texto) => /^\s*-?\d+(?:[.,]\d+)?\s*$/.test(String(texto ?? ''));
+
 // ---------- formatos de papel (em mm, retrato: largura × altura) ----------
 export const FORMATOS = {
   A0: [841, 1189], A1: [594, 841], A2: [420, 594], A3: [297, 420], A4: [210, 297], A5: [148, 210], A6: [105, 148],
