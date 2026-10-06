@@ -10,5 +10,5 @@ export async function goToDoc(id) {
 // Volta ao painel de documentos (o rascunho é salvo antes).
 export async function goToDocuments() {
   if (S.doc) { try { await saveNow(); } catch { /* segue mesmo assim */ } }
-  location.href = '../documentos/';
+  location.href = S.host?.urls.documentos || '../documentos/';
 }

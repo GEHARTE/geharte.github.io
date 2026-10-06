@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="../assets/css/anim.css">
+  <link rel="stylesheet" href="../assets/css/galeria.css">
   <link rel="stylesheet" href="../assets/css/documentos.css">
 </head>
 <body class="docs">
@@ -29,27 +30,29 @@
   <main id="conteudo">
     <p class="carregando" id="carregando">Carregando os documentos…</p>
 
+    <!-- 1. O que está NO AR no site (editável só por quem tem permissão: hoje, a equipe de desenvolvimento) -->
     <section class="dsec" id="sec-site" hidden aria-labelledby="h-site">
       <header class="dsec-h">
-        <h2 id="h-site">Páginas do site</h2>
-        <p id="sub-site">É daqui que se controla como o site funciona. Abrir uma página carrega a versão no ar para você editar; Publicar leva a mudança ao site público.</p>
+        <h2 id="h-site">Páginas ativas no site</h2>
+        <p id="sub-site">As páginas que estão no ar. Só quem tem permissão de edição pode alterá-las; Publicar leva a mudança ao site público.</p>
       </header>
       <div class="dgrid" id="g-site"></div>
     </section>
 
+    <section class="dsec" id="sec-equipe" hidden aria-labelledby="h-eq">
+      <header class="dsec-h"><h2 id="h-eq">Perfis da equipe no ar</h2><p>As páginas de perfil publicadas pelas outras pessoas — só para ver.</p></header>
+      <div class="dgrid" id="g-equipe"></div>
+    </section>
+
+    <!-- 2. O que a PESSOA criou (fica neste navegador até ser exportado ou publicado) -->
     <section class="dsec" id="sec-meu" hidden aria-labelledby="h-meu">
       <header class="dsec-h"><h2 id="h-meu">Meu espaço</h2><p>Sua página de perfil e os seus materiais no Drive.</p></header>
       <div class="dgrid" id="g-meu"></div>
     </section>
 
     <section class="dsec" id="sec-artigos" hidden aria-labelledby="h-art">
-      <header class="dsec-h"><h2 id="h-art">Meus artigos e rascunhos</h2><p>Textos seus, guardados neste navegador até serem publicados.</p></header>
+      <header class="dsec-h"><h2 id="h-art">Meus arquivos</h2><p>Arquivos criados por você, guardados neste navegador. Crie um novo escolhendo o modelo e o tamanho.</p></header>
       <div class="dgrid" id="g-artigos"></div>
-    </section>
-
-    <section class="dsec" id="sec-equipe" hidden aria-labelledby="h-eq">
-      <header class="dsec-h"><h2 id="h-eq">Perfis da equipe</h2><p>As páginas das outras pessoas do Gehrarte — só para ver.</p></header>
-      <div class="dgrid" id="g-equipe"></div>
     </section>
 
     <p class="vazio" id="vazio" hidden>Nenhum documento encontrado para essa busca.</p>

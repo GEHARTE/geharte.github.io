@@ -5,7 +5,9 @@ export const FONTS = [
   { name: 'Space Grotesk', g: 'Space+Grotesk:wght@300;400;500;700', cat: 'Sans' },
   { name: 'DM Sans', g: 'DM+Sans:wght@300;400;500;700', cat: 'Sans' },
   { name: 'Montserrat', g: 'Montserrat:wght@300;400;500;600;700;800', cat: 'Sans' },
+  { name: 'Andika', g: 'Andika:wght@400;700', cat: 'Sans' },
   { name: 'Playfair Display', g: 'Playfair+Display:wght@400;500;700;800', cat: 'Serifa' },
+  { name: 'Libre Caslon Text', g: 'Libre+Caslon+Text:wght@400;700', cat: 'Serifa' },
   { name: 'Merriweather', g: 'Merriweather:wght@300;400;700;900', cat: 'Serifa' },
   { name: 'Lora', g: 'Lora:wght@400;500;600;700', cat: 'Serifa' },
   { name: 'DM Serif Display', g: 'DM+Serif+Display', cat: 'Serifa' },
@@ -15,6 +17,7 @@ export const FONTS = [
   { name: 'Caveat', g: 'Caveat:wght@400;500;700', cat: 'Manuscrita' },
   { name: 'Pacifico', g: 'Pacifico', cat: 'Manuscrita' },
   { name: 'Permanent Marker', g: 'Permanent+Marker', cat: 'Manuscrita' },
+  { name: 'Cutive Mono', g: 'Cutive+Mono', cat: 'Mono' },
   { name: 'JetBrains Mono', g: 'JetBrains+Mono:wght@300;400;500;700', cat: 'Mono' },
   { name: 'Press Start 2P', g: 'Press+Start+2P', cat: 'Mono' },
 ];
@@ -29,6 +32,12 @@ export function loadFonts(names) {
   link.rel = 'stylesheet';
   link.href = 'https://fonts.googleapis.com/css2?' + want.map((f) => 'family=' + f.g).join('&') + '&display=swap';
   document.head.append(link);
+}
+
+// Endereço da folha de estilo do Google Fonts para esses nomes (ou null se nenhum está na lista). Usado também pela exportação em HTML.
+export function urlDasFontes(names) {
+  const want = FONTS.filter((f) => names.includes(f.name));
+  return want.length ? 'https://fonts.googleapis.com/css2?' + want.map((f) => 'family=' + f.g).join('&') + '&display=swap' : null;
 }
 
 export const loadAllFonts = () => loadFonts(FONTS.map((f) => f.name));

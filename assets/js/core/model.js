@@ -13,7 +13,13 @@ export const DEV_LABEL = { d: 'PC', m: 'Celular' };
 // Tipos de página: 'perfil' (uma por usuário, id fixo 'perfil'), 'artigo' (quantas quiser) e
 // 'pagina' (página do SITE: landing, home… — uma só para a equipe toda, definidas em paginas.json).
 // Páginas do site têm id "site-<pagina>" (ex.: site-landing) para nunca colidir com o id de um artigo.
-export const KINDS = { perfil: 'Página de perfil', artigo: 'Artigo', pagina: 'Página do site' };
+// 'site' = PROJETO DE SITE: um site inteiro (várias abas/páginas navegáveis, topo e rodapé compartilhados) dentro de um só documento;
+// é o tipo que o MUVVI usa. A lógica das abas fica em core/sites.js.
+// 'arquivo' = arquivo em branco criado pela pessoa (qualquer tamanho: página, tela, papel); fica no navegador e sai por exportar/ações do host.
+// 'artigo' = texto para o blog (publicável). Os dois têm o mesmo tratamento de id.
+export const KINDS = { perfil: 'Página de perfil', artigo: 'Artigo', arquivo: 'Arquivo', pagina: 'Página do site', site: 'Projeto de site' };
+// Tipos que o Publicador do Gehrarte NÃO publica (saem por exportar ou pelas ações do host).
+export const NAO_PUBLICAVEIS = ['site', 'arquivo'];
 export const PROFILE_ID = 'perfil';
 export const SITE_PREFIX = 'site-';
 export const siteDocId = (pageId) => SITE_PREFIX + pageId;
@@ -39,11 +45,24 @@ export function normalizeDoc(doc, owner = '') {
   }
   if (owner && !doc.owner) doc.owner = owner;
   doc.assets ||= {};
+  if (doc.kind === 'site') garantirSite(doc);
+  return doc;
+}
+
+// Projeto de site: garante a estrutura de abas. Uma aba = { id, nome, titulo, page:{bg,h}, elements }. A aba aberta no editor vive em
+// doc.page/doc.elements (o conjunto de trabalho, junto com os elementos compartilhados marcados com `comum`); as outras ficam em doc.abas.
+// doc.comum = { hRef:{d,m}, elements } guarda o topo e o rodapé compartilhados; `hRef` é a altura de página contra a qual o rodapé foi desenhado.
+export function garantirSite(doc) {
+  if (!Array.isArray(doc.abas) || !doc.abas.length) doc.abas = [{ id: 'inicio', nome: 'Início', titulo: 'Início', page: JSON.parse(JSON.stringify(doc.page)), elements: [] }];
+  for (const a of doc.abas) { a.id = cleanId(a.id) || 'aba'; a.nome ||= a.id; a.titulo ||= a.nome; a.page ||= { bg: { c: '#ffffff', g: null }, h: { d: 900, m: 1400 } }; a.elements ||= []; }
+  if (!doc.abas.some((a) => a.id === doc.abaAtiva)) doc.abaAtiva = doc.abas[0].id;
+  doc.comum ||= { hRef: { d: doc.page.h.d, m: doc.page.h.m ?? Math.round(doc.page.h.d * K) }, elements: [] };
+  doc.comum.elements ||= [];
   return doc;
 }
 
 // Caminho público de uma página (relativo à raiz do site) e URL do visualizador.
-export const publishDir = (slug, doc) => (doc.kind === 'pagina' ? `paginas/${sitePageId(doc.id)}/` : doc.kind === 'artigo' ? `artigos/${slug}/${doc.id}/` : `perfis/${slug}/`);
+export const publishDir = (slug, doc) => (doc.kind === 'site' ? `projetos/${slug}/${doc.id}/` : doc.kind === 'arquivo' ? `arquivos/${slug}/${doc.id}/` : doc.kind === 'pagina' ? `paginas/${sitePageId(doc.id)}/` : doc.kind === 'artigo' ? `artigos/${slug}/${doc.id}/` : `perfis/${slug}/`);
 export const viewerQuery = (slug, doc) => (doc.kind === 'pagina'
   ? `u=${encodeURIComponent(slug)}&p=${encodeURIComponent(sitePageId(doc.id))}`
   : `u=${encodeURIComponent(slug)}${doc.kind === 'artigo' ? `&a=${encodeURIComponent(doc.id)}` : ''}`);
@@ -71,6 +90,8 @@ export function makeElement(t, props = {}, frame = {}) {
   if (t === 'path') Object.assign(base, { d: '', vb: [100, 100], s: { stroke: '#17161d', sw: 6, fill: null, cap: 'round' } });
   if (t === 'image') Object.assign(base, { asset: '', s: { fit: 'cover', radius: 0 } });
   if (t === 'svg') Object.assign(base, { code: '' });
+  // 'abas' = barra de abas FUNCIONAL: lista as abas do projeto de site e leva de uma a outra (no editor só mostra; na página publicada navega)
+  if (t === 'abas') Object.assign(base, { name: 'Barra de abas', ls: { fontFamily: 'Inter', fontSize: 16, fontWeight: 600, color: '#17161d' }, abas: { ...ABAS_PADRAO } });
   // props sobrescreve o padrão (merge raso de s / ls / f)
   for (const [k, v] of Object.entries(props)) {
     if (k === 's' || k === 'ls') base[k] = { ...base[k], ...v };
@@ -79,7 +100,10 @@ export function makeElement(t, props = {}, frame = {}) {
   return base;
 }
 
-export const fontOwner = (el) => (el.t === 'text' ? el.s : el.t === 'shape' ? el.ls : null);
+// Configuração padrão da barra de abas. estilo: 'sublinhado' | 'pilula' | 'texto'; mostrar: null (todas) ou lista de ids; rotulos: { idDaAba: 'texto' }.
+export const ABAS_PADRAO = { estilo: 'sublinhado', alinhar: 'left', corAtiva: '#e4572e', corFundoAtivo: '#e4572e', corTextoAtivo: '#ffffff', gap: 22, mostrar: null, rotulos: {} };
+
+export const fontOwner = (el) => (el.t === 'text' ? el.s : el.t === 'shape' || el.t === 'abas' ? el.ls : null);
 
 // Frame efetivo (em px de design) do elemento no dispositivo dado.
 export function frameOf(el, dev) {
@@ -103,6 +127,10 @@ export function setFrame(el, dev, patch) {
   Object.assign(el.f.m, patch);
 }
 
+// Largura da página no dispositivo: formato único (page.w) ou as larguras de sempre (1200 / 390).
+export const pageW = (doc, dev) => (dev === 'd' && doc?.page?.w > 0 ? doc.page.w : W[dev]);
+export const ehUnico = (doc) => doc?.page?.w > 0;     // só uma versão (sem celular)
+export const ehFixa = (doc) => !!doc?.page?.fixa;      // altura fixa (papel)
 export const pageH = (doc, dev) => (dev === 'd' ? doc.page.h.d : doc.page.h.m ?? doc.page.h.d * K);
 
 // Caixa envolvente (alinhada aos eixos) de um frame rotacionado.

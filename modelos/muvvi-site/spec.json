@@ -1,0 +1,510 @@
+{
+ "id": "muvvi-site",
+ "nome": "MUVVI — site do museu (provisório)",
+ "descricao": "Projeto de site do Museu Virtual do Vale do Ivaí: identidade do protótipo (verde, creme, Libre Caslon Text e Andika) e as abas do Roteiro Curatorial Digital — entrada, cinco salas virtuais (eixos) e participação. Textos tirados do roteiro; imagens são quadros para trocar. Será substituído pelo modelo do POC do setor de design.",
+ "categoria": "MUVVI",
+ "tipo": "site",
+ "tema": {
+  "fundo": "#fcfbf6",
+  "texto": "#1b1b18",
+  "suave": "#55574f",
+  "escuro": "#0e3e20",
+  "sobreEscuro": "#ffffff",
+  "acento": "#86a3fc",
+  "sobreAcento": "#0e3e20",
+  "superficie": "#efeadb",
+  "fonteTitulo": "Libre Caslon Text",
+  "fonteTexto": "Andika",
+  "raio": 14
+ },
+ "compartilhado": {
+  "topo": [
+   {
+    "tipo": "topo",
+    "marca": "MUVVI",
+    "abas": true
+   }
+  ],
+  "rodape": [
+   {
+    "tipo": "rodape",
+    "texto": "MUVVI · Museu Virtual do Vale do Ivaí\nEntre rios, memórias e territórios: o Vale do Ivaí e sua herança cultural e natural"
+   }
+  ]
+ },
+ "abas": [
+  {
+   "id": "inicio",
+   "nome": "Início",
+   "titulo": "Início",
+   "secoes": [
+    {
+     "tipo": "hero",
+     "fundo": "claro",
+     "kicker": "Museu Virtual do Vale do Ivaí",
+     "titulo": "Entre rios, memórias e territórios",
+     "texto": "Uma travessia pelo Vale do Ivaí: um território moldado pela força do rio, pelas comunidades que o habitam e pelos vestígios de tempos ancestrais.",
+     "botao": {
+      "rotulo": "Começar a travessia",
+      "aba": "o-rio"
+     },
+     "imagem": true,
+     "imagemRotulo": "Vídeo de boas-vindas"
+    },
+    {
+     "tipo": "faixa",
+     "texto": "Apucarana ◆ Cambira ◆ Faxinal ◆ Ivaiporã ◆ Jandaia do Sul ◆ Lidianópolis ◆ Marumbi ◆ Rio Bom ◆ São João do Ivaí"
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Salas virtuais",
+     "colunas": 3,
+     "itens": [
+      {
+       "titulo": "O Rio que dá nome ao Vale",
+       "texto": "Natureza e cultura do rio Ivaí.",
+       "aba": "o-rio"
+      },
+      {
+       "titulo": "Vestígios do Tempo",
+       "texto": "Ocupação humana ancestral e patrimônio arqueológico.",
+       "aba": "vestigios"
+      },
+      {
+       "titulo": "Arquiteturas da Memória",
+       "texto": "Patrimônio construído e urbanização no Vale.",
+       "aba": "arquiteturas"
+      },
+      {
+       "titulo": "Coleções, Memórias e Cotidianos",
+       "texto": "Cultura material, objetos e coleções históricas locais.",
+       "aba": "colecoes"
+      },
+      {
+       "titulo": "Saberes, Fazeres e Festas",
+       "texto": "Patrimônio imaterial do Vale do Ivaí.",
+       "aba": "saberes"
+      },
+      {
+       "titulo": "Participe",
+       "texto": "Envie memórias, jogue o quiz e ajude a construir o acervo.",
+       "aba": "participe"
+      }
+     ]
+    },
+    {
+     "tipo": "texto",
+     "titulo": "Percurso livre ou guiado",
+     "paragrafos": [
+      "Escolha navegar por temas ou siga uma trilha sugerida, como “Do rio à cidade”.",
+      "O museu tem legendas e textos simplificados para tornar a visita acessível a mais pessoas."
+     ]
+    },
+    {
+     "tipo": "chamada",
+     "titulo": "A história do Vale do Ivaí é escrita por você",
+     "texto": "Tem uma foto antiga, um objeto de família ou uma história para contar? Compartilhe conosco.",
+     "botao": {
+      "rotulo": "Contribuir",
+      "aba": "participe"
+     }
+    }
+   ]
+  },
+  {
+   "id": "o-rio",
+   "nome": "O Rio que dá nome ao Vale",
+   "titulo": "O Rio que dá nome ao Vale",
+   "secoes": [
+    {
+     "tipo": "hero",
+     "fundo": "escuro",
+     "kicker": "Eixo 1 · Sala virtual",
+     "titulo": "O Rio que dá nome ao Vale",
+     "texto": "Mostrar a importância do rio como eixo geográfico, ambiental e simbólico, como elemento marcador de uma paisagem.",
+     "imagem": true,
+     "imagemRotulo": "Imagem de abertura da sala"
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Subtemas",
+     "colunas": 2,
+     "itens": [
+      {
+       "titulo": "Nascente e foz",
+       "texto": "Percurso do rio e sua bacia hidrográfica."
+      },
+      {
+       "titulo": "O rio e as comunidades ribeirinhas",
+       "texto": "Modos de vida, pesca, travessias."
+      },
+      {
+       "titulo": "Paisagens e biodiversidade",
+       "texto": "Fauna, flora e áreas de preservação."
+      },
+      {
+       "titulo": "O Ivaí mítico",
+       "texto": "Lendas, memórias e representações culturais."
+      }
+     ]
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Recursos digitais",
+     "colunas": 3,
+     "itens": [
+      {
+       "titulo": "Mapa interativo",
+       "texto": "O curso do rio Ivaí."
+      },
+      {
+       "titulo": "Galeria de fotografias",
+       "texto": "Históricas e atuais."
+      },
+      {
+       "titulo": "Vídeos curtos",
+       "texto": "Depoimentos de moradores."
+      }
+     ]
+    },
+    {
+     "tipo": "galeria",
+     "titulo": "Acervo da sala",
+     "quantidade": 6,
+     "colunas": 3
+    },
+    {
+     "tipo": "chamada",
+     "titulo": "Vestígios do Tempo",
+     "texto": "Siga a travessia: a ocupação humana ancestral do Vale.",
+     "botao": {
+      "rotulo": "Ir para os Vestígios",
+      "aba": "vestigios"
+     }
+    }
+   ]
+  },
+  {
+   "id": "vestigios",
+   "nome": "Vestígios do Tempo",
+   "titulo": "Vestígios do Tempo: arqueologia do Vale",
+   "secoes": [
+    {
+     "tipo": "hero",
+     "fundo": "escuro",
+     "kicker": "Eixo 2 · Sala virtual",
+     "titulo": "Vestígios do Tempo: arqueologia do Vale",
+     "texto": "Divulgar os sítios arqueológicos e o valor científico e cultural desses achados.",
+     "imagem": true,
+     "imagemRotulo": "Imagem de abertura da sala"
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Subtemas",
+     "colunas": 2,
+     "itens": [
+      {
+       "titulo": "Primeiros habitantes",
+       "texto": "Grupos indígenas pré-coloniais e seus materiais."
+      },
+      {
+       "titulo": "Sítios e escavações",
+       "texto": "Mapa dos principais sítios registrados pelo IPHAN."
+      },
+      {
+       "titulo": "Arqueologia comunitária",
+       "texto": "Preservação e educação patrimonial."
+      }
+     ]
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Recursos digitais",
+     "colunas": 3,
+     "itens": [
+      {
+       "titulo": "Modelos 3D de artefatos",
+       "texto": "Cerâmicas e líticos."
+      },
+      {
+       "titulo": "Linha do tempo interativa",
+       "texto": "A ocupação humana do Vale."
+      },
+      {
+       "titulo": "Podcast ou vídeo",
+       "texto": "Explicações com arqueólogos."
+      }
+     ]
+    },
+    {
+     "tipo": "galeria",
+     "titulo": "Acervo da sala",
+     "quantidade": 6,
+     "colunas": 3
+    },
+    {
+     "tipo": "chamada",
+     "titulo": "Arquiteturas da Memória",
+     "texto": "Do tempo profundo ao patrimônio construído.",
+     "botao": {
+      "rotulo": "Ir para as Arquiteturas",
+      "aba": "arquiteturas"
+     }
+    }
+   ]
+  },
+  {
+   "id": "arquiteturas",
+   "nome": "Arquiteturas da Memória",
+   "titulo": "Arquiteturas da Memória",
+   "secoes": [
+    {
+     "tipo": "hero",
+     "fundo": "escuro",
+     "kicker": "Eixo 3 · Sala virtual",
+     "titulo": "Arquiteturas da Memória",
+     "texto": "Mostrar como as edificações históricas expressam a trajetória social e econômica da região.",
+     "imagem": true,
+     "imagemRotulo": "Imagem de abertura da sala"
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Subtemas",
+     "colunas": 2,
+     "itens": [
+      {
+       "titulo": "Pontes, estações e trilhos",
+       "texto": "Marcas da circulação e do trabalho."
+      },
+      {
+       "titulo": "Casas e edifícios do interior",
+       "texto": "A vida cotidiana em construções."
+      },
+      {
+       "titulo": "Capelas e santuários",
+       "texto": "Espaços de fé."
+      }
+     ]
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Recursos digitais",
+     "colunas": 3,
+     "itens": [
+      {
+       "titulo": "Tour 360º",
+       "texto": "Prédios históricos."
+      },
+      {
+       "titulo": "Fichas informativas",
+       "texto": "Datas, autores e estilos arquitetônicos."
+      }
+     ]
+    },
+    {
+     "tipo": "galeria",
+     "titulo": "Acervo da sala",
+     "quantidade": 6,
+     "colunas": 3
+    },
+    {
+     "tipo": "chamada",
+     "titulo": "Coleções, Memórias e Cotidianos",
+     "texto": "Dos prédios aos objetos que guardam o dia a dia.",
+     "botao": {
+      "rotulo": "Ir para as Coleções",
+      "aba": "colecoes"
+     }
+    }
+   ]
+  },
+  {
+   "id": "colecoes",
+   "nome": "Coleções, Memórias e Cotidianos",
+   "titulo": "Coleções, Memórias e Cotidianos",
+   "secoes": [
+    {
+     "tipo": "hero",
+     "fundo": "escuro",
+     "kicker": "Eixo 4 · Sala virtual",
+     "titulo": "Coleções, Memórias e Cotidianos",
+     "texto": "Revelar o cotidiano das famílias e comunidades por meio de objetos, fotografias e documentos.",
+     "imagem": true,
+     "imagemRotulo": "Imagem de abertura da sala"
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Subtemas",
+     "colunas": 2,
+     "itens": [
+      {
+       "titulo": "Coleções familiares e comunitárias",
+       "texto": "Guardiões da memória local."
+      },
+      {
+       "titulo": "Objetos do trabalho rural e doméstico",
+       "texto": "O fazer de cada dia."
+      },
+      {
+       "titulo": "Documentos, cartas e fotografias antigas",
+       "texto": "Registros de outros tempos."
+      }
+     ]
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Recursos digitais",
+     "colunas": 3,
+     "itens": [
+      {
+       "titulo": "Carrossel de imagens",
+       "texto": "Legendas curtas e audiodescrição."
+      },
+      {
+       "titulo": "Depoimentos em vídeo",
+       "texto": "Colecionadores e famílias."
+      },
+      {
+       "titulo": "Linha do tempo",
+       "texto": "Transformações sociais e econômicas."
+      }
+     ]
+    },
+    {
+     "tipo": "galeria",
+     "titulo": "Acervo da sala",
+     "quantidade": 6,
+     "colunas": 3
+    },
+    {
+     "tipo": "chamada",
+     "titulo": "Saberes, Fazeres e Festas",
+     "texto": "Dos objetos às práticas vivas do Vale.",
+     "botao": {
+      "rotulo": "Ir para os Saberes",
+      "aba": "saberes"
+     }
+    }
+   ]
+  },
+  {
+   "id": "saberes",
+   "nome": "Saberes, Fazeres e Festas",
+   "titulo": "Saberes, Fazeres e Festas",
+   "secoes": [
+    {
+     "tipo": "hero",
+     "fundo": "escuro",
+     "kicker": "Eixo 5 · Sala virtual",
+     "titulo": "Saberes, Fazeres e Festas",
+     "texto": "Valorizar práticas culturais e expressões vivas da região.",
+     "imagem": true,
+     "imagemRotulo": "Imagem de abertura da sala"
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Subtemas",
+     "colunas": 2,
+     "itens": [
+      {
+       "titulo": "Festas religiosas e celebrações populares",
+       "texto": "Do padroeiro à Paixão de Cristo."
+      },
+      {
+       "titulo": "Música, dança e culinária regional",
+       "texto": "Catira, Dança de São Gonçalo, Festa do Milho."
+      },
+      {
+       "titulo": "Tradições orais, lendas e histórias contadas",
+       "texto": "A palavra que atravessa gerações."
+      }
+     ]
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Recursos digitais",
+     "colunas": 3,
+     "itens": [
+      {
+       "titulo": "Áudios e vídeos",
+       "texto": "Performances e entrevistas."
+      },
+      {
+       "titulo": "Mapa sonoro do Vale",
+       "texto": "Sons de festas, do rio e da floresta."
+      },
+      {
+       "titulo": "Histórias contadas",
+       "texto": "Painel em formato de podcast."
+      }
+     ]
+    },
+    {
+     "tipo": "galeria",
+     "titulo": "Acervo da sala",
+     "quantidade": 6,
+     "colunas": 3
+    },
+    {
+     "tipo": "chamada",
+     "titulo": "Participe",
+     "texto": "Agora é a sua vez de contar a história.",
+     "botao": {
+      "rotulo": "Participar",
+      "aba": "participe"
+     }
+    }
+   ]
+  },
+  {
+   "id": "participe",
+   "nome": "Participe",
+   "titulo": "Participe",
+   "secoes": [
+    {
+     "tipo": "hero",
+     "fundo": "acento",
+     "kicker": "Memórias colaborativas",
+     "titulo": "O museu também é construído por você",
+     "texto": "O público envia fotos e histórias para integrar o acervo digital. A equipe do museu cuida da curadoria antes da publicação.",
+     "botao": {
+      "rotulo": "Enviar uma memória",
+      "href": "/colecoes/enviar"
+     }
+    },
+    {
+     "tipo": "cards",
+     "titulo": "Como participar",
+     "colunas": 2,
+     "itens": [
+      {
+       "titulo": "Envie memórias",
+       "texto": "Fotos, objetos e histórias da sua família e da sua cidade."
+      },
+      {
+       "titulo": "Quiz sobre o patrimônio",
+       "texto": "Teste o que você aprendeu nas salas virtuais."
+      },
+      {
+       "titulo": "Linha do tempo participativa",
+       "texto": "Ajude a colocar fatos e lembranças no tempo."
+      },
+      {
+       "titulo": "Oficinas e materiais educativos",
+       "texto": "Atividades virtuais e conteúdo para as escolas do Vale."
+      }
+     ]
+    },
+    {
+     "tipo": "chamada",
+     "titulo": "Volte para o começo da travessia",
+     "texto": "Entre rios, memórias e territórios.",
+     "botao": {
+      "rotulo": "Ir para o Início",
+      "aba": "inicio"
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -1,7 +1,9 @@
 // Painel direito: propriedades contextuais do que está selecionado (ou da página).
 import { h } from '../core/dom.js';
 import { debounce, round } from '../core/util.js';
-import { W, K, frameOf, setFrame, pageH, fontOwner, DEV_LABEL } from '../core/model.js';
+import { W, K, frameOf, setFrame, pageH, fontOwner, DEV_LABEL, ABAS_PADRAO, ehUnico, ehFixa } from '../core/model.js';
+import { rotuloDaPagina } from '../core/formatos.js';
+import { marcarComum } from '../core/sites.js';
 import { FONTS, fontStack } from '../core/fonts.js';
 import { SHAPE_LIST } from '../core/render.js';
 import { sanitizeSvg } from '../core/sanitize.js';
@@ -21,8 +23,8 @@ const val = (get) => {
 const set = (fn) => mutate(S.sel, fn, 'panel');
 const all = (t) => selEls().every((e) => e.t === t);
 
-const TYPE_LABEL = { text: 'Texto', shape: 'Forma', path: 'Desenho', image: 'Imagem', svg: 'SVG' };
-const TYPE_ICON = { text: 'text', shape: 'square', path: 'pencil', image: 'image', svg: 'burst' };
+const TYPE_LABEL = { text: 'Texto', shape: 'Forma', path: 'Desenho', image: 'Imagem', svg: 'SVG', abas: 'Barra de abas' };
+const TYPE_ICON = { text: 'text', shape: 'square', path: 'pencil', image: 'image', svg: 'burst', abas: 'layers' };
 
 // ---------- geometria ----------
 function boxNow(el) {
@@ -134,7 +136,7 @@ function secShape() {
       row(colorField({ label: 'Cor', value: val((e) => e.ls.color), onChange: (v) => set((e) => { e.ls.color = v; }) }),
         num({ label: 'Tam', value: val((e) => round(frameOf(e, S.dev).fs, 1)), min: 6, max: 300, onChange: (v) => set((e) => setFrame(e, S.dev, { fs: v })) })),
       select({ label: 'Fonte', value: val((e) => e.ls.fontFamily), options: FONTS.map((f) => [f.name, f.name, fontStack(f.name)]), onChange: (v) => set((e) => { e.ls.fontFamily = v; }) }),
-    ], { open: !!first.label }));
+    ]));
   }
   return out;
 }
@@ -172,6 +174,43 @@ function secSvg() {
   return section('SVG', [ta, status, hint('Animações CSS (@keyframes) e SMIL (<animate>) funcionam. Scripts e links externos são removidos.')]);
 }
 
+// ---------- projeto de site: barra de abas, compartilhar entre abas e link para aba ----------
+const eSite = () => S.doc?.kind === 'site';
+const cfgAbas = (e) => ({ ...ABAS_PADRAO, ...(e.abas || {}) });
+const setAbas = (patch) => set((e) => { e.abas = { ...cfgAbas(e), ...patch }; });
+
+function secAbas() {
+  const todas = S.doc.abas || [];
+  const mostrar = val((e) => cfgAbas(e).mostrar);
+  const ativa = (id) => !Array.isArray(mostrar) || !mostrar.length || mostrar.includes(id);
+  const estilo = val((e) => cfgAbas(e).estilo);
+  return section('Barra de abas', [
+    hint('Mostra as abas do projeto. Na página publicada, cada item leva à aba. O nome de cada aba se muda na barra “Abas”, acima do canvas.'),
+    seg({ value: estilo, options: [['sublinhado', 'Sublinhado'], ['pilula', 'Pílula'], ['texto', 'Texto']], onChange: (v) => { setAbas({ estilo: v }); build(); } }),
+    seg({ value: val((e) => cfgAbas(e).alinhar), options: [['left', 'Esquerda'], ['center', 'Centro'], ['right', 'Direita']], onChange: (v) => setAbas({ alinhar: v }) }),
+    select({ label: 'Fonte', value: val((e) => e.ls.fontFamily), options: FONTS.map((f) => [f.name, f.name]), onChange: (v) => set((e) => { e.ls.fontFamily = v; }) }),
+    row(num({ label: 'Tam.', value: val((e) => frameOf(e, S.dev).fs), min: 8, max: 80, onChange: (v) => { S.sel.forEach((id) => mutateGeom([id], (e) => setFrame(e, S.dev, { fs: v }))); } }),
+      num({ label: 'Espaço', value: val((e) => cfgAbas(e).gap), min: 0, max: 120, onChange: (v) => setAbas({ gap: v }) })),
+    row(colorField({ label: 'Texto', value: val((e) => e.ls.color), onChange: (v) => set((e) => { e.ls.color = v; }) }),
+      colorField({ label: estilo === 'pilula' ? 'Fundo ativa' : 'Aba ativa', value: val((e) => (estilo === 'pilula' ? cfgAbas(e).corFundoAtivo : cfgAbas(e).corAtiva)), onChange: (v) => setAbas(estilo === 'pilula' ? { corFundoAtivo: v } : { corAtiva: v }) })),
+    estilo === 'pilula' ? colorField({ label: 'Texto da ativa', value: val((e) => cfgAbas(e).corTextoAtivo), onChange: (v) => setAbas({ corTextoAtivo: v }) }) : null,
+    h('p', { class: 'hint' }, 'Abas exibidas'),
+    ...todas.map((a) => toggle({ label: a.nome, value: ativa(a.id), onChange: (v) => {
+      const atual = Array.isArray(mostrar) && mostrar.length ? mostrar : todas.map((x) => x.id);
+      const novo = todas.map((x) => x.id).filter((id) => (id === a.id ? v : atual.includes(id)));
+      setAbas({ mostrar: novo.length === todas.length || !novo.length ? null : novo });
+    } })),
+  ]);
+}
+
+function secCompartilhar() {
+  const g = val((e) => e.comum || '');
+  return section('Projeto de site', [
+    hint('Elementos do topo e do rodapé podem aparecer em todas as abas. O rodapé acompanha o fim de cada página.'),
+    seg({ value: g, options: [['', 'Só esta aba'], ['topo', 'Topo (todas)'], ['rodape', 'Rodapé (todas)']], onChange: (v) => { const ids = [...S.sel]; marcarComum(S.doc, ids, v || null); commit(); emit('struct'); build(); } }),
+  ]);
+}
+
 // ---------- aparência ----------
 function secAppearance() {
   const body = [];
@@ -185,14 +224,17 @@ function secAppearance() {
   }
   body.push(range({ label: 'Desfoque', value: val((e) => e.s.blur || 0), min: 0, max: 40, fmt: (v) => v + 'px', onChange: (v) => set((e) => { e.s.blur = v; }) }));
   body.push(select({ label: 'Mistura', value: val((e) => e.s.blend || 'normal'), options: [['normal', 'Normal'], ['multiply', 'Multiplicar'], ['screen', 'Clarear'], ['overlay', 'Sobrepor'], ['difference', 'Diferença'], ['soft-light', 'Luz suave']], onChange: (v) => set((e) => { e.s.blend = v; }) }));
-  return section('Aparência', body, { open: false });
+  return section('Aparência', body);
 }
 
 // ---------- link ----------
 function secLink() {
-  const body = [textInput({ label: 'Endereço (https://…, mailto:…, #seção)', value: val((e) => e.link?.href || ''), placeholder: 'https://', onChange: (v) => set((e) => { e.link = v.trim() ? { ...(e.link || {}), href: v.trim() } : null; }) }),
+  const body = [textInput({ label: 'Endereço (https://…, mailto:…, #seção)', value: val((e) => e.link?.href || ''), placeholder: 'https://', onChange: (v) => set((e) => { e.link = v.trim() ? { ...(e.link || {}), href: v.trim() } : (e.link?.aba ? { aba: e.link.aba } : null); }) }),
     toggle({ label: 'Abrir em nova aba', value: val((e) => !!e.link?.blank), onChange: (v) => set((e) => { if (e.link) e.link.blank = v; }) })];
-  return section('Link', body, { open: !!val((e) => e.link?.href) });
+  // projeto de site: o elemento pode levar a outra aba (vale mais que o endereço)
+  if (eSite()) body.unshift(select({ label: 'Ir para a aba', value: val((e) => e.link?.aba || ''), options: [['', '— nenhuma (usar o endereço) —'], ...(S.doc.abas || []).map((a) => [a.id, a.nome])],
+    onChange: (v) => set((e) => { if (v) e.link = { ...(e.link || {}), aba: v }; else if (e.link) { delete e.link.aba; if (!e.link.href) e.link = null; } }) }));
+  return section('Link', body);
 }
 
 // ---------- animação ----------
@@ -244,7 +286,8 @@ function pagePanel() {
       ? [row(colorField({ label: 'De', value: bg.g.c1, onChange: (v) => setPage((p) => { p.bg.g.c1 = v; }) }), colorField({ label: 'Até', value: bg.g.c2, onChange: (v) => setPage((p) => { p.bg.g.c2 = v; }) })),
         range({ label: 'Ângulo', value: bg.g.a, min: 0, max: 360, fmt: (v) => v + '°', onChange: (v) => setPage((p) => { p.bg.g.a = v; }) })]
       : colorField({ label: 'Cor de fundo', value: bg.c, onChange: (v) => setPage((p) => { p.bg.c = v; }) }),
-    row(num({ label: 'Altura', value: pageH(S.doc, S.dev), min: 300, max: 12000, step: 10, unit: 'px', onChange: (v) => setPage((p) => { p.h[S.dev] = Math.round(v); }) }),
+    ehUnico(S.doc) ? h('p', { class: 'hint' }, `Formato: ${rotuloDaPagina(S.doc.page)}${ehFixa(S.doc) ? ' (tamanho fixo)' : ''}`) : null,
+    ehFixa(S.doc) ? null : row(num({ label: 'Altura', value: pageH(S.doc, S.dev), min: 300, max: 12000, step: 10, unit: 'px', onChange: (v) => setPage((p) => { p.h[S.dev] = Math.round(v); }) }),
       btn({ label: 'Ajustar', title: 'Ajustar a altura ao conteúdo', ic: 'fit', onClick: () => { fitPageHeight(); build(); } })),
     hint('Dica: fundos animados ficam na aba SVG animado, em “Fundos”.'),
   ]));
@@ -257,17 +300,17 @@ function pagePanel() {
   }
 
   const derived = S.doc.elements.filter((e) => !e.f.m).length;
-  out.push(section('Celular', S.dev === 'm'
+  if (!ehUnico(S.doc)) out.push(section('Celular', S.dev === 'm'
     ? [hint(derived ? `${derived} de ${S.doc.elements.length} elementos ainda seguem o layout do PC (proporcional).` : 'Todos os elementos têm ajuste próprio para celular.'),
       btn({ label: 'Empilhar elementos', ic: 'stack', title: 'Monta uma coluna única a partir do PC', onClick: () => { autoStack(measureAll); build(); } }),
       btn({ label: 'Voltar ao automático', ic: 'reset', onClick: () => { if (confirm('Descartar todos os ajustes do celular?')) { resetMobile(); build(); } } })]
     : [hint('Para ajustar a versão de celular, mude para “Celular” no topo. Quem abrir pelo telefone vê aquela versão.'),
       btn({ label: 'Gerar layout do celular', ic: 'stack', title: 'Monta uma coluna única a partir do PC', onClick: () => { autoStack(measureAll); build(); } })]));
 
-  out.push(section('Animações', [btn({ label: 'Tocar todas as entradas', ic: 'play', onClick: () => playEntrance() })], { open: false }));
+  out.push(section('Animações', [btn({ label: 'Tocar todas as entradas', ic: 'play', onClick: () => playEntrance() })]));
   out.push(section('Atalhos', [h('ul', { class: 'keys' },
     ...[['V', 'Selecionar'], ['T', 'Texto'], ['R', 'Forma'], ['P', 'Lápis'], ['Espaço + arrastar', 'Mover a tela'], ['Ctrl + roda', 'Zoom'], ['Shift', 'Manter proporção / eixo'], ['Alt', 'Sem ímã'], ['Setas', 'Mover (Shift = 10)'], ['Ctrl+D', 'Duplicar'], ['Ctrl+C / V', 'Copiar / colar'], ['Ctrl+Z / Y', 'Desfazer / refazer'], ['[  ]', 'Atrás / frente'], ['Del', 'Excluir'], ['Dois cliques', 'Editar texto / SVG']].map(([k, d]) => h('li', {}, h('kbd', {}, k), d)))
-  ], { open: false }));
+  ]));
   return out;
 }
 
@@ -299,6 +342,8 @@ export function build() {
     if (t0 === 'image') root.append(secImage());
     if (t0 === 'svg' && els.length === 1) root.append(secSvg());
   }
+  if (t0 === 'abas' && types.size === 1) root.append(secAbas());
+  if (eSite()) root.append(secCompartilhar());
   root.append(secAppearance(), secAnim(), secLink());
   root.scrollTop = top;
 }

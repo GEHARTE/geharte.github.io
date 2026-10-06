@@ -4,7 +4,7 @@
 //   modo 'largura' ocupa a largura do contêiner e cresce em altura (faixa de destaque da home)
 import { renderArtboard, observeEntrances, usedFonts } from './render.js';
 import { loadFonts } from './fonts.js';
-import { W, pageH, bgCss } from './model.js';
+import { W, pageH, bgCss, pageW, ehUnico } from './model.js';
 import { BASE } from './util.js';
 import { fetchPublished, pageDir } from './site.js';
 
@@ -23,12 +23,12 @@ export async function mountPublished(host, pageId, { modo = 'largura', onBg } = 
   }
 
   const draw = () => {
-    const dev = matchMedia('(max-width:720px)').matches ? 'm' : 'd';
+    const dev = ehUnico(doc) ? 'd' : matchMedia('(max-width:720px)').matches ? 'm' : 'd';
     const cw = host.clientWidth || document.documentElement.clientWidth, ch = host.clientHeight || innerHeight;
-    const s = modo === 'tela' ? Math.min(cw / W[dev], ch / pageH(doc, dev)) : Math.min(cw / W[dev], dev === 'd' ? 1.5 : 2);
+    const s = modo === 'tela' ? Math.min(cw / pageW(doc, dev), ch / pageH(doc, dev)) : Math.min(cw / pageW(doc, dev), dev === 'd' ? 1.5 : 2);
     const stage = document.createElement('div');
     stage.className = 'stage';
-    stage.style.cssText = `position:relative;margin:0 auto;overflow:hidden;width:${W[dev] * s}px;height:${pageH(doc, dev) * s}px`;
+    stage.style.cssText = `position:relative;margin:0 auto;overflow:hidden;width:${pageW(doc, dev) * s}px;height:${pageH(doc, dev) * s}px`;
     const ab = renderArtboard(doc, { dev, assetUrl, editing: false });
     ab.style.transform = `scale(${s})`;
     Object.assign(ab.style, { position: 'absolute', left: '0', top: '0', overflow: 'hidden', transformOrigin: '0 0' });

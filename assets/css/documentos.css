@@ -59,7 +59,7 @@ code{font:11.5px/1.4 'JetBrains Mono',ui-monospace,monospace;background:var(--bg
 .mais:hover{background:var(--bg);color:var(--tx)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font:600 10.5px/1 var(--f);letter-spacing:.04em;text-transform:uppercase;padding:5px 9px;border-radius:99px;background:var(--neutro-bg);color:var(--neutro)}
-.chip.tipo-pagina{background:#fde7ef;color:#a1204f}.chip.tipo-perfil{background:#e8e6ff;color:#4b3fc4}.chip.tipo-artigo{background:#e1f0fa;color:#0b5d8c}.chip.tipo-drive{background:#dff3ef;color:#0a6b5c}
+.chip.tipo-site{background:#dff3e4;color:#14663a}.chip.tipo-pagina{background:#fde7ef;color:#a1204f}.chip.tipo-perfil{background:#e8e6ff;color:#4b3fc4}.chip.tipo-artigo{background:#e1f0fa;color:#0b5d8c}.chip.tipo-drive{background:#dff3ef;color:#0a6b5c}
 .chip.st-publicada{background:var(--ok-bg);color:var(--ok)}.chip.st-alterada{background:var(--av-bg);color:var(--av)}
 .chip.st-inventario,.chip.st-original{background:var(--neutro-bg);color:var(--neutro)}
 .chip.so-ler{background:#fff;box-shadow:inset 0 0 0 1px var(--line);color:var(--fraco)}

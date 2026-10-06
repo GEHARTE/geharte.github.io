@@ -165,7 +165,7 @@ body.pnl-window .pnl{position:absolute;inset:0;width:auto;height:auto;border:0;b
 #pathbar{flex:none;height:24px;display:flex;align-items:center;gap:8px;padding:0 14px;background:#0e0d13;border-bottom:1px solid rgba(255,255,255,.05);font-size:11.5px;color:#6f6c80;white-space:nowrap;overflow:hidden;user-select:text}
 #pathbar i{font-style:normal;opacity:.5}
 #pathbar .chip{font:600 10px var(--f);letter-spacing:.05em;text-transform:uppercase;padding:1px 7px;border-radius:99px;line-height:15px;flex:none}
-.chip.kind-perfil{background:#2d2a4a;color:#b9b0ff}.chip.kind-artigo{background:#1f3a4a;color:#8fd0f0}.chip.kind-pagina{background:#4a2a3a;color:#f5a9c6}
+.chip.kind-site{background:#16402a;color:#8fe0b0}.chip.kind-perfil{background:#2d2a4a;color:#b9b0ff}.chip.kind-artigo{background:#1f3a4a;color:#8fd0f0}.chip.kind-pagina{background:#4a2a3a;color:#f5a9c6}
 .chip.st-inventario{background:#2e2d36;color:#a09db3}.chip.st-publicada{background:#143a2c;color:#6fe0b0}.chip.st-alterada{background:#4a3a14;color:#f0cf7a}.chip.st-original{background:#2e2d36;color:#a09db3}
 #pb-path{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:-.01em}
 #pb-name{color:#8e8ba1;overflow:hidden;text-overflow:ellipsis}
@@ -420,3 +420,12 @@ body.compact .pv-sub{display:none}
 body.compact #pubview{padding:10px}
 body.compact .pv-diagram svg.pd{max-height:52vh;margin:0 auto}
 .pnl.is-drawer .no-window{display:none}
+
+/* projeto de site: barra de abas do projeto */
+.abas-bar{flex:none;display:flex;align-items:center;gap:4px;padding:5px 12px;background:#12111a;border-bottom:1px solid rgba(255,255,255,.07);overflow-x:auto;scrollbar-width:thin}
+.abas-bar[hidden]{display:none}
+.abas-bar .ab{flex:none;font:600 12.5px var(--f);color:#a8a5bb;background:transparent;border:1px solid transparent;border-radius:8px;padding:5px 11px;cursor:pointer;white-space:nowrap}
+.abas-bar .ab:hover{background:rgba(255,255,255,.06);color:#fff}
+.abas-bar .ab.on{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.18)}
+.abas-bar .ab-rot{flex:none;font:600 10px var(--f);letter-spacing:.06em;text-transform:uppercase;color:#6f6c80;margin-right:4px}
+.abas-bar .ab-mais{margin-left:auto}

@@ -1,0 +1,12 @@
+{
+ "v": 1,
+ "modelos": [
+  {
+   "id": "muvvi-site",
+   "nome": "MUVVI — site do museu (provisório)",
+   "descricao": "Projeto de site do Museu Virtual do Vale do Ivaí: identidade do protótipo (verde, creme, Libre Caslon Text e Andika) e as abas do Roteiro Curatorial Digital — entrada, cinco salas virtuais (eixos) e participação. Textos tirados do roteiro; imagens são quadros para trocar. Será substituído pelo modelo do POC do setor de design.",
+   "categoria": "MUVVI",
+   "tipo": "site"
+  }
+ ]
+}

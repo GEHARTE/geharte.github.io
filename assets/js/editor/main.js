@@ -1,9 +1,10 @@
 import '../core/migracao.js';
 import { h, $, $$ } from '../core/dom.js';
-import { session, logout, loadUsers, loadConfig } from '../core/auth.js';
+import { loadConfig } from '../core/auth.js';
+import { carregarHost, identidadeValida } from '../core/host.js';
 import { Store } from '../core/store.js';
 import { loadAllFonts } from '../core/fonts.js';
-import { newDoc, normalizeDoc, DEV_LABEL, KINDS, PROFILE_ID, STATE_LABEL, docState, publishDir, viewerQuery, isSiteId, sitePageId, publisherName } from '../core/model.js';
+import { newDoc, normalizeDoc, DEV_LABEL, KINDS, PROFILE_ID, STATE_LABEL, docState, publishDir, viewerQuery, isSiteId, sitePageId, publisherName, ehUnico, NAO_PUBLICAVEIS } from '../core/model.js';
 import { docPath, prepareSiteDoc } from '../core/docs.js';
 import { canEditSite, registryEntry } from '../core/site.js';
 import { BASE } from '../core/util.js';
@@ -16,9 +17,11 @@ import { initDock } from './dock.js';
 import { instalar as vigiarAreaVisivel } from '../core/janelas.js';
 import { trava, retomar, aplicarNoAr } from './publicacao.js';
 import { insertImageFile, insertSvg } from './tools.js';
-import { exportProject, buildProject, importProject, openPublish, openPreview } from './publish.js';
+import { exportProject, exportHtml, buildProject, importProject, openPublish, openPreview } from './publish.js';
 import { goToDocuments } from './nav.js';
 import { saveCopyToDrive } from './drive.js';
+import { initAbas } from './abas.js';
+import { rotuloDaPagina } from '../core/formatos.js';
 import { toast, modal, btn } from './ui.js';
 import { icon } from './icons.js';
 
@@ -69,8 +72,11 @@ function askConflict({ remote }) {
 let dock = null;
 
 async function main() {
-  const sess = session();
-  if (!sess) { location.replace('../login.html?next=documentos/'); return; }
+  const host = await carregarHost({ carregarConfig: loadConfig });
+  S.host = host;
+  const sess = await host.identidade();
+  if (!sess) { host.entrar('documentos/'); return; }
+  if (!identidadeValida(sess)) { alert('O host devolveu uma identidade inválida.'); return; }
   S.user = sess; S.slug = sess.slug;
   $('#who').textContent = sess.nome;
   loadAllFonts();
@@ -80,21 +86,20 @@ async function main() {
 
   // o editor abre sempre uma página escolhida no painel de documentos: ?doc=<id> (perfil, artigo ou site-<pagina>)
   const want = new URLSearchParams(location.search).get('doc');
-  if (!want) { location.replace('../documentos/'); return; }
-  const users = await loadUsers().catch(() => []);
-  S.canSite = canEditSite(users.find((u) => u.slug === sess.slug));
+  if (!want) { location.replace(host.urls.documentos); return; }
+  S.canSite = !!sess.podeSite && host.capacidades.paginasDoSite;
 
   let doc = null, updatedAt = 0, fresh = false;
   if (isSiteId(want)) {
     // página do SITE (landing, home…): só quem organiza o site; vem da versão publicada, do rascunho ou do modelo
     const entry = S.canSite ? await registryEntry(sitePageId(want)) : null;
-    if (!entry) { alert(S.canSite ? 'Essa página do site não existe.' : 'Só quem organiza o site pode editar as páginas do site.'); location.replace('../documentos/'); return; }
+    if (!entry) { alert(S.canSite ? 'Essa página do site não existe.' : 'Só quem organiza o site pode editar as páginas do site.'); location.replace(host.urls.documentos); return; }
     S.siteEntry = entry;
     let r = await prepareSiteDoc(S.slug, entry.id);
     if (r.conflict) {
       // publicação em andamento: o "conflito" é a nossa própria publicação chegando; não perguntar (o editor está travado de qualquer jeito)
       const keep = trava.estado(S.slug, want).estado === 'travado' ? true : await askConflict(r.conflict);
-      if (keep === null) { location.replace('../documentos/'); return; }
+      if (keep === null) { location.replace(host.urls.documentos); return; }
       r = await prepareSiteDoc(S.slug, entry.id, { keepLocal: keep });
     }
     ({ doc, updatedAt } = r);
@@ -111,7 +116,7 @@ async function main() {
       } catch { /* sem publicado */ }
       if (!doc) { doc = newDoc(S.slug, `Página de ${sess.nome}`); fresh = true; }
     }
-    if (!doc) { alert('Não achei essa página nos seus documentos.'); location.replace('../documentos/'); return; }
+    if (!doc) { alert('Não achei essa página nos seus documentos.'); location.replace(host.urls.documentos); return; }
   }
   normalizeDoc(doc, S.slug);
   await loadAssetsFor(doc);
@@ -122,6 +127,7 @@ async function main() {
   const lib = initLibrary($('#lib'));
   initLayersPanel($('#layerspane'));
   loadDoc(doc, updatedAt);
+  initAbas($('#abas-bar'));   // só aparece em projetos de site
   // painéis reorganizáveis (docks, soltos, outra janela; no celular, gavetas): ver dock.js
   dock = initDock({
     app: $('#app'), slug: S.slug, rotateEl: $('#rotate'),
@@ -160,7 +166,7 @@ function wireTop() {
     st.textContent = STATE_LABEL[state]; st.className = `chip st-${state}`;
     $('#pb-path').textContent = docPath(S.slug, d);
     $('#pb-name').textContent = d.title?.trim() || 'sem título';
-    $('#pb-dev').textContent = 'editando: ' + DEV_LABEL[S.dev === 'm' ? 'm' : 'd'];
+    $('#pb-dev').textContent = ehUnico(d) ? rotuloDaPagina(d.page) : 'editando: ' + DEV_LABEL[S.dev === 'm' ? 'm' : 'd'];
   };
   paintPath();
   on('struct', paintPath); on('device', paintPath); on('saved', paintPath); on('dirty', paintPath); on('published', paintPath);
@@ -173,7 +179,7 @@ function wireTop() {
   on('struct', () => { if (document.activeElement !== title) title.value = S.doc.title; });
 
   $$('#devseg button').forEach((b) => b.addEventListener('click', () => setDevice(b.dataset.dev)));
-  const syncDev = () => $$('#devseg button').forEach((b) => b.classList.toggle('on', b.dataset.dev === S.dev));
+  const syncDev = () => { $('#devseg').hidden = ehUnico(S.doc); $$('#devseg button').forEach((b) => b.classList.toggle('on', b.dataset.dev === S.dev)); };
   on('device', syncDev); syncDev();
 
   $('#zin').onclick = () => setZoom(S.zoom * 1.2);
@@ -192,10 +198,17 @@ function wireTop() {
   $('#btn-preview').onclick = () => openPreview();
   $('#btn-publish').onclick = () => openPublish();
   $('#btn-savefile').onclick = async () => { await exportProject(); toast('Arquivo salvo na sua pasta de Downloads.', 'ok'); };
-  // modo teste (config.json: "publicar": false): nada vai para o GitHub, tudo fica neste computador
-  fetch(BASE + 'config.json', { cache: 'no-cache' }).then((r) => r.json()).then((c) => {
-    if (c.publicar === false) { $('#btn-publish').hidden = true; $('#btn-savefile').hidden = false; }
-  }).catch(() => {});
+  // o que a saída oferece depende do host: Publicar (Gehrarte), botões próprios do host (ex.: MUVVI) ou só salvar arquivo
+  // (modo teste e host local: nada vai para a internet, tudo fica neste computador)
+  const H = S.host;
+  // projeto de site e arquivo em branco não vão pelo Publicador do Gehrarte: só arquivo ou ações do host
+  const syncSaida = () => { const pub = H.capacidades.publicar && !NAO_PUBLICAVEIS.includes(S.doc.kind); $('#btn-publish').hidden = !pub; $('#btn-savefile').hidden = pub || !!H.acoes.length; };
+  syncSaida(); on('struct', syncSaida); on('struct', () => { $('#devseg').hidden = ehUnico(S.doc); });
+  for (const a of [...H.acoes].reverse()) {
+    const b = h('button', { class: `btn${a.principal ? ' primary' : ''}`, id: `btn-acao-${a.id}`, title: a.rotulo,
+      onclick: async () => { try { await saveNow(); await a.executar({ doc: S.doc, slug: S.slug, salvar: saveNow }); } catch (e) { toast(e.message || String(e), 'err'); } } }, a.icone ? [h('span', { html: icon(a.icone) }), a.rotulo] : a.rotulo);
+    $('#btn-publish').after(b);
+  }
 
   const st = $('#savestate');
   on('dirty', () => { st.textContent = 'Salvando…'; st.className = 'busy'; });
@@ -225,15 +238,15 @@ function wireTop() {
       window.open(S.doc.kind === 'pagina' ? BASE + S.siteEntry.caminho.replace(/index\.html$/, '') : `${BASE}perfil.html?${viewerQuery(S.slug, S.doc)}`, '_blank');
     };
     const m = h('div', { id: 'menu', class: 'popover menu' },
-      item('eye', 'Ver página publicada', verPublicada),
+      S.host.capacidades.publicar ? item('eye', 'Ver página publicada', verPublicada) : null,
       item('stack', 'Documentos', () => goToDocuments()),
       item('download', 'Exportar projeto (.json)', exportProject),
+      item('code', S.doc.kind === 'site' ? 'Exportar site em HTML (.html)' : 'Exportar página em HTML (.html)', async () => { try { toast('Montando o arquivo HTML…'); const r = await exportHtml(); toast(`HTML salvo na pasta de Downloads (${r.paginas} ${r.paginas > 1 ? 'páginas' : 'página'}, ${(r.bytes / 1024).toFixed(0)} KB).`, 'ok'); } catch (e) { toast(e.message || String(e), 'err'); } }),
       item('upload', 'Importar projeto…', () => imp.click()), imp,
-      item('cloud', 'Salvar cópia no Drive', async () => {
+      S.host.capacidades.drive ? item('cloud', 'Salvar cópia no Drive', async () => {
         try { toast('Salvando no seu Drive…'); const nome = await saveCopyToDrive(await buildProject()); toast(`Cópia salva no Drive: ${nome}`, 'ok'); } catch (e) { toast(e.message, 'err'); }
-      }),
-      h('hr'),
-      item('x', 'Sair', () => { logout(); location.href = '../'; }));
+      }) : null,
+      S.host.sair ? [h('hr'), item('x', 'Sair', () => S.host.sair())] : null);
     document.body.append(m);
     const r = e.currentTarget.getBoundingClientRect();
     Object.assign(m.style, { top: r.bottom + 6 + 'px', right: innerWidth - r.right + 'px' });

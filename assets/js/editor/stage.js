@@ -1,7 +1,7 @@
 // Palco do editor: renderização, zoom, seleção, arrastar/redimensionar/rotacionar, ferramentas de desenho.
 import { h } from '../core/dom.js';
 import { renderArtboard, renderElement } from '../core/render.js';
-import { W, frameOf, setFrame, pageH, aabb, unionBox, bgCss } from '../core/model.js';
+import { W, frameOf, setFrame, pageH, pageW, aabb, unionBox, bgCss } from '../core/model.js';
 import { clamp, round } from '../core/util.js';
 import { S, on, emit, byId, selEls, select, mutateGeom, mutate, commit, touch, assetUrl, setTool, removeEls, duplicate, reorder } from './state.js';
 import { createShape, createText, createPath, insertImageFile, ensureHeight, defaultShapeSize, inkColor } from './tools.js';
@@ -10,7 +10,7 @@ import { icon } from './icons.js';
 const PAD = 48;
 let vp, stage, holder, selLayer, fxLayer, ab;
 
-const ctx = () => ({ dev: S.dev, assetUrl, editing: true });
+const ctx = () => ({ dev: S.dev, assetUrl, editing: true, doc: S.doc });
 export const nodeOf = (id) => ab?.querySelector(`:scope > [data-id="${id}"]`);
 const guard = (el) => el && !el.hide;
 
@@ -37,7 +37,7 @@ export function measureAll() { for (const el of S.doc.elements) measure(el, node
 
 // ---------- renderização ----------
 function layout() {
-  const z = S.zoom, w = W[S.dev], hh = pageH(S.doc, S.dev);
+  const z = S.zoom, w = pageW(S.doc, S.dev), hh = pageH(S.doc, S.dev);
   stage.style.width = w * z + PAD * 2 + 'px';
   stage.style.height = hh * z + PAD * 2 + 'px';
   Object.assign(holder.style, { left: PAD + 'px', top: PAD + 'px', width: w * z + 'px', height: hh * z + 'px' });
@@ -69,7 +69,7 @@ function rerender(id) {
 function applyGeom(id) {
   const el = byId(id), n = nodeOf(id);
   if (!el || !n) return;
-  if (el.t === 'shape' || el.t === 'text') return rerender(id);
+  if (el.t === 'shape' || el.t === 'text' || el.t === 'abas') return rerender(id);
   const fr = frameOf(el, S.dev);
   Object.assign(n.style, { left: fr.x + 'px', top: fr.y + 'px', width: fr.w + 'px', height: fr.h + 'px', transform: fr.r ? `rotate(${fr.r}deg)` : '' });
 }
@@ -106,7 +106,7 @@ export function setZoom(z, cx, cy) {
   emit('zoom');
 }
 export function fit() {
-  const w = W[S.dev], hh = pageH(S.doc, S.dev);
+  const w = pageW(S.doc, S.dev), hh = pageH(S.doc, S.dev);
   const zw = (vp.clientWidth - PAD * 2) / w, zh = (vp.clientHeight - 40) / Math.min(hh, S.dev === 'm' ? 844 : 760);
   S.zoom = clamp(Math.min(zw, zh, 1.5), 0.1, 4);
   layout();
@@ -174,7 +174,7 @@ export function refreshOverlay() {
 function clearFx() { fxLayer.innerHTML = ''; }
 function guides(list) {
   clearFx();
-  const hh = pageH(S.doc, S.dev), w = W[S.dev];
+  const hh = pageH(S.doc, S.dev), w = pageW(S.doc, S.dev);
   for (const g of list) {
     fxLayer.append(g.x != null
       ? h('i', { class: 'guide v', style: { left: sx(g.x) + 'px', top: PAD + 'px', height: hh * S.zoom + 'px' } })
@@ -222,7 +222,7 @@ function startTouchPan(e) {
 }
 
 function snapBox(box, others) {
-  const T = 6 / S.zoom, w = W[S.dev], hh = pageH(S.doc, S.dev);
+  const T = 6 / S.zoom, w = pageW(S.doc, S.dev), hh = pageH(S.doc, S.dev);
   const xs = [0, w / 2, w], ys = [0, hh / 2, hh];
   for (const o of others) { xs.push(o.x, o.x + o.w / 2, o.x + o.w); ys.push(o.y, o.y + o.h / 2, o.y + o.h); }
   const best = (mine, cands) => {
@@ -457,7 +457,7 @@ export function initStage(refs) {
 
   S.viewCenter = () => {
     const r = vp.getBoundingClientRect(), p = toDocRaw(r.left + r.width / 2, r.top + r.height / 2);
-    return { x: clamp(p.x, 0, W[S.dev]), y: clamp(p.y, 0, pageH(S.doc, S.dev)) };
+    return { x: clamp(p.x, 0, pageW(S.doc, S.dev)), y: clamp(p.y, 0, pageH(S.doc, S.dev)) };
   };
 
   on('struct', renderAll);

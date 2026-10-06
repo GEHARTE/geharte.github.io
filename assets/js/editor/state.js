@@ -1,7 +1,7 @@
 // Estado do editor: documento, seleção, histórico (desfazer/refazer) e autosave.
 import { clone, debounce, uid } from '../core/util.js';
 import { Store } from '../core/store.js';
-import { cloneElement } from '../core/model.js';
+import { cloneElement, ehUnico } from '../core/model.js';
 
 const handlers = {};
 export const on = (ev, fn) => { (handlers[ev] ||= []).push(fn); };
@@ -89,7 +89,7 @@ export function select(ids, mode = 'set') {
   else if (mode === 'toggle') for (const id of valid) S.sel = S.sel.includes(id) ? S.sel.filter((x) => x !== id) : [...S.sel, id];
   emit('select');
 }
-export function setDevice(d) { if (S.dev === d) return; S.dev = d; emit('device'); }
+export function setDevice(d) { if (S.dev === d || (d === 'm' && ehUnico(S.doc))) return; S.dev = d; emit('device'); }   // formato único: só existe a versão 'd'
 export function setTool(t, kind) { S.tool = t; if (kind) S.shapeKind = kind; emit('tool'); }
 
 // ---------- mutações ----------

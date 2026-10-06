@@ -5,11 +5,15 @@ import { makeElement, K, W } from '../core/model.js';
 import { sanitizeSvg } from '../core/sanitize.js';
 import { SHAPE_LIST, shapeSvg } from '../core/render.js';
 import { S, on, emit, commit, select } from './state.js';
-import { createShape, addTextPreset, insertSvg, insertSvgBackground, insertImageFile, insertAsset } from './tools.js';
+import { createShape, createAbas, addTextPreset, insertSvg, insertSvgBackground, insertImageFile, insertAsset } from './tools.js';
 import { renderLayers } from './layers.js';
 import { driveTab } from './drive.js';
 import { icon } from './icons.js';
 import { btn, toast, modal } from './ui.js';
+import { montarGaleria } from '../core/galeria.js';
+import { abrirGerador } from '../core/gerador-ui.js';
+import { criarMeusModelos, carregarCatalogo, aplicarModeloAoDoc, ehModeloDeSite, FORMATO, MODELO_V, slugModelo } from '../core/modelos.js';
+import { getJson } from '../core/site.js';
 
 // ---------- presets de texto ----------
 const TEXTS = [
@@ -103,17 +107,22 @@ const TPL = [
   },
 ];
 
-function applyTemplate(t) {
+// Os modelos de código (acima) entram na galeria no mesmo formato dos modelos publicados e dos "meus modelos".
+const modelosInternos = () => TPL.map((t) => ({ format: FORMATO, v: MODELO_V, id: 'interno-' + slugModelo(t.name), nome: t.name, descricao: t.desc, categoria: 'Básicos', origem: 'interno', doc: t.build() }));
+
+function applyModelo(modelo) {
+  // modelo de projeto de site: só dentro de um projeto de site (converter outro tipo de documento no lugar quebraria o desfazer);
+  // para começar um projeto novo: Documentos › Galeria de modelos
+  if (ehModeloDeSite(modelo) && S.doc.kind !== 'site') { toast('Este é um modelo de projeto de site. Para usá-lo, crie um projeto novo em Documentos › Galeria de modelos.', 'err'); return; }
   const go = () => {
-    const b = t.build();
-    S.doc.elements = b.elements;
-    S.doc.page = b.page;
+    if (!aplicarModeloAoDoc(S.doc, modelo)) { toast('Não dá para aplicar este modelo a este tipo de página.', 'err'); return; }
     S.sel = [];
     emit('struct'); emit('select'); emit('page');
     commit();
     emit('fit');
   };
-  if (S.doc.elements.length) modal({ title: 'Trocar de modelo?', body: h('p', {}, 'O conteúdo atual da página será substituído. (Dá para desfazer com Ctrl+Z.)'), actions: [btn({ label: 'Substituir', cls: 'primary', onClick: (e) => { go(); e.target.closest('.modal-back').remove(); } })] });
+  const vazio = !S.doc.elements.some((e) => !e.comum);
+  if (!vazio) modal({ title: 'Trocar de modelo?', body: h('p', {}, ehModeloDeSite(modelo) ? 'O projeto inteiro (todas as abas) será substituído. (Dá para desfazer com Ctrl+Z.)' : 'O conteúdo atual da página será substituído. (Dá para desfazer com Ctrl+Z.)'), actions: [btn({ label: 'Substituir', cls: 'primary', onClick: (e) => { go(); e.target.closest('.modal-back').remove(); } })] });
   else go();
 }
 
@@ -128,7 +137,9 @@ export function initLibrary(root) {
   let cleanup = null;   // aba que precisa limpar algo ao sair (Drive)
 
   const tabEls = {};
-  for (const [id, ic, title] of TABS) {
+  const TABS_ATIVAS = TABS.filter(([id]) => id !== 'drive' || S.host?.capacidades.drive);   // o Drive só existe nos hosts que o oferecem
+  if (!TABS_ATIVAS.some(([id]) => id === cur)) cur = 'els';
+  for (const [id, ic, title] of TABS_ATIVAS) {
     tabEls[id] = h('button', { title, 'aria-label': title, html: icon(ic, 18), onclick: () => show(id) });
     tabs.append(tabEls[id]);
   }
@@ -152,6 +163,10 @@ export function initLibrary(root) {
       return h('button', { class: 'cell', title: label, onclick: () => { S.shapeKind = k; createShape(k); } }, h('div', { class: 'pv', html: shapeSvg(prev, 52, 52) }));
     })));
     body.append(h('p', { class: 'hint pad' }, 'Clique para inserir. Para desenhar no tamanho que quiser, use a ferramenta Forma (R) e arraste no canvas.'));
+    if (S.doc?.kind === 'site') {
+      body.append(h('h4', {}, 'Projeto de site'));
+      body.append(h('div', { class: 'pad' }, btn({ label: 'Barra de abas', ic: 'layers', onClick: createAbas }), h('p', { class: 'hint' }, 'Menu funcional: lista as abas do projeto e leva de uma a outra. Para links soltos (cartões, botões), use “Ir para a aba” em Link.')));
+    }
   }
 
   function svg() {
@@ -179,8 +194,15 @@ export function initLibrary(root) {
   function drive() { cleanup = driveTab(body); }
 
   function tpl() {
-    body.append(h('p', { class: 'hint pad' }, 'Pontos de partida. Tudo é editável depois.'));
-    body.append(h('div', { class: 'tpls' }, TPL.map((t) => h('button', { class: 'tpl', onclick: () => applyTemplate(t) }, h('b', {}, t.name), h('span', {}, t.desc)))));
+    const meus = criarMeusModelos();
+    const catalogo = async () => [...modelosInternos(), ...(await carregarCatalogo(getJson).catch(() => [])), ...(await S.host?.modelos?.catalogo().catch(() => []) || [])];
+    const raiz = h('div', { class: 'pad' });
+    body.append(raiz);
+    montarGaleria(raiz, {
+      catalogo, meus, compacta: true, rotuloUsar: 'Usar',
+      onUsar: applyModelo,
+      onGerar: (recarregar) => abrirGerador({ docAtual: S.doc, meus, aoSalvar: recarregar, onUsar: applyModelo }),
+    });
   }
 
   function layers() { renderLayers(body); }

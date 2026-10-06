@@ -1,9 +1,13 @@
 // Salvar fora do navegador: exportar/importar projeto, publicar (Publicador + trava do editor), preview PC/celular.
 import { h } from '../core/dom.js';
 import { BASE, blobToDataURL, dataURLToBlob, downloadBlob } from '../core/util.js';
+import { todosOsElementos, todasAsPaginas, guardarAbaAtual } from '../core/sites.js';
+import { renderArtboard, usedFonts } from '../core/render.js';
+import { urlDasFontes } from '../core/fonts.js';
+import { montarHtml, nomeDoArquivoHtml } from '../core/exportar-html.js';
 import { Store } from '../core/store.js';
 import { S, saveNow, emit } from './state.js';
-import { normalizeDoc, PROFILE_ID, publishDir, viewerQuery, publisherName, KINDS } from '../core/model.js';
+import { normalizeDoc, PROFILE_ID, publishDir, viewerQuery, publisherName, KINDS, NAO_PUBLICAVEIS, pageW, pageH, bgCss, ehUnico } from '../core/model.js';
 import { goToDoc } from './nav.js';
 import { publishedUrl, siteHost } from '../core/site.js';
 import { createPublicador } from '../core/publicador.js';
@@ -12,7 +16,8 @@ import { trava, travar, acompanhar, cancelar, aplicarNoAr, diagramaSvg, bloquead
 import { btn, modal, toast } from './ui.js';
 import { icon } from './icons.js';
 
-const usedAssetIds = () => [...new Set(S.doc.elements.filter((e) => e.t === 'image' && e.asset).map((e) => e.asset))];
+// imagens usadas pelo documento (num projeto de site, por todas as abas e pelos compartilhados)
+const usedAssetIds = () => [...new Set((S.doc.kind === 'site' ? todosOsElementos(S.doc) : S.doc.elements).filter((e) => e.t === 'image' && e.asset).map((e) => e.asset))];
 
 // ---------- exportar / importar (backup) ----------
 export async function buildProject() {
@@ -21,12 +26,38 @@ export async function buildProject() {
     const a = S.assets.get(id);
     if (a) assets[id] = { ext: a.ext, mime: a.mime, w: a.w, h: a.h, data: await blobToDataURL(a.blob) };
   }
-  return { format: 'gehrarte-projeto', v: 2, slug: S.slug, id: S.doc.id, kind: S.doc.kind, doc: S.doc, assets };
+  let doc = S.doc;
+  if (doc.kind === 'site') { doc = JSON.parse(JSON.stringify(doc)); guardarAbaAtual(doc); }   // abas e compartilhados em dia
+  return { format: 'gehrarte-projeto', v: 2, slug: S.slug, id: S.doc.id, kind: S.doc.kind, doc, assets };
 }
 
 export async function exportProject() {
   const out = await buildProject();
   downloadBlob(`gehrarte-${S.slug}-${S.doc.id}-${new Date().toISOString().slice(0, 10)}.json`, new Blob([JSON.stringify(out)], { type: 'application/json' }));
+}
+
+// Exporta a página (ou o projeto de site inteiro) como UM arquivo .html autônomo: abre com duplo clique, sem o editor nem servidor.
+export async function exportHtml() {
+  await saveNow();
+  const doc = S.doc;
+  const paginas0 = doc.kind === 'site' ? todasAsPaginas(doc) : [{ id: 'pagina', titulo: doc.title || 'Página', doc }];
+  const urls = new Map();                                            // imagens embutidas (data:), de todas as abas
+  for (const id of usedAssetIds()) { const a = S.assets.get(id); if (a) urls.set(id, await blobToDataURL(a.blob)); }
+  const assetUrl = (id) => urls.get(id) || null;
+  const nomes = new Set();
+  const paginas = paginas0.map(({ id, titulo, doc: d }) => {
+    const dispositivos = {};
+    for (const dev of ehUnico(d) ? ['d'] : ['d', 'm']) {
+      const ab = renderArtboard(d, { dev, assetUrl, editing: false });
+      dispositivos[dev] = { w: pageW(d, dev), h: pageH(d, dev), html: ab.outerHTML };
+    }
+    usedFonts(d).forEach((n) => nomes.add(n));
+    return { id, titulo, bg: bgCss(d.page.bg), dispositivos };
+  });
+  const css = (await Promise.all(['anim.css', 'viewer.css'].map((f) => fetch(`${BASE}assets/css/${f}`).then((r) => (r.ok ? r.text() : '')).catch(() => '')))).join('\n');
+  const html = montarHtml({ titulo: doc.title || 'Página', nome: doc.kind === 'site' ? doc.title || '' : '', paginas, css, fontes: urlDasFontes([...nomes]) });
+  downloadBlob(nomeDoArquivoHtml(S.slug, doc), new Blob([html], { type: 'text/html;charset=utf-8' }));
+  return { paginas: paginas.length, bytes: html.length };
 }
 
 export async function importProject(file) {
@@ -43,7 +74,7 @@ export async function importProject(file) {
   doc.owner = S.slug;
   if (data.kind && KINDS[data.kind]) doc.kind = data.kind;
   if (doc.kind === 'pagina' && !S.canSite) { toast('Só quem organiza o site pode importar páginas do site.', 'err'); return; }
-  if (data.id && doc.kind === 'artigo') doc.id = String(data.id).replace(/[^a-z0-9-]/g, '') || doc.id;
+  if (data.id && (doc.kind === 'artigo' || doc.kind === 'site')) doc.id = String(data.id).replace(/[^a-z0-9-]/g, '') || doc.id;
   if (doc.kind === 'perfil') doc.id = PROFILE_ID;
   normalizeDoc(doc, S.slug);
   await saveNow();                                   // não perder o que está aberto agora
@@ -67,6 +98,7 @@ const row = (k, ...v) => h('div', { class: 'pub-row' }, h('span', {}, k), h('div
 
 export async function openPublish() {
   if (bloqueado()) return;
+  if (NAO_PUBLICAVEIS.includes(S.doc.kind)) { toast('Este tipo de arquivo não é publicado pelo Gehrarte. Use “Exportar projeto” ou as ações do host (ex.: MUVVI). Para publicar um texto no blog, crie um Artigo.', 'err'); return; }
   await saveNow();
   const cfg = await siteConfig();
   const pagina = S.doc.kind === 'pagina';

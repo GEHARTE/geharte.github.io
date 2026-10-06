@@ -1,5 +1,5 @@
 // Criação de elementos e ferramentas "inteligentes" (alinhar, distribuir, empilhar no celular...).
-import { makeElement, K, W, pageH, frameOf, setFrame, aabb, unionBox, TEXT_DEFAULTS } from '../core/model.js';
+import { makeElement, K, W, pageH, pageW as pageWDoc, ehUnico, ehFixa, frameOf, setFrame, aabb, unionBox, TEXT_DEFAULTS } from '../core/model.js';
 import { sanitizeSvg, svgNaturalSize } from '../core/sanitize.js';
 import { sha256Hex, clamp, round } from '../core/util.js';
 import { Store } from '../core/store.js';
@@ -21,7 +21,7 @@ export function place(el, fr, fs) {
   return el;
 }
 
-const pageW = () => W[S.dev];
+const pageW = () => pageWDoc(S.doc, S.dev);
 // Caixa centrada na área visível do canvas; se já há algo ali, desloca em cascata.
 function centered(w, h) {
   const c = S.viewCenter?.() || { x: pageW() / 2, y: 300 };
@@ -54,6 +54,16 @@ export function createShape(kind, box) {
   const el = makeElement('shape', { shape: kind, s: lineLike ? { fill: null, stroke: inkColor(), sw: 6 } : {} });
   if (!box) { const [w, h] = defaultShapeSize(kind); box = centered(w, h); }
   place(el, box);
+  addEls([el]);
+  return el;
+}
+
+// Barra de abas (só em projetos de site): lista as abas do projeto e navega entre elas na página publicada.
+export function createAbas() {
+  const el = makeElement('abas', { ls: { fontFamily: 'Inter', fontSize: 16, fontWeight: 600, color: inkColor() } });
+  const w = Math.min(1000, pageW() - 80);
+  place(el, { ...centered(w, 44), w, h: 44 });
+  el.f.m = { x: 24, y: el.f.d.y * K, w: 342, h: 56, r: 0, fs: 14 };
   addEls([el]);
   return el;
 }
@@ -177,7 +187,7 @@ export function insertSvg(code, name = 'SVG', at) {
 export function insertSvgBackground(code, name) {
   const el = makeElement('svg', { code, name });
   const dev = S.dev, H = pageH(S.doc, dev);
-  place(el, { x: 0, y: 0, w: W[dev], h: H });
+  place(el, { x: 0, y: 0, w: pageWDoc(S.doc, dev), h: H });
   el.lock = false;
   addEls([el]);
   S.doc.elements.splice(S.doc.elements.indexOf(el), 1);
@@ -227,7 +237,7 @@ export function distribute(axis) {
 }
 
 // ---------- celular ----------
-const isBackdrop = (el, H) => el.f.d.w >= W.d * 0.9 && el.f.d.h >= H * 0.6;
+const isBackdrop = (el, H) => el.f.d.w >= pageWDoc(S.doc, 'd') * 0.9 && el.f.d.h >= H * 0.6;
 
 // Empilha os elementos do PC numa coluna única, na ordem de leitura. O resultado é só um ponto de partida.
 export function autoStack(measureAll) {
@@ -285,5 +295,5 @@ export function fitPageHeight() {
 export function ensureHeight() {
   const bottoms = S.doc.elements.filter((e) => !e.hide).map((e) => { const b = aabb(frameOf(e, S.dev)); return b.y + b.h; });
   const need = Math.ceil(Math.max(0, ...bottoms) + 40);
-  if (need > pageH(S.doc, S.dev)) setPage((p) => { p.h[S.dev] = need; });
+  if (!ehFixa(S.doc) && need > pageH(S.doc, S.dev)) setPage((p) => { p.h[S.dev] = need; });
 }

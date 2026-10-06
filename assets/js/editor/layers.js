@@ -3,7 +3,7 @@ import { h } from '../core/dom.js';
 import { S, on, select, mutate, commit, moveLayer, selEls } from './state.js';
 import { icon } from './icons.js';
 
-const TYPE_ICON = { text: 'text', shape: 'square', path: 'pencil', image: 'image', svg: 'burst' };
+const TYPE_ICON = { text: 'text', shape: 'square', path: 'pencil', image: 'image', svg: 'burst', abas: 'layers' };
 const label = (e) => e.name || (e.t === 'text' ? e.text.split('\n')[0].slice(0, 28) : e.t === 'shape' ? (e.label || 'Forma') : { path: 'Desenho', image: 'Imagem', svg: 'SVG' }[e.t]);
 
 export function renderLayers(root) {

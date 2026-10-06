@@ -7,7 +7,8 @@
 //   .el-lp  animação contínua (loop)
 //   .el-ct  conteúdo (opacidade, sombra, desfoque, mistura)
 import { h } from './dom.js';
-import { W, frameOf, pageH, bgCss } from './model.js';
+import { W, frameOf, pageH, pageW, bgCss, ABAS_PADRAO } from './model.js';
+import { abasDaBarra, hrefDaAba } from './sites.js';
 import { sanitizeSvg } from './sanitize.js';
 import { safeHref } from './util.js';
 import { fontStack } from './fonts.js';
@@ -128,6 +129,26 @@ function content(el, fr, ctx) {
       break;
     }
     case 'path': ct.innerHTML = pathSvg(el, fr); break;
+    case 'abas': {
+      // Barra de abas do projeto de site: no editor só mostra; na página publicada cada item é um link (#/<aba>)
+      const cfg = { ...ABAS_PADRAO, ...(el.abas || {}) }, l = el.ls, esc = fr.fs / (l.fontSize || 16);
+      ct.classList.add('abas');
+      Object.assign(ct.style, {
+        display: 'flex', flexWrap: 'wrap', alignItems: 'center', alignContent: 'center', width: '100%', height: '100%', boxSizing: 'border-box',
+        gap: `${Math.max(2, cfg.gap * esc)}px`, justifyContent: { left: 'flex-start', center: 'center', right: 'flex-end' }[cfg.alinhar] || 'flex-start',
+        fontFamily: fontStack(l.fontFamily), fontSize: fr.fs + 'px', fontWeight: l.fontWeight, color: l.color, lineHeight: 1.25,
+      });
+      const itens = ctx.doc?.abas ? abasDaBarra(ctx.doc, cfg) : [{ id: 'a', rotulo: 'Aba 1', ativa: true }, { id: 'b', rotulo: 'Aba 2', ativa: false }];
+      for (const a of itens) {
+        const it = h(ctx.editing ? 'span' : 'a', { class: 'abas-item' + (a.ativa ? ' on' : ''), href: ctx.editing ? null : hrefDaAba(a.id), 'aria-current': a.ativa ? 'page' : null }, a.rotulo);
+        Object.assign(it.style, { color: 'inherit', textDecoration: 'none', whiteSpace: 'nowrap', cursor: ctx.editing ? 'default' : 'pointer' });
+        if (cfg.estilo === 'pilula') Object.assign(it.style, { padding: '.45em 1em', borderRadius: '9999px', background: a.ativa ? cfg.corFundoAtivo : 'transparent', color: a.ativa ? cfg.corTextoAtivo : 'inherit' });
+        else if (cfg.estilo === 'texto') Object.assign(it.style, { opacity: a.ativa ? '1' : '0.62', fontWeight: a.ativa ? '700' : l.fontWeight, color: a.ativa ? cfg.corAtiva : 'inherit' });
+        else Object.assign(it.style, { padding: '.35em 0', borderBottom: `${Math.max(2, 3 * esc)}px solid ${a.ativa ? cfg.corAtiva : 'transparent'}` });
+        ct.append(it);
+      }
+      break;
+    }
     case 'image': {
       const url = el.asset && ctx.assetUrl ? ctx.assetUrl(el.asset) : null;
       if (url) {
@@ -162,7 +183,8 @@ export function renderElement(el, ctx) {
     if (el.lock) wrap.classList.add('is-locked');
   }
 
-  const href = !ctx.editing && el.link?.href ? safeHref(el.link.href) : null;
+  // link para outra aba do projeto de site (#/<aba>) ou endereço comum
+  const href = ctx.editing ? null : el.link?.aba ? hrefDaAba(el.link.aba) : el.link?.href ? safeHref(el.link.href) : null;
   const inner = href
     ? h('a', { class: 'el-in', href, target: el.link.blank ? '_blank' : null, rel: 'noopener' })
     : h('div', { class: 'el-in' });
@@ -189,10 +211,11 @@ export function renderElement(el, ctx) {
 
 export function renderArtboard(doc, ctx) {
   const ab = h('div', { class: 'artboard', 'data-dev': ctx.dev });
-  ab.style.width = W[ctx.dev] + 'px';
+  ab.style.width = pageW(doc, ctx.dev) + 'px';
   ab.style.height = pageH(doc, ctx.dev) + 'px';
   ab.style.background = bgCss(doc.page.bg);
-  for (const el of doc.elements) if (ctx.editing || !el.hide) ab.append(renderElement(el, ctx));
+  const c = ctx.doc ? ctx : { ...ctx, doc };   // a barra de abas precisa saber as abas do documento
+  for (const el of doc.elements) if (ctx.editing || !el.hide) ab.append(renderElement(el, c));
   return ab;
 }
 
@@ -214,6 +237,6 @@ export function observeEntrances(root) {
 
 export function usedFonts(doc) {
   const set = new Set();
-  for (const e of doc.elements) { if (e.t === 'text') set.add(e.s.fontFamily); if (e.t === 'shape' && e.label) set.add(e.ls.fontFamily); }
+  for (const e of doc.elements) { if (e.t === 'text') set.add(e.s.fontFamily); if ((e.t === 'shape' && e.label) || e.t === 'abas') set.add(e.ls.fontFamily); }
   return [...set];
 }

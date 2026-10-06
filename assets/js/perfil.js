@@ -7,8 +7,9 @@
 //   &embed=1 / &toolbar=1                    sem selo / com botões PC·Celular
 import { renderArtboard, observeEntrances, usedFonts } from './core/render.js';
 import { loadFonts } from './core/fonts.js';
-import { W, pageH, bgCss } from './core/model.js';
+import { W, pageH, pageW, ehUnico, bgCss } from './core/model.js';
 import { Store } from './core/store.js';
+import { docDeAba, abaDoHash } from './core/sites.js';
 import { BASE } from './core/util.js';
 
 const q = new URLSearchParams(location.search);
@@ -42,27 +43,37 @@ async function load() {
   }
 }
 
+// Projeto de site: a página exibida é a aba do endereço (#/<aba>; sem hash, a primeira) + o topo e o rodapé compartilhados.
+function vista() {
+  if (doc.kind !== 'site') return doc;
+  const id = abaDoHash(location.hash, doc) || doc.abas[0].id;
+  return docDeAba(doc, id);
+}
+
 let lastVw = 0;
 function draw() {
+  const view = vista();
   const forced = q.get('device') === 'm' || q.get('device') === 'd' ? q.get('device') : null;
-  const dev = forced || (matchMedia('(max-width:720px)').matches ? 'm' : 'd');
-  const framed = forced === 'm' && innerWidth > 520;
+  const dev = ehUnico(view) ? 'd' : forced || (matchMedia('(max-width:720px)').matches ? 'm' : 'd');
+  const framed = !ehUnico(view) && forced === 'm' && innerWidth > 520;
   document.body.classList.toggle('framed', framed);
-  document.body.style.background = framed ? '' : bgCss(doc.page.bg);
+  document.body.style.background = framed ? '' : bgCss(view.page.bg);
 
   const vw = lastVw = document.documentElement.clientWidth;
-  const s = framed ? 1 : Math.min(vw / W[dev], dev === 'd' ? 1.5 : 2);
+  const s = framed ? 1 : Math.min(vw / pageW(view, dev), dev === 'd' ? 1.5 : 2);
   const stage = document.createElement('div');
   stage.className = 'stage' + (framed ? ' phone' : '');
-  stage.style.width = W[dev] * s + 'px';
-  stage.style.height = pageH(doc, dev) * s + 'px';
-  const ab = renderArtboard(doc, { dev, assetUrl, editing: false });
+  stage.style.width = pageW(view, dev) * s + 'px';
+  stage.style.height = pageH(view, dev) * s + 'px';
+  const ab = renderArtboard(view, { dev, assetUrl, editing: false });
   ab.style.transform = `scale(${s})`;
   stage.append(ab);
   root.innerHTML = '';
   root.append(stage);
   observeEntrances(root);
-  document.title = `${doc.title || 'Página'} — Gehrarte`;
+  const aba = view.kind === 'site' ? view.abas.find((a) => a.id === view.abaAtiva) : null;
+  document.title = aba ? `${aba.titulo} — ${doc.title || 'Site'}` : `${doc.title || 'Página'} — Gehrarte`;
+  loadFonts(usedFonts(view));
   return dev;
 }
 
@@ -83,6 +94,8 @@ try {
   toolbar(dev);
   let t;
   addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { dev = draw(); toolbar(dev); }, 120); });
+  // navegação entre abas do projeto de site
+  addEventListener('hashchange', () => { if (doc.kind === 'site') { dev = draw(); toolbar(dev); scrollTo(0, 0); } });
 } catch (e) {
   msg(e.message);
 }

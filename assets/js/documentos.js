@@ -1,18 +1,23 @@
 // Painel de documentos (o "início" do editor, no estilo da tela inicial do Google Docs):
 //   · Páginas do site — cartões FIXOS (landing, home…, definidas em paginas.json). Abrir = editar a versão no ar.
 //   · Meu espaço — o cartão fixo do perfil de cada pessoa e os materiais no Drive.
-//   · Meus artigos e rascunhos — o inventário local (guardado neste navegador).
+//   · Meus arquivos — o que a pessoa criou (arquivos em branco, projetos de site, artigos): o inventário local, guardado neste navegador.
 //   · Perfis da equipe — as páginas das outras pessoas, só para ver.
 // Cada cartão diz o que a página é, onde está publicada, quem publicou e qual é o arquivo.
 import { h } from './core/dom.js';
-import { session, logout, loadUsers, loadConfig } from './core/auth.js';
+import { loadUsers, loadConfig } from './core/auth.js';
+import { carregarHost } from './core/host.js';
 import { Store } from './core/store.js';
 import { renderArtboard, usedFonts } from './core/render.js';
 import { loadFonts } from './core/fonts.js';
-import { W, KINDS, STATE_LABEL, PROFILE_ID, docState, siteDocId, publisherName, publishDir, bgCss } from './core/model.js';
+import { pageW, KINDS, STATE_LABEL, PROFILE_ID, docState, siteDocId, publisherName, publishDir, bgCss } from './core/model.js';
 import { BASE } from './core/util.js';
 import { loadRegistry, canEditSite, fetchPublished, fetchModel, getJson, pageDir, publicUrl, publishedUrl, siteHost } from './core/site.js';
-import { createDoc, duplicateDoc, docPath } from './core/docs.js';
+import { createDoc, createArquivoEmBranco, createDocFromModelo, duplicateDoc, docPath } from './core/docs.js';
+import { GRUPOS_FORMATO, FORMATO_PADRAO, formatoPorId, orientacaoNatural, rotuloDoItem, medidasDoItem, rotuloDaPagina } from './core/formatos.js';
+import { montarGaleria } from './core/galeria.js';
+import { abrirGerador } from './core/gerador-ui.js';
+import { criarMeusModelos, carregarCatalogo } from './core/modelos.js';
 import { getDrive, uploadAll } from './core/drive-ui.js';
 import { FOLDER_NAME, folderUrl, humanSize } from './core/drive.js';
 
@@ -43,7 +48,7 @@ function miniatura(c) {
   ab.querySelectorAll('.an-pre').forEach((n) => n.classList.remove('an-pre'));
   Object.assign(ab.style, { position: 'absolute', left: '0', top: '0', transformOrigin: '0 0', pointerEvents: 'none' });
   box.append(ab);
-  const fit = () => { const w = box.clientWidth; if (w) ab.style.transform = `scale(${w / W.d})`; };
+  const fit = () => { const w = box.clientWidth; if (w) ab.style.transform = `scale(${w / pageW(doc, 'd')})`; };
   new ResizeObserver(fit).observe(box);
   fit();
   return box;
@@ -116,18 +121,21 @@ const remotoUrl = (dir, doc) => (id) => { const a = doc?.assets?.[id]; return a 
 const aberto = (path) => BASE + path;   // endereço "de verdade" deste ambiente (em produção é o próprio site)
 
 async function main() {
-  const sess = session();
-  if (!sess) { location.replace('../login.html?next=documentos/'); return; }
+  const H = await carregarHost({ carregarConfig: loadConfig });
+  const sess = await H.identidade();
+  if (!sess) { H.entrar('documentos/'); return; }
   const slug = sess.slug;
+  meuSlug = slug;
+  const cap = H.capacidades;
   $('#quem').textContent = sess.nome;
-  $('#sair').onclick = () => { logout(); location.href = '../'; };
+  if (H.sair) $('#sair').onclick = () => H.sair(); else $('#sair').hidden = true;
   document.addEventListener('scroll', fechaMenu, { passive: true });
 
+  // o que existe depende do host: páginas do site, perfis da equipe e Drive são do Gehrarte; o host local só tem os documentos da pessoa
   const [users, cfg, reg, locais, imagens, indice] = await Promise.all([
-    loadUsers().catch(() => []), loadConfig(), loadRegistry(), Store.listDocs(slug), carregaImagensLocais(slug), getJson('indice.json'),
+    cap.perfisDaEquipe ? loadUsers().catch(() => []) : [], loadConfig(), cap.paginasDoSite ? loadRegistry() : [], Store.listDocs(slug), carregaImagensLocais(slug), cap.perfisDaEquipe ? getJson('indice.json') : null,
   ]);
-  const eu = users.find((u) => u.slug === slug);
-  const podeSite = canEditSite(eu);
+  const podeSite = !!sess.podeSite && cap.paginasDoSite;
   const host = siteHost(cfg) || location.host;
   const urlTexto = (u) => u.replace(/^https?:\/\//, '');
   const secoes = { site: [], meu: [], artigos: [], equipe: [] };
@@ -159,8 +167,8 @@ async function main() {
 
   // ----- meu perfil -----
   const meuLocal = locais.find((d) => d.id === PROFILE_ID) || null;
-  const meuRemoto = await getJson(`perfis/${slug}/page.json`);
-  {
+  const meuRemoto = cap.perfisDaEquipe ? await getJson(`perfis/${slug}/page.json`) : null;
+  if (cap.perfisDaEquipe) {
     const fake = { kind: 'perfil', id: PROFILE_ID };
     const dir = publishDir(slug, fake);
     const pub = publicacao({ local: meuLocal, remote: meuRemoto?.publishedAt ? meuRemoto : null });
@@ -180,18 +188,21 @@ async function main() {
     } });
   }
 
-  // ----- artigos e rascunhos (locais + publicados por mim em outro navegador) -----
-  const artigosLocais = locais.filter((d) => d.doc.kind === 'artigo');
+  // ----- meus arquivos (locais + artigos publicados por mim em outro navegador) -----
+  const artigosLocais = locais.filter((d) => d.doc.kind === 'artigo' || d.doc.kind === 'site' || d.doc.kind === 'arquivo');
   const idsLocais = new Set(artigosLocais.map((d) => d.id));
   const publicadosFora = (indice?.artigos || []).filter((a) => a.slug === slug && !idsLocais.has(a.id));
   const remotosArt = await Promise.all(publicadosFora.map((a) => getJson(`artigos/${slug}/${a.id}/page.json`).then((doc) => ({ a, doc }))));
   const artigoCartao = ({ id, local, remote }) => {
-    const fake = { kind: 'artigo', id };
+    const kind = local?.doc?.kind === 'site' || local?.doc?.kind === 'arquivo' ? local.doc.kind : 'artigo';
+    const fake = { kind, id };
     const dir = publishDir(slug, fake);
     const pub = publicacao({ local, remote: remote?.publishedAt ? remote : null });
     const verUrl = aberto(`perfil.html?u=${encodeURIComponent(slug)}&a=${encodeURIComponent(id)}`);
-    return { tipo: 'artigo', titulo: local?.doc?.title || remote?.title || id, arquivo: docPath(slug, { ...(local?.doc || remote), id, kind: 'artigo' }), host,
-      funcao: 'Texto seu, publicado na seção Artigos da home do blog.',
+    return { tipo: kind, titulo: local?.doc?.title || remote?.title || id, arquivo: docPath(slug, { ...(local?.doc || remote), id, kind }), host,
+      funcao: kind === 'site' ? 'Projeto de site: várias abas navegáveis, com topo e rodapé compartilhados. Fica neste navegador; saia por “Exportar projeto” ou pelas ações do host.'
+        : kind === 'arquivo' ? `Arquivo seu (${rotuloDaPagina(local?.doc?.page || {})}). Fica neste navegador; saia por “Exportar projeto” ou pelas ações do host.`
+        : 'Artigo seu, publicado na seção Artigos da home do blog.',
       ...pub, doc: local?.doc || remote, assetUrl: (a) => (local?.doc?.assets?.[a] ? imagens.get(a) : null) || remotoUrl(dir, remote)(a) || imagens.get(a),
       verUrl, urlTexto: urlTexto(publicUrl(cfg, `perfil.html?u=${slug}&a=${id}`)),
       editor: `../editor/?doc=${encodeURIComponent(id)}`,
@@ -228,17 +239,18 @@ async function main() {
   pinta('site', '#g-site');
   $('#sub-site').textContent = podeSite
     ? $('#sub-site').textContent
-    : 'Estas são as páginas que fazem o site funcionar. Só quem organiza o site pode editá-las; você pode ver como cada uma está.';
-  pinta('meu', '#g-meu', [cartaoDrive(slug, cfg)]);
-  pinta('artigos', '#g-artigos', [azulejoNovo(slug)]);
+    : 'Estas são as páginas que estão no ar. Só quem tem permissão de edição pode alterá-las; você pode ver como cada uma está.';
+  pinta('meu', '#g-meu', cap.drive ? [cartaoDrive(slug, cfg)] : []);
+  pinta('artigos', '#g-artigos', [azulejoNovoArquivo(slug)]);
   pinta('equipe', '#g-equipe');
   $('#carregando').hidden = true;
   filtra();
 }
 
 // ---------- excluir / descartar ----------
+let meuSlug = '';
 function descartar(rec, quem, nota) {
-  const slug = session().slug;
+  const slug = meuSlug;
   const dlg = h('dialog', { class: 'dlg' },
     h('h2', {}, 'Tem certeza?'),
     h('p', {}, `Vamos remover ${quem} deste navegador.`),
@@ -251,25 +263,81 @@ function descartar(rec, quem, nota) {
   dlg.showModal();
 }
 
-// ---------- novo artigo ----------
-function azulejoNovo(slug) {
-  const abre = () => {
-    const titulo = h('input', { type: 'text', value: 'Novo artigo', maxlength: '80', 'aria-label': 'Título do artigo' });
-    const dlg = h('dialog', { class: 'dlg' },
-      h('h2', {}, 'Novo artigo'),
-      h('p', { class: 'fraco' }, 'Começa com um modelo de texto (rótulo, título, autoria, resumo e corpo). Vai para a seção Artigos do blog quando você publicar.'),
-      h('label', { class: 'campo' }, 'Título', titulo),
-      h('div', { class: 'acoes' },
-        h('button', { class: 'dbtn', type: 'button', onclick: () => dlg.close() }, 'Cancelar'),
-        h('button', { class: 'dbtn primario', type: 'button', onclick: async (e) => { e.target.disabled = true; try { location.href = `../editor/?doc=${encodeURIComponent(await createDoc(slug, 'artigo', titulo.value.trim() || 'Novo artigo'))}`; } catch (er) { alert(er.message); e.target.disabled = false; } } }, 'Criar e abrir')));
-    dlg.addEventListener('close', () => dlg.remove());
-    titulo.addEventListener('keydown', (e) => { if (e.key === 'Enter') dlg.querySelector('.primario').click(); });
-    document.body.append(dlg);
-    dlg.showModal();
-    titulo.select();
-  };
-  return h('button', { class: 'cartao novo', type: 'button', onclick: abre, 'data-busca': 'novo artigo criar' },
-    h('span', { class: 'mais-grande', 'aria-hidden': 'true' }, '+'), h('b', {}, 'Novo artigo'), h('small', {}, 'Comece com um modelo de texto'));
+// ---------- novo arquivo em branco ----------
+// Janela de confirmação antes de abrir o editor: à esquerda, o MODELO (uma tela em branco, um projeto de site, um artigo para o blog
+// ou um modelo da galeria); à direita, o TAMANHO (PC e celular, só PC, tablet, celular, A6…A3, Carta, personalizado) e a orientação.
+// Modelos da galeria trazem o próprio tamanho; só "Em branco" usa o tamanho escolhido.
+const EXTRAS_NOVO = [
+  { id: '__branco', nome: 'Em branco', descricao: 'Uma tela em branco, no tamanho que você escolher ao lado.', categoria: 'Começar', glifo: '▢' },
+  { id: '__site', nome: 'Projeto de site em branco', descricao: 'Várias abas navegáveis, com topo e rodapé compartilhados.', categoria: 'Começar', glifo: '▤' },
+  { id: '__artigo', nome: 'Artigo para o blog', descricao: 'Texto com título, autoria e resumo, para publicar na seção Artigos.', categoria: 'Começar', glifo: '¶' },
+];
+
+function abrirNovoArquivo(slug) {
+  const meus = criarMeusModelos();
+  let escolhido = EXTRAS_NOVO[0], formato = FORMATO_PADRAO, orientacao = 'retrato';
+  const titulo = h('input', { type: 'text', value: '', placeholder: 'Nome do arquivo (opcional)', maxlength: '80', 'aria-label': 'Nome do arquivo' });
+  const lugar = h('div'), lado = h('div', { class: 'na-lado' }), erro = h('p', { class: 'gal-msg erro', hidden: true, role: 'alert' });
+  const pers = { w: h('input', { type: 'text', inputmode: 'decimal', value: '21', 'aria-label': 'Largura' }), h: h('input', { type: 'text', inputmode: 'decimal', value: '29,7', 'aria-label': 'Altura' }),
+    u: h('select', { 'aria-label': 'Unidade' }, ['cm', 'mm', 'px', 'pol'].map((u) => h('option', { value: u }, u))) };
+  const proprio = () => escolhido.id === '__branco';      // só "Em branco" usa o tamanho escolhido
+
+  function pintaLado() {
+    if (!proprio()) {
+      const fm = escolhido.id === '__site' || escolhido.id === '__artigo' ? 'PC e celular' : rotuloDaPagina(escolhido.doc?.page || {});
+      lado.replaceChildren(h('h3', {}, 'Tamanho'), h('p', { class: 'fraco' }, `Este modelo já define o tamanho: ${escolhido.doc?.kind === 'site' ? 'projeto de site (PC e celular)' : fm}. Para escolher o tamanho, use “Em branco”.`));
+      return;
+    }
+    const ehDual = formatoPorId(formato)?.dual, ehPers = formatoPorId(formato)?.personalizado;
+    lado.replaceChildren(h('h3', {}, 'Tamanho'),
+      ...GRUPOS_FORMATO.map((g) => h('fieldset', { class: 'na-grupo' }, h('legend', {}, g.rotulo),
+        ...g.itens.map((f) => h('label', { class: 'na-op' + (formato === f.id ? ' on' : '') },
+          h('input', { type: 'radio', name: 'formato', value: f.id, checked: formato === f.id, onchange: () => { formato = f.id; orientacao = orientacaoNatural(f); pintaLado(); } }),
+          h('span', { class: 'na-nome' }, rotuloDoItem(f)), h('small', {}, medidasDoItem(f, orientacao)))))),
+      ehDual ? null : h('div', { class: 'na-orient', role: 'group', 'aria-label': 'Orientação' },
+        ...[['retrato', 'Em pé'], ['paisagem', 'Deitado']].map(([v, r]) => h('button', { type: 'button', class: 'gal-btn', 'aria-pressed': String(orientacao === v), onclick: () => { orientacao = v; pintaLado(); } }, r))),
+      ehPers ? h('div', { class: 'na-pers' }, h('label', {}, 'Largura', pers.w), h('label', {}, 'Altura', pers.h), h('label', {}, 'Unidade', pers.u)) : null);
+  }
+
+  async function criar(modeloEscolhido) {
+    erro.hidden = true;
+    const nome = titulo.value.trim();
+    try {
+      let id;
+      const m = modeloEscolhido || escolhido;
+      if (m.id === '__branco') id = await createArquivoEmBranco(slug, nome || 'Novo arquivo', formato, { orientacao, w: pers.w.value, h: pers.h.value, unidade: pers.u.value });
+      else if (m.id === '__site') id = await createDoc(slug, 'site', nome || 'Meu site');
+      else if (m.id === '__artigo') id = await createDoc(slug, 'artigo', nome || 'Novo artigo');
+      else id = await createDocFromModelo(slug, m, nome);
+      location.href = `../editor/?doc=${encodeURIComponent(id)}`;
+    } catch (e) { erro.textContent = e.message || String(e); erro.hidden = false; }
+  }
+
+  const dlg = h('dialog', { class: 'gal-dlg larga novo-arq', 'aria-label': 'Novo arquivo em branco' },
+    h('div', { class: 'gal-dlg-c' },
+      h('h2', {}, 'Novo arquivo em branco'),
+      h('p', { class: 'fraco' }, 'Escolha por onde começar e o tamanho. Tudo pode ser mudado depois, no editor.'),
+      h('label', { class: 'campo' }, 'Nome', titulo),
+      h('div', { class: 'na-corpo' }, h('section', { class: 'na-esq', 'aria-label': 'Modelo' }, h('h3', {}, 'Modelo'), lugar), lado),
+      erro,
+      h('div', { class: 'gal-dlg-rodape' },
+        h('button', { class: 'gal-btn', type: 'button', onclick: () => dlg.close() }, 'Cancelar'),
+        h('button', { class: 'gal-btn primario', type: 'button', onclick: (e) => { e.target.disabled = true; criar().finally(() => { e.target.disabled = false; }); } }, 'Criar e abrir'))));
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.append(dlg);
+  montarGaleria(lugar, {
+    catalogo: () => carregarCatalogo(getJson), meus, extras: EXTRAS_NOVO, selecionavel: true, selecionado: '__branco', compacta: true,
+    onSelecionar: (m) => { escolhido = m; pintaLado(); },
+    onGerar: (recarregar) => abrirGerador({ meus, aoSalvar: recarregar, onUsar: (m) => criar(m) }),
+  });
+  pintaLado();
+  dlg.showModal();
+  titulo.focus();
+}
+
+function azulejoNovoArquivo(slug) {
+  return h('button', { class: 'cartao novo', type: 'button', onclick: () => abrirNovoArquivo(slug), 'data-busca': 'novo arquivo em branco criar modelo tamanho a4 a5 celular pc tablet site artigo' },
+    h('span', { class: 'mais-grande', 'aria-hidden': 'true' }, '+'), h('b', {}, 'Novo arquivo em branco'), h('small', {}, 'Escolha o modelo e o tamanho'));
 }
 
 // ---------- materiais no Drive ----------

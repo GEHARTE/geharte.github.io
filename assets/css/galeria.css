@@ -1,0 +1,68 @@
+/* Galeria de modelos do ArtAtk (editor e painel de documentos). Neutra: herda cor e fundo de onde estiver. */
+.gal { display: flex; flex-direction: column; gap: 12px; font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.gal-barra { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.gal-barra input[type=search] { flex: 1 1 140px; min-width: 0; padding: 7px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); background: transparent; color: inherit; font: inherit; font-size: 13px; }
+.gal-cats { display: flex; flex-wrap: wrap; gap: 6px; }
+.gal-cat { padding: 4px 11px; border-radius: 999px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); background: transparent; color: inherit; font: inherit; font-size: 12.5px; cursor: pointer; }
+.gal-cat[aria-pressed=true] { background: color-mix(in srgb, currentColor 16%, transparent); font-weight: 600; }
+.gal-btn { padding: 5px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: transparent; color: inherit; font: inherit; font-size: 13px; cursor: pointer; min-height: 32px; }
+.gal-btn.primario { background: #e4572e; border-color: #e4572e; color: #fff; font-weight: 600; }
+.gal-btn:disabled { opacity: .5; cursor: default; }
+.gal-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.gal.compacta .gal-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.gal-card { display: flex; flex-direction: column; border-radius: 10px; border: 1px solid color-mix(in srgb, currentColor 20%, transparent); overflow: hidden; background: color-mix(in srgb, currentColor 4%, transparent); }
+.gal-thumb { position: relative; overflow: hidden; aspect-ratio: 3 / 4; background: #fff; border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent); }
+.gal-thumb * { animation: none !important; transition: none !important; }
+.gal-thumb .artboard { pointer-events: none; }
+.gal-corpo { padding: 9px 10px 10px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.gal-corpo b { font-size: 13.5px; line-height: 1.25; }
+.gal-corpo small { opacity: .72; font-size: 12px; }
+.gal-chip { align-self: flex-start; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, currentColor 14%, transparent); }
+.gal-acoes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+.gal-vazio { opacity: .7; padding: 12px 2px; }
+/* diálogo (gerador e escolha de modelo) */
+dialog.gal-dlg { width: min(720px, 94vw); max-height: 90vh; padding: 0; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 14px; background: Canvas; color: CanvasText; overflow: hidden; }
+dialog.gal-dlg::backdrop { background: rgba(0, 0, 0, .5); }
+dialog.gal-dlg.larga { width: min(1040px, 96vw); }
+.gal-dlg form, .gal-dlg .gal-dlg-c { display: flex; flex-direction: column; gap: 12px; padding: 18px; max-height: 90vh; overflow: auto; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.gal-dlg h2 { margin: 0; font-size: 18px; }
+.gal-dlg label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 13px; }
+.gal-dlg input[type=text], .gal-dlg textarea, .gal-dlg select { padding: 8px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: transparent; color: inherit; font: inherit; font-weight: 400; }
+.gal-dlg textarea { min-height: 220px; font-family: ui-monospace, "JetBrains Mono", Consolas, monospace; font-size: 12.5px; }
+.gal-abas { display: flex; gap: 6px; }
+.gal-abas button { flex: 1; }
+.gal-abas button[aria-selected=true] { background: color-mix(in srgb, currentColor 16%, transparent); font-weight: 700; }
+.gal-msg { padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, currentColor 8%, transparent); font-size: 13px; }
+.gal-msg.erro { background: #e4572e22; color: #c0391a; }
+.gal-msg.ok { background: #1f9d8b22; }
+.gal-previa { width: 200px; align-self: center; }
+.gal-dlg-rodape { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.gal-dlg details { font-size: 13px; }
+.gal-dlg details pre { white-space: pre-wrap; background: color-mix(in srgb, currentColor 7%, transparent); padding: 10px; border-radius: 8px; font-size: 12px; }
+@media (max-width: 520px) { .gal-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* novo arquivo em branco: modelo à esquerda, tamanho à direita */
+.na-corpo { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 18px; align-items: start; }
+.na-esq h3, .na-lado h3 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+.na-esq { max-height: 52vh; overflow: auto; padding-right: 4px; }
+.na-lado { display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow: auto; }
+.na-grupo { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.na-grupo legend { font-size: 12px; opacity: .65; padding: 0; margin-bottom: 2px; }
+.gal-dlg label.na-op { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; padding: 6px 9px; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); cursor: pointer; font-weight: 400; text-align: left; }
+.gal-dlg label.na-op.on { border-color: #e4572e; background: color-mix(in srgb, #e4572e 12%, transparent); }
+.na-op .na-nome { font-weight: 600; font-size: 13px; }
+.na-op small { opacity: .7; font-size: 11.5px; white-space: nowrap; }
+.na-op:has(small:only-of-type) small { white-space: normal; }
+.na-orient { display: flex; gap: 6px; }
+.na-orient .gal-btn { flex: 1; }
+.na-orient .gal-btn[aria-pressed=true] { background: color-mix(in srgb, currentColor 16%, transparent); font-weight: 700; }
+.na-pers { display: grid; grid-template-columns: 1fr 1fr 80px; gap: 6px; }
+.na-pers input, .na-pers select { width: 100%; box-sizing: border-box; }
+.gal-card.escolhivel { cursor: pointer; }
+.gal-card.escolhivel:focus-visible { outline: 2px solid #e4572e; outline-offset: 2px; }
+.gal-card.sel { border-color: #e4572e; box-shadow: 0 0 0 2px #e4572e; }
+.gal-virtual { display: grid; place-items: center; background: color-mix(in srgb, currentColor 6%, Canvas); }
+.gal-glifo { font-size: 44px; opacity: .55; }
+@media (max-width: 720px) { .na-corpo { grid-template-columns: 1fr; } .na-esq, .na-lado { max-height: none; } }
+.na-esq .gal.compacta .gal-grade { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.na-esq .gal-thumb { aspect-ratio: 4 / 3; }
+.na-esq .gal-corpo { padding: 7px 8px 8px; }

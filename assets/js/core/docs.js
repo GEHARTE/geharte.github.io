@@ -4,6 +4,8 @@ import { Store } from './store.js';
 import { makeElement, newDoc, normalizeDoc, PROFILE_ID, SITE_PREFIX, isSiteId, siteDocId, publishDir, slugify } from './model.js';
 import { clone } from './util.js';
 import { fetchPublished, fetchModel } from './site.js';
+import { docDeModelo } from './modelos.js';
+import { paginaDoFormato, FORMATO_PADRAO } from './formatos.js';
 
 // Caminho que o usuário vê: o publicado, ou "inventário/<id>" quando só local.
 export const docPath = (slug, doc) => (doc.publishedAt ? `${publishDir(slug, doc)}page.json` : `inventário/${doc.id}`);
@@ -46,11 +48,31 @@ export async function createDoc(owner, kind, title) {
   return id;
 }
 
+// Cria um artigo novo com o conteúdo de um modelo da galeria e devolve o id.
+// "Novo arquivo em branco": uma tela em branco no formato escolhido (PC e celular, só PC, tablet, celular, A5, A4…).
+// Devolve o id. `opcoes` vai para paginaDoFormato (orientação; largura, altura e unidade do personalizado).
+export async function createArquivoEmBranco(owner, titulo, formato = FORMATO_PADRAO, opcoes = {}) {
+  const docs = await Store.listDocs(owner);
+  const nome = String(titulo || '').trim() || 'Novo arquivo';
+  const doc = newDoc(owner, nome, 'arquivo', freeId(slugify(nome), docs));
+  doc.page = paginaDoFormato(formato, opcoes);
+  await Store.saveDoc(owner, doc);
+  return doc.id;
+}
+
+export async function createDocFromModelo(owner, modelo, title) {
+  const docs = await Store.listDocs(owner);
+  const nome = (title || modelo.nome).trim();
+  const doc = docDeModelo(modelo, owner, { id: freeId(slugify(nome), docs), title: nome, kind: 'arquivo' });
+  await Store.saveDoc(owner, doc);
+  return doc.id;
+}
+
 // A cópia vira sempre artigo: só pode haver um perfil por pessoa e as páginas do site são únicas.
 export async function duplicateDoc(owner, rec) {
   const docs = await Store.listDocs(owner);
   const copy = clone(rec.doc);
-  copy.kind = 'artigo';
+  if (copy.kind !== 'site' && copy.kind !== 'arquivo') copy.kind = 'artigo';
   copy.id = freeId(slugify(`${rec.doc.title} copia`), docs);
   copy.title = `${rec.doc.title} (cópia)`;
   delete copy.publishedAt; delete copy.publishedBy;
