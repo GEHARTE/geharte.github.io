@@ -50,7 +50,7 @@ function build(host) {
   const burger = h('button', { class: 'sn-burger', type: 'button', 'aria-label': 'Abrir menu', 'aria-expanded': 'false', 'aria-controls': 'sn-menu' }, h('span'));
   host.className = 'sn';
   host.replaceChildren(h('div', { class: 'sn-in' },
-    h('a', { class: 'sn-brand', href: U('home/'), 'aria-label': 'Gehrarte — início do blog' }, h('img', { src: U('assets/lettering/geharte.svg'), alt: '', width: 122, height: 51 })),
+    h('a', { class: 'sn-brand', href: U('home/'), 'aria-label': 'Gehrarte — início do blog' }, h('img', { src: U('assets/lettering/gehrarte.svg'), alt: '', width: 131, height: 51 })),
     menu, burger));
 
   // ---- comportamento ----

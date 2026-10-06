@@ -11,12 +11,12 @@ body.landing{background:var(--papel);color:var(--tinta);font:17px/1.6 var(--font
 
 /* ---- lettering ---- */
 .banner{display:grid;place-items:center;min-width:0;min-height:0}
-.mark{position:relative;width:min(100%,calc((100vh - 2 * var(--pad)) * 1224 / 510));width:min(100%,calc((100dvh - 2 * var(--pad)) * 1224 / 510));aspect-ratio:1224/510}
+.mark{position:relative;width:min(100%,calc((100vh - 2 * var(--pad)) * 1314 / 510));width:min(100%,calc((100dvh - 2 * var(--pad)) * 1314 / 510));aspect-ratio:1314/510}
 .mark .word,.mark .orn{position:absolute;inset:0;width:100%;height:100%;display:block}
-/* O NOME SENDO ESCRITO vem do próprio SVG (assets/lettering/geharte-escrita.svg): uma máscara anima seguindo o traço da caneta.
+/* O NOME SENDO ESCRITO vem do próprio SVG (assets/lettering/gehrarte-escrita.svg): uma máscara anima seguindo o traço da caneta.
    Não há transição aqui — nada de cortina esquerda→direita. Os enfeites entram depois que a escrita termina. */
 .mark .word{object-fit:contain}
-.mark{--escrita:5.5s}   /* duração da escrita no SVG (~5,35 s) + folga */
+.mark{--escrita:4.6s}   /* duração da escrita no SVG (~4,2 s, letra por letra) + folga */
 .mark .orn{pointer-events:none;overflow:visible;animation:surge 1.2s ease var(--escrita) both}
 @keyframes surge{from{opacity:0}to{opacity:1}}
 .tw{transform-box:fill-box;transform-origin:center;animation:brilha 3.4s ease-in-out infinite}
@@ -38,7 +38,7 @@ body.landing{background:var(--papel);color:var(--tinta);font:17px/1.6 var(--font
 /* celular / telas em pé: empilha (lettering em cima, texto embaixo) */
 @media (max-width:760px),(max-aspect-ratio:1/1){
   .page{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);align-items:start;gap:clamp(10px,2vh,24px);padding:clamp(14px,3vh,32px) clamp(18px,6vw,40px)}
-  .mark{width:min(100%,calc(46dvh * 1224 / 510))}
+  .mark{width:min(100%,calc(46dvh * 1314 / 510))}
   .side{align-self:stretch;justify-content:flex-start;height:100%}
   .texto{max-width:none}
 }
