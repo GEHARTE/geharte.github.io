@@ -7,8 +7,8 @@
   <link rel="icon" type="image/png" sizes="192x192" href="../assets/logo/favicon-192.png">
   <link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Documentos — Gehrarte</title>
-  <meta name="description" content="Documentos do Gehrarte: páginas do site, perfil, artigos e materiais da equipe.">
+  <title>Arquivos — Gehrarte</title>
+  <meta name="description" content="Arquivos do Gehrarte: os seus últimos arquivos, as páginas do site, o perfil, os artigos e os materiais da equipe.">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <script>try{var t=localStorage.getItem("artatk.tema");if(t==="claro"||t==="escuro")document.documentElement.dataset.tema=t}catch(e){}</script>
@@ -19,10 +19,10 @@
 <body class="docs">
   <header class="dtop">
     <a class="dlogo" href="../home/" title="Gehrarte — voltar ao blog"><img src="../assets/logo/gehrarte-logo.png" alt="Gehrarte" width="38" height="38"></a>
-    <span class="dtitle">Documentos</span>
+    <span class="dtitle">Arquivos</span>
     <label class="dsearch">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input id="busca" type="search" placeholder="Buscar nos documentos" aria-label="Buscar nos documentos" autocomplete="off">
+      <input id="busca" type="search" placeholder="Buscar nos arquivos" aria-label="Buscar nos arquivos" autocomplete="off">
     </label>
     <nav class="dnav" aria-label="Ferramentas">
       <a href="../ferramentas/">Ferramentas</a>
@@ -33,13 +33,19 @@
   </header>
 
   <main id="conteudo">
-    <p class="carregando" id="carregando">Carregando os documentos…</p>
+    <p class="carregando" id="carregando">Carregando os arquivos…</p>
 
-    <!-- 1. O que está NO AR no site (editável só por quem tem permissão: hoje, a equipe de desenvolvimento) -->
+    <!-- 1. Por onde começar: "Novo arquivo em branco" e, ao lado, os últimos arquivos editados (no máximo 3) -->
+    <section class="dsec" id="sec-recentes" aria-labelledby="h-rec">
+      <header class="dsec-h"><h2 id="h-rec">Recentes</h2><p>Comece um arquivo em branco ou continue de onde parou: os últimos que você editou.</p></header>
+      <div class="dgrid recentes" id="g-recentes"></div>
+    </section>
+
+    <!-- 2. O que já está postado no site (editável só por quem tem permissão: hoje, a equipe de desenvolvimento) -->
     <section class="dsec" id="sec-site" hidden aria-labelledby="h-site">
       <header class="dsec-h">
-        <h2 id="h-site">Páginas ativas no site</h2>
-        <p id="sub-site">As páginas que estão no ar. Só quem tem permissão de edição pode alterá-las; Publicar leva a mudança ao site público.</p>
+        <h2 id="h-site">Páginas do site</h2>
+        <p id="sub-site">O que já está postado no site. Só quem tem permissão de edição pode alterar estas páginas; Publicar leva a mudança ao site público.</p>
       </header>
       <div class="dgrid" id="g-site"></div>
     </section>
@@ -49,18 +55,18 @@
       <div class="dgrid" id="g-equipe"></div>
     </section>
 
-    <!-- 2. O que a PESSOA criou (fica neste navegador até ser exportado ou publicado) -->
+    <!-- 3. O que a PESSOA criou (fica neste navegador até ser exportado ou publicado) -->
     <section class="dsec" id="sec-meu" hidden aria-labelledby="h-meu">
       <header class="dsec-h"><h2 id="h-meu">Meu espaço</h2><p>Sua página de perfil e os seus materiais no Drive.</p></header>
       <div class="dgrid" id="g-meu"></div>
     </section>
 
     <section class="dsec" id="sec-artigos" hidden aria-labelledby="h-art">
-      <header class="dsec-h"><h2 id="h-art">Meus arquivos</h2><p>Arquivos criados por você, guardados neste navegador. Crie um novo escolhendo o modelo e o tamanho.</p></header>
+      <header class="dsec-h"><h2 id="h-art">Todos os meus arquivos</h2><p>Tudo o que você criou, guardado neste navegador — inclusive o que não aparece nos recentes.</p></header>
       <div class="dgrid" id="g-artigos"></div>
     </section>
 
-    <p class="vazio" id="vazio" hidden>Nenhum documento encontrado para essa busca.</p>
+    <p class="vazio" id="vazio" hidden>Nenhum arquivo encontrado para essa busca.</p>
   </main>
 
   <div id="menu-pop" class="pop" hidden role="menu"></div>

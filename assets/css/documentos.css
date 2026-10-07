@@ -1,4 +1,4 @@
-/* Painel de documentos — no espírito da tela inicial do Google Docs: topo branco com busca, fundo cinza claro,
+/* Painel de arquivos — no espírito da tela inicial do Google Docs: topo branco com busca, fundo cinza claro,
    cartões brancos com miniatura da página. Acento = o laranja do editor. */
 :root{
   --bg:#f1f3f4; --card:#fff; --line:#dadce0; --linha-leve:#ececef; --tx:#202124; --dim:#5f6368; --fraco:#80868b;
@@ -70,6 +70,9 @@ code{font:11.5px/1.4 'JetBrains Mono',ui-monospace,monospace;background:var(--bg
 .dsec-h h2{margin:0;font:600 18px var(--f)}
 .dsec-h p{margin:3px 0 0;color:var(--dim);font-size:13px;max-width:78ch}
 .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;align-items:stretch}
+/* Recentes: "Novo arquivo em branco" + até 3 arquivos = no máximo 4 colunas */
+.dgrid.recentes{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1100px){.dgrid.recentes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* ---------- cartão ---------- */
 .cartao{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:box-shadow .15s,border-color .15s;min-width:0}
@@ -132,6 +135,6 @@ code.fonte{color:var(--fraco);background:transparent;padding:0}
   .dsearch{order:3;flex:1 0 100%;max-width:none;height:42px}
   .dnav{gap:10px}.dnav a{display:none}
   #conteudo{width:calc(100% - 28px)}
-  .dgrid{grid-template-columns:minmax(0,1fr)}
+  .dgrid,.dgrid.recentes{grid-template-columns:minmax(0,1fr)}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}

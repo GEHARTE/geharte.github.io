@@ -1,5 +1,5 @@
 // Galeria de modelos do ArtAtk: grade com miniatura real (a própria página, renderizada pequena), busca e categorias.
-// Serve ao editor (aba Modelos) e ao painel de documentos (Novo a partir de um modelo). Quem usa decide o que "Usar" faz.
+// Serve ao editor (aba Modelos) e ao painel de arquivos (Novo a partir de um modelo). Quem usa decide o que "Usar" faz.
 import { h } from './dom.js';
 import { renderArtboardRecortado, usedFonts } from './render.js';
 import { larguraFinal } from './gabarito.js';

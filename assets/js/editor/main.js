@@ -47,7 +47,7 @@ async function loadAssetsFor(doc) {
 }
 
 // Publicaram uma versão mais nova desta página do site e há edições locais: a pessoa escolhe o que fazer.
-// Devolve true (manter o rascunho), false (abrir a versão publicada) ou null (voltar aos documentos).
+// Devolve true (manter o rascunho), false (abrir a versão publicada) ou null (voltar aos arquivos).
 // Camadas como painel próprio (a mesma lista que a aba da biblioteca, mas solta ou encaixada onde a pessoa quiser).
 function initLayersPanel(el) {
   el.classList.add('lib-body');
@@ -65,7 +65,7 @@ function askConflict({ remote }) {
       h('p', {}, `Esta página foi publicada ${quem}em ${new Date(remote.publishedAt).toLocaleString('pt-BR')}, depois da versão em que você estava trabalhando — e você tem alterações que ainda não foram publicadas.`),
       h('p', { class: 'hint' }, 'Abrir a versão publicada descarta o seu rascunho neste navegador. Manter o rascunho preserva o seu trabalho, mas, ao publicar, ele substitui o que a outra pessoa fez (o editor avisa antes).'),
     ], actions: [
-      btn({ label: 'Voltar aos documentos', onClick: () => fin(null) }),
+      btn({ label: 'Voltar aos arquivos', onClick: () => fin(null) }),
       btn({ label: 'Abrir a versão publicada', onClick: () => fin(false) }),
       btn({ label: 'Manter o meu rascunho', cls: 'primary', onClick: () => fin(true) }),
     ], onClose: () => fin(null) });
@@ -87,7 +87,7 @@ async function main() {
   try { for (const k of ['gehrarte.ghtoken', 'gehrarte.repo', 'gehrarte.branch']) localStorage.removeItem(k); } catch { /* sem armazenamento */ }
   vigiarAreaVisivel(window);   // --vv-*: área visível real, usada por diálogos e menus (core/janelas.js)
 
-  // o editor abre sempre uma página escolhida no painel de documentos: ?doc=<id> (perfil, artigo ou site-<pagina>)
+  // o editor abre sempre uma página escolhida no painel de arquivos: ?doc=<id> (perfil, artigo ou site-<pagina>)
   const want = new URLSearchParams(location.search).get('doc');
   if (!want) { location.replace(host.urls.documentos); return; }
   S.canSite = !!sess.podeSite && host.capacidades.paginasDoSite;
@@ -119,7 +119,7 @@ async function main() {
       } catch { /* sem publicado */ }
       if (!doc) { doc = newDoc(S.slug, `Página de ${sess.nome}`); fresh = true; }
     }
-    if (!doc) { alert('Não achei essa página nos seus documentos.'); location.replace(host.urls.documentos); return; }
+    if (!doc) { alert('Não achei essa página nos seus arquivos.'); location.replace(host.urls.documentos); return; }
   }
   normalizeDoc(doc, S.slug);
   await loadAssetsFor(doc);
@@ -256,7 +256,7 @@ function wireTop() {
     };
     const m = h('div', { id: 'menu', class: 'popover menu' },
       S.host.capacidades.publicar ? item('eye', 'Ver página publicada', verPublicada) : null,
-      item('stack', 'Documentos', () => goToDocuments()),
+      item('stack', 'Arquivos', () => goToDocuments()),
       item('layers', reguasVisiveis() ? 'Ocultar réguas (Alt+R)' : 'Mostrar réguas (Alt+R)', () => alternarReguas()),
       item('layers', gradeAtual().visivel ? 'Ocultar grade (Alt+G)' : 'Mostrar grade (Alt+G)', () => alternarGrade()),
       item('download', 'Exportar PDF…', openExportPdf),

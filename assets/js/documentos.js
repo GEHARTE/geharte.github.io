@@ -1,7 +1,8 @@
-// Painel de documentos (o "início" do editor, no estilo da tela inicial do Google Docs):
-//   · Páginas do site — cartões FIXOS (landing, home…, definidas em paginas.json). Abrir = editar a versão no ar.
+// Painel de arquivos (o "início" do editor, no estilo da tela inicial do Google Docs):
+//   · Recentes — da esquerda para a direita: "Novo arquivo em branco" e os 3 últimos arquivos editados (de qualquer tipo).
+//   · Páginas do site — o que já está postado: cartões FIXOS (landing, home…, definidas em paginas.json). Abrir = editar a versão no ar.
 //   · Meu espaço — o cartão fixo do perfil de cada pessoa e os materiais no Drive.
-//   · Meus arquivos — o que a pessoa criou (arquivos em branco, projetos de site, artigos): o inventário local, guardado neste navegador.
+//   · Todos os meus arquivos — o que a pessoa criou (arquivos em branco, projetos de site, artigos): o inventário local, guardado neste navegador.
 //   · Perfis da equipe — as páginas das outras pessoas, só para ver.
 // Cada cartão diz o que a página é, onde está publicada, quem publicou e qual é o arquivo.
 import { h } from './core/dom.js';
@@ -25,6 +26,8 @@ import { FOLDER_NAME, folderUrl, humanSize } from './core/drive.js';
 
 const $ = (s) => document.querySelector(s);
 const fmtWhen = (iso) => { const d = new Date(iso); return Number.isNaN(+d) ? '' : d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); };
+// quantos arquivos aparecem ao lado do "Novo arquivo em branco"
+const MAX_RECENTES = 3;
 const semAcento = (t) => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const ms = (iso) => Date.parse(iso || '') || 0;
 
@@ -133,14 +136,14 @@ async function main() {
   if (H.sair) $('#sair').onclick = () => H.sair(); else $('#sair').hidden = true;
   document.addEventListener('scroll', fechaMenu, { passive: true });
 
-  // o que existe depende do host: páginas do site, perfis da equipe e Drive são do Gehrarte; o host local só tem os documentos da pessoa
+  // o que existe depende do host: páginas do site, perfis da equipe e Drive são do Gehrarte; o host local só tem os arquivos da pessoa
   const [users, cfg, reg, locais, imagens, indice] = await Promise.all([
     cap.perfisDaEquipe ? loadUsers().catch(() => []) : [], loadConfig(), cap.paginasDoSite ? loadRegistry() : [], Store.listDocs(slug), carregaImagensLocais(slug), cap.perfisDaEquipe ? getJson('indice.json') : null,
   ]);
   const podeSite = !!sess.podeSite && cap.paginasDoSite;
   const host = siteHost(cfg) || location.host;
   const urlTexto = (u) => u.replace(/^https?:\/\//, '');
-  const secoes = { site: [], meu: [], artigos: [], equipe: [] };
+  const secoes = { recentes: [], site: [], meu: [], artigos: [], equipe: [] };
 
   // ----- páginas do site -----
   await Promise.all(reg.map(async (p) => {
@@ -153,7 +156,7 @@ async function main() {
     const fake = { kind: 'pagina', id };
     const verUrl = aberto(p.caminho.replace(/index\.html$/, ''));
     secoes.site.push({ ordem: reg.indexOf(p), c: {
-      tipo: 'pagina', titulo: p.titulo, funcao: p.funcao, arquivo: p.caminho, fonte: `${dir}page.json`, host,
+      id, tipo: 'pagina', titulo: p.titulo, funcao: p.funcao, arquivo: p.caminho, fonte: `${dir}page.json`, host,
       ...pub, doc, assetUrl: (a) => (local?.doc?.assets?.[a] ? imagens.get(a) : null) || remotoUrl(dir, remote || modelo)(a) || imagens.get(a),
       verUrl, urlTexto: urlTexto(publicUrl(cfg, p.caminho)),
       editor: podeSite ? `../editor/?doc=${id}` : null, somenteLeitura: !podeSite,
@@ -176,7 +179,7 @@ async function main() {
     const pub = publicacao({ local: meuLocal, remote: meuRemoto?.publishedAt ? meuRemoto : null });
     const verUrl = aberto(`perfil.html?u=${encodeURIComponent(slug)}`);
     secoes.meu.push({ ordem: 0, c: {
-      tipo: 'perfil', titulo: meuLocal?.doc?.title || meuRemoto?.title || `Página de ${sess.nome}`, arquivo: `${dir}page.json`, host,
+      id: PROFILE_ID, tipo: 'perfil', titulo: meuLocal?.doc?.title || meuRemoto?.title || `Página de ${sess.nome}`, arquivo: `${dir}page.json`, host,
       funcao: 'A sua página pessoal na equipe, montada do jeito que você quiser: texto, imagem, desenho e animação. Aparece em “Páginas da equipe” na home do blog.',
       ...pub, doc: meuLocal?.doc || meuRemoto, assetUrl: (a) => (meuLocal?.doc?.assets?.[a] ? imagens.get(a) : null) || remotoUrl(dir, meuRemoto)(a) || imagens.get(a),
       verUrl, urlTexto: urlTexto(publicUrl(cfg, `perfil.html?u=${slug}`)),
@@ -201,7 +204,7 @@ async function main() {
     const dir = publishDir(slug, fake);
     const pub = publicacao({ local, remote: remote?.publishedAt ? remote : null });
     const verUrl = aberto(`perfil.html?u=${encodeURIComponent(slug)}&a=${encodeURIComponent(id)}`);
-    return { tipo: kind, titulo: local?.doc?.title || remote?.title || id, arquivo: docPath(slug, { ...(local?.doc || remote), id, kind }), host,
+    return { id, tipo: kind, titulo: local?.doc?.title || remote?.title || id, arquivo: docPath(slug, { ...(local?.doc || remote), id, kind }), host,
       funcao: kind === 'site' ? 'Projeto de site: várias abas navegáveis, com topo e rodapé compartilhados. Fica neste navegador; saia por “Exportar projeto” ou pelas ações do host.'
         : kind === 'arquivo' ? `Arquivo seu (${rotuloDaPagina(local?.doc?.page || {})}). Fica neste navegador; saia por “Exportar projeto” ou pelas ações do host.`
         : 'Artigo seu, publicado na seção Artigos da home do blog.',
@@ -232,18 +235,25 @@ async function main() {
   }));
   secoes.equipe.sort((a, b) => String(a.ordem).localeCompare(String(b.ordem), 'pt-BR'));
 
+  // ----- recentes: os últimos arquivos editados (rascunhos deste navegador), de qualquer tipo -----
+  // É um atalho: o mesmo arquivo continua na sua seção (páginas do site, meu espaço, todos os meus arquivos).
+  const cartaoDoId = new Map([...secoes.site, ...secoes.meu, ...secoes.artigos].map((x) => [x.c.id, x.c]));
+  [...locais].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).map((l) => cartaoDoId.get(l.id)).filter(Boolean)
+    .slice(0, MAX_RECENTES).forEach((c) => secoes.recentes.push({ c }));
+
   // ----- desenhar -----
-  const pinta = (chave, grid, extra = []) => {
+  const pinta = (chave, grid, extra = [], antes = []) => {
     const itens = secoes[chave].map((x) => cartao(x.c));
-    $(grid).replaceChildren(...itens, ...extra);
-    $(`#sec-${chave}`).hidden = !(itens.length || extra.length);
+    $(grid).replaceChildren(...antes, ...itens, ...extra);
+    $(`#sec-${chave}`).hidden = !(itens.length || extra.length || antes.length);
   };
+  pinta('recentes', '#g-recentes', [], [azulejoNovoArquivo(slug)]);
   pinta('site', '#g-site');
   $('#sub-site').textContent = podeSite
     ? $('#sub-site').textContent
-    : 'Estas são as páginas que estão no ar. Só quem tem permissão de edição pode alterá-las; você pode ver como cada uma está.';
+    : 'O que já está postado no site. Só quem tem permissão de edição pode alterar estas páginas; você pode ver como cada uma está.';
   pinta('meu', '#g-meu', cap.drive ? [cartaoDrive(slug, cfg)] : []);
-  pinta('artigos', '#g-artigos', [azulejoNovoArquivo(slug)]);
+  pinta('artigos', '#g-artigos');
   // vindo do editor (Opções › Novo arquivo): já abre o diálogo
   if (new URLSearchParams(location.search).has('novo')) { history.replaceState(null, '', location.pathname); abrirNovoArquivo(slug); }
   pinta('equipe', '#g-equipe');
@@ -408,7 +418,7 @@ function filtra() {
 }
 $('#busca').addEventListener('input', filtra);
 
-main().catch((e) => { console.error(e); $('#carregando').textContent = 'Não consegui carregar os documentos: ' + (e?.message || e); });
+main().catch((e) => { console.error(e); $('#carregando').textContent = 'Não consegui carregar os arquivos: ' + (e?.message || e); });
 
 // ---------- modo noturno ----------
 // A escolha da pessoa vale; sem escolha segue o sistema (e acompanha quando ele muda). O <head> já aplicou a escolha guardada.

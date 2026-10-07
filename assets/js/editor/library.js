@@ -110,8 +110,8 @@ const modelosInternos = () => TPL.map((t) => ({ format: FORMATO, v: MODELO_V, id
 
 function applyModelo(modelo) {
   // modelo de projeto de site: só dentro de um projeto de site (converter outro tipo de documento no lugar quebraria o desfazer);
-  // para começar um projeto novo: Documentos › Galeria de modelos
-  if (ehModeloDeSite(modelo) && S.doc.kind !== 'site') { toast('Este é um modelo de projeto de site. Para usá-lo, crie um projeto novo em Documentos › Galeria de modelos.', 'err'); return; }
+  // para começar um projeto novo: Arquivos › Galeria de modelos
+  if (ehModeloDeSite(modelo) && S.doc.kind !== 'site') { toast('Este é um modelo de projeto de site. Para usá-lo, crie um projeto novo em Arquivos › Galeria de modelos.', 'err'); return; }
   const go = () => {
     if (!aplicarModeloAoDoc(S.doc, modelo)) { toast('Não dá para aplicar este modelo a este tipo de página.', 'err'); return; }
     S.sel = [];

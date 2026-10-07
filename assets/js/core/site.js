@@ -1,5 +1,5 @@
 // Páginas do SITE (landing, home…): o registro em paginas.json, quem pode mexer nelas e a versão publicada.
-// Compartilhado pelo painel de documentos, pelo editor e pelas páginas públicas que mostram o que foi publicado.
+// Compartilhado pelo painel de arquivos, pelo editor e pelas páginas públicas que mostram o que foi publicado.
 import { BASE } from './util.js';
 import { siteDocId, viewerQuery } from './model.js';
 

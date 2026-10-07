@@ -77,7 +77,7 @@ export function criarTela({ titulo, restanteMs = TRAVA_MS, onVoltar }) {
 
   let fim = Date.now() + restanteMs, tick = setInterval(() => { timer.textContent = `Se algo travar, o editor é liberado sozinho em ${fmt(fim - Date.now())}`; }, 500);
   timer.textContent = `Se algo travar, o editor é liberado sozinho em ${fmt(restanteMs)}`;
-  const voltar = h('a', { class: 'btn', href: '../documentos/', html: icon('stack') + '<span>Voltar aos documentos</span>' });
+  const voltar = h('a', { class: 'btn', href: '../documentos/', html: icon('stack') + '<span>Voltar aos arquivos</span>' });
   acoes.append(voltar);
 
   const api = {

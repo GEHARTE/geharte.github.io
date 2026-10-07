@@ -1,5 +1,5 @@
 // Liga o cliente do Drive (core/drive.js) ao resto do site: Client ID do config.json e conferência da conta
-// com o e-mail liberado em users.json. Compartilhado pelo editor (aba Drive) e pelo painel de documentos.
+// com o e-mail liberado em users.json. Compartilhado pelo editor (aba Drive) e pelo painel de arquivos.
 import { createDrive } from './drive.js';
 import { loadConfig, loadUsers, hashEmail } from './auth.js';
 

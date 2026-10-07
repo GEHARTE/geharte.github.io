@@ -1,6 +1,6 @@
 // Gerador de modelos embutido: (1) salva a página aberta como modelo; (2) gera um modelo a partir de uma especificação
 // em JSON (o mesmo formato de modelos/<id>/spec.json e de tools/gerar-modelos.mjs). Usa <dialog> nativo para funcionar
-// no editor e no painel de documentos.
+// no editor e no painel de arquivos.
 import { h } from './dom.js';
 import { modeloDeDoc, gerarDeSpec, slugModelo } from './modelos.js';
 import { miniaturaModelo, baixarModelo } from './galeria.js';

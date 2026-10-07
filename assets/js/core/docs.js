@@ -1,5 +1,5 @@
 // Operações sobre os documentos do usuário (o "inventário" no navegador), sem depender do estado do editor:
-// usadas pelo painel de documentos e pelo editor. Criar, duplicar, achar id livre e preparar as páginas do site.
+// usadas pelo painel de arquivos e pelo editor. Criar, duplicar, achar id livre e preparar as páginas do site.
 import { Store } from './store.js';
 import { makeElement, newDoc, normalizeDoc, PROFILE_ID, SITE_PREFIX, isSiteId, siteDocId, publishDir, slugify } from './model.js';
 import { clone } from './util.js';
