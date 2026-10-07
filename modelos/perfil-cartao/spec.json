@@ -1,0 +1,16 @@
+{
+ "id": "perfil-cartao",
+ "nome": "Perfil — cartão de apresentação",
+ "descricao": "A versão enxuta: uma abertura escura com seu nome e foto, três coisas que você faz e um botão de contato. Boa para começar rápido e ir acrescentando seções depois. Tons de roxo do Gehrarte.",
+ "categoria": "Perfil",
+ "tema": { "fundo": "#17161d", "texto": "#f3f0fa", "suave": "#cfcbe0", "escuro": "#2a1f3d", "sobreEscuro": "#ffffff", "acento": "#ffb703", "sobreAcento": "#17161d", "superficie": "#26233a", "fonteTitulo": "Space Grotesk", "fonteTexto": "Inter", "raio": 22 },
+ "secoes": [
+  { "tipo": "hero", "fundo": "escuro", "kicker": "Olá, eu sou", "titulo": "Seu Nome", "texto": "Uma frase sobre você, o que estuda e no que está trabalhando no Gehrarte.", "botao": { "rotulo": "Fale comigo", "href": "mailto:" }, "imagem": true, "imagemRotulo": "Sua foto" },
+  { "tipo": "cards", "titulo": "O que eu faço", "colunas": 3, "itens": [
+   { "titulo": "Faço isto", "texto": "Uma linha sobre a primeira coisa." },
+   { "titulo": "E também isto", "texto": "Uma linha sobre a segunda coisa." },
+   { "titulo": "E aprendo isto", "texto": "Uma linha sobre o que vem a seguir." }
+  ] },
+  { "tipo": "rodape", "texto": "Seu Nome\nFeito no Gehrarte · UEM", "links": ["Instagram", "E-mail"] }
+ ]
+}

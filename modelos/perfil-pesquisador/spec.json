@@ -1,0 +1,24 @@
+{
+ "id": "perfil-pesquisador",
+ "nome": "Perfil — pesquisador(a) e escritor(a)",
+ "descricao": "Página de perfil voltada ao texto: abertura em cor de destaque, biografia em parágrafos, linhas de pesquisa e publicações em cartões e contato. Serifada (Lora) sobre fundo claro, para leitura confortável.",
+ "categoria": "Perfil",
+ "tema": { "fundo": "#fbf9f4", "texto": "#1e1c18", "suave": "#585349", "escuro": "#1f3a34", "sobreEscuro": "#ffffff", "acento": "#cfe3d4", "sobreAcento": "#1f3a34", "superficie": "#ece7da", "fonteTitulo": "Lora", "fonteTexto": "Inter", "raio": 12 },
+ "secoes": [
+  { "tipo": "hero", "fundo": "acento", "kicker": "Pesquisa e escrita", "titulo": "Seu Nome", "texto": "Estudo, escrevo e organizo ideias sobre o tema que me interessa. Esta página reúne minha trajetória, minhas linhas de pesquisa e o que já publiquei." },
+  { "tipo": "texto", "titulo": "Biografia", "paragrafos": ["Comece pela formação: curso, universidade e ano. Depois conte o que despertou o seu interesse pelo tema.", "Descreva projetos de pesquisa, extensão ou iniciação científica de que participa e com quem trabalha.", "Termine com o que vem a seguir: o que você está lendo, escrevendo ou planejando."] },
+  { "tipo": "cards", "titulo": "Linhas de pesquisa", "colunas": 3, "itens": [
+   { "titulo": "Tema 1", "texto": "Uma frase sobre a pergunta que você investiga." },
+   { "titulo": "Tema 2", "texto": "Uma frase sobre a pergunta que você investiga." },
+   { "titulo": "Tema 3", "texto": "Uma frase sobre a pergunta que você investiga." }
+  ] },
+  { "tipo": "cards", "titulo": "Publicações", "colunas": 2, "itens": [
+   { "titulo": "Título do artigo ou texto", "texto": "Revista ou veículo, ano. Resumo em uma linha." },
+   { "titulo": "Título do artigo ou texto", "texto": "Revista ou veículo, ano. Resumo em uma linha." },
+   { "titulo": "Título do artigo ou texto", "texto": "Revista ou veículo, ano. Resumo em uma linha." },
+   { "titulo": "Título do artigo ou texto", "texto": "Revista ou veículo, ano. Resumo em uma linha." }
+  ] },
+  { "tipo": "chamada", "titulo": "Vamos trocar ideias", "texto": "Para convites, colaborações e perguntas sobre os textos, escreva.", "botao": { "rotulo": "Entrar em contato", "href": "mailto:" } },
+  { "tipo": "rodape", "texto": "Seu Nome · Pesquisa e escrita\nFeito no Gehrarte · UEM", "links": ["Lattes", "E-mail"] }
+ ]
+}

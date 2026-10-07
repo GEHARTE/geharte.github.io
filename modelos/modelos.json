@@ -7,6 +7,34 @@
    "descricao": "Projeto de site do Museu Virtual do Vale do Ivaí: identidade do protótipo (verde, creme, Libre Caslon Text e Andika) e as abas do Roteiro Curatorial Digital — entrada, cinco salas virtuais (eixos) e participação. Textos tirados do roteiro; imagens são quadros para trocar. Será substituído pelo modelo do POC do setor de design.",
    "categoria": "MUVVI",
    "tipo": "site"
+  },
+  {
+   "id": "perfil-artista",
+   "nome": "Perfil — artista",
+   "descricao": "Página de perfil para quem mostra trabalhos: abertura escura com seu nome, sobre você, três séries em cartões, galeria e convite para conversar. Fundo creme, títulos em Playfair Display e acento laranja.",
+   "categoria": "Perfil",
+   "tipo": "pagina"
+  },
+  {
+   "id": "perfil-cartao",
+   "nome": "Perfil — cartão de apresentação",
+   "descricao": "A versão enxuta: uma abertura escura com seu nome e foto, três coisas que você faz e um botão de contato. Boa para começar rápido e ir acrescentando seções depois. Tons de roxo do Gehrarte.",
+   "categoria": "Perfil",
+   "tipo": "pagina"
+  },
+  {
+   "id": "perfil-designer",
+   "nome": "Perfil — designer",
+   "descricao": "Página de perfil limpa para portfólio de design: abertura clara com imagem, faixa de especialidades, projetos em dois cartões grandes, processo de trabalho e chamada final. Fundo branco, Space Grotesk e acento violeta.",
+   "categoria": "Perfil",
+   "tipo": "pagina"
+  },
+  {
+   "id": "perfil-pesquisador",
+   "nome": "Perfil — pesquisador(a) e escritor(a)",
+   "descricao": "Página de perfil voltada ao texto: abertura em cor de destaque, biografia em parágrafos, linhas de pesquisa e publicações em cartões e contato. Serifada (Lora) sobre fundo claro, para leitura confortável.",
+   "categoria": "Perfil",
+   "tipo": "pagina"
   }
  ]
 }

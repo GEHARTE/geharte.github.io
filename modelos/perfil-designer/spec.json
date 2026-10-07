@@ -1,0 +1,24 @@
+{
+ "id": "perfil-designer",
+ "nome": "Perfil — designer",
+ "descricao": "Página de perfil limpa para portfólio de design: abertura clara com imagem, faixa de especialidades, projetos em dois cartões grandes, processo de trabalho e chamada final. Fundo branco, Space Grotesk e acento violeta.",
+ "categoria": "Perfil",
+ "tema": { "fundo": "#ffffff", "texto": "#17161d", "suave": "#5a5766", "escuro": "#1d1a2b", "sobreEscuro": "#ffffff", "acento": "#7b5cff", "sobreAcento": "#ffffff", "superficie": "#f1eefc", "fonteTitulo": "Space Grotesk", "fonteTexto": "Inter", "raio": 20 },
+ "secoes": [
+  { "tipo": "hero", "fundo": "claro", "kicker": "Design", "titulo": "Olá, eu sou Seu Nome", "texto": "Desenho identidades, interfaces e peças gráficas. Aqui estão alguns dos meus projetos e a forma como eu trabalho.", "botao": { "rotulo": "Falar comigo", "href": "mailto:" }, "imagem": true, "imagemRotulo": "Seu retrato" },
+  { "tipo": "faixa", "fundo": "acento", "texto": "Identidade visual ◆ Interfaces ◆ Ilustração ◆ Tipografia ◆ Motion" },
+  { "tipo": "cards", "titulo": "Projetos em destaque", "colunas": 2, "itens": [
+   { "titulo": "Projeto 1", "texto": "Cliente ou disciplina, o desafio e o que você entregou." },
+   { "titulo": "Projeto 2", "texto": "Cliente ou disciplina, o desafio e o que você entregou." },
+   { "titulo": "Projeto 3", "texto": "Cliente ou disciplina, o desafio e o que você entregou." },
+   { "titulo": "Projeto 4", "texto": "Cliente ou disciplina, o desafio e o que você entregou." }
+  ] },
+  { "tipo": "cards", "titulo": "Como eu trabalho", "colunas": 3, "itens": [
+   { "titulo": "1 · Entender", "texto": "Conversa, pesquisa e referências antes de desenhar." },
+   { "titulo": "2 · Explorar", "texto": "Esboços e variações até a ideia certa aparecer." },
+   { "titulo": "3 · Entregar", "texto": "Arquivos finais, guia de uso e acompanhamento." }
+  ] },
+  { "tipo": "chamada", "titulo": "Tem um projeto em mente?", "texto": "Conte o que você precisa e eu respondo em até dois dias úteis.", "botao": { "rotulo": "Escrever agora", "href": "mailto:" } },
+  { "tipo": "rodape", "texto": "Seu Nome · Designer\nFeito no Gehrarte · UEM", "links": ["Behance", "Instagram", "E-mail"] }
+ ]
+}

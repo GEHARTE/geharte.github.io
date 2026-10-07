@@ -1,0 +1,844 @@
+{
+ "format": "artatk-modelo",
+ "v": 1,
+ "id": "perfil-cartao",
+ "nome": "Perfil — cartão de apresentação",
+ "descricao": "A versão enxuta: uma abertura escura com seu nome e foto, três coisas que você faz e um botão de contato. Boa para começar rápido e ir acrescentando seções depois. Tons de roxo do Gehrarte.",
+ "categoria": "Perfil",
+ "origem": "spec",
+ "doc": {
+  "page": {
+   "bg": {
+    "c": "#17161d",
+    "g": null
+   },
+   "h": {
+    "d": 1051,
+    "m": 1217
+   }
+  },
+  "elements": [
+   {
+    "id": "g1",
+    "t": "shape",
+    "name": "Fundo do destaque",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 0,
+      "w": 1200,
+      "h": 480,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 558
+     }
+    },
+    "s": {
+     "fill": "#2a1f3d",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g2",
+    "t": "text",
+    "name": "Etiqueta",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 88,
+      "w": 560,
+      "h": 18,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 44,
+      "w": 342,
+      "h": 16,
+      "fs": 13
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": true,
+     "align": "left",
+     "color": "#ffffff",
+     "lh": 1.2,
+     "ls": 0.18
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Olá, eu sou",
+    "ah": true
+   },
+   {
+    "id": "g3",
+    "t": "text",
+    "name": "Título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 124,
+      "w": 560,
+      "h": 70,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 72,
+      "w": 342,
+      "h": 39,
+      "fs": 34
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 64,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#ffffff",
+     "lh": 1.08,
+     "ls": -0.015
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.12,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Seu Nome",
+    "ah": true
+   },
+   {
+    "id": "g4",
+    "t": "text",
+    "name": "Texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 218,
+      "w": 560,
+      "h": 66,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 127,
+      "w": 342,
+      "h": 53,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 21,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#ffffff",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.24,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Uma frase sobre você, o que estuda e no que está trabalhando no Gehrarte.",
+    "ah": true
+   },
+   {
+    "id": "g5",
+    "t": "shape",
+    "name": "Botão Fale comigo",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 320,
+      "w": 240,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 208,
+      "w": 220,
+      "h": 50,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fill": "#ffb703",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 9999,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.36,
+      "ease": "ease-out"
+     }
+    },
+    "link": {
+     "href": "mailto:",
+     "blank": false
+    },
+    "shape": "rect",
+    "label": "Fale comigo",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#17161d"
+    }
+   },
+   {
+    "id": "g6",
+    "t": "shape",
+    "name": "Imagem do destaque",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 680,
+      "y": 48,
+      "w": 420,
+      "h": 384,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "fs": 14,
+      "x": 24,
+      "y": 266,
+      "w": 342,
+      "h": 220
+     }
+    },
+    "s": {
+     "fill": "#d9d4c7",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 22,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.48,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "shape": "rect",
+    "label": "Sua foto",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 500,
+     "color": "#6a6458"
+    }
+   },
+   {
+    "id": "g7",
+    "t": "text",
+    "name": "Título da seção",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 568,
+      "w": 1000,
+      "h": 49,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 602,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 42,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#f3f0fa",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "O que eu faço",
+    "ah": true
+   },
+   {
+    "id": "g8",
+    "t": "shape",
+    "name": "Cartão 1",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 653,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 659,
+      "w": 342,
+      "h": 104
+     }
+    },
+    "s": {
+     "fill": "#26233a",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 22,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g9",
+    "t": "text",
+    "name": "Cartão 1 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 679,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 679,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#f3f0fa",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Faço isto",
+    "ah": true
+   },
+   {
+    "id": "g10",
+    "t": "text",
+    "name": "Cartão 1 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 723,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 716,
+      "w": 302,
+      "h": 25,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#cfcbe0",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Uma linha sobre a primeira coisa.",
+    "ah": true
+   },
+   {
+    "id": "g11",
+    "t": "shape",
+    "name": "Cartão 2",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 441,
+      "y": 653,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 779,
+      "w": 342,
+      "h": 104
+     }
+    },
+    "s": {
+     "fill": "#26233a",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 22,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g12",
+    "t": "text",
+    "name": "Cartão 2 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 467,
+      "y": 679,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 799,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#f3f0fa",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "E também isto",
+    "ah": true
+   },
+   {
+    "id": "g13",
+    "t": "text",
+    "name": "Cartão 2 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 467,
+      "y": 723,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 836,
+      "w": 302,
+      "h": 25,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#cfcbe0",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Uma linha sobre a segunda coisa.",
+    "ah": true
+   },
+   {
+    "id": "g14",
+    "t": "shape",
+    "name": "Cartão 3",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 782,
+      "y": 653,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 899,
+      "w": 342,
+      "h": 104
+     }
+    },
+    "s": {
+     "fill": "#26233a",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 22,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g15",
+    "t": "text",
+    "name": "Cartão 3 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 808,
+      "y": 679,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 919,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#f3f0fa",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "E aprendo isto",
+    "ah": true
+   },
+   {
+    "id": "g16",
+    "t": "text",
+    "name": "Cartão 3 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 808,
+      "y": 723,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 956,
+      "w": 302,
+      "h": 25,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#cfcbe0",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Uma linha sobre o que vem a seguir.",
+    "ah": true
+   },
+   {
+    "id": "g17",
+    "t": "shape",
+    "name": "Rodapé",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 901,
+      "w": 1200,
+      "h": 150,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 1047,
+      "w": 390,
+      "h": 170
+     }
+    },
+    "s": {
+     "fill": "#2a1f3d",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g18",
+    "t": "text",
+    "name": "Rodapé — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 941,
+      "w": 1000,
+      "h": 45,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1083,
+      "w": 342,
+      "h": 42,
+      "fs": 14
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.5,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Seu Nome\nFeito no Gehrarte · UEM",
+    "ah": true
+   },
+   {
+    "id": "g19",
+    "t": "text",
+    "name": "Rodapé — links",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 991,
+      "w": 1000,
+      "h": 20,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1143,
+      "w": 342,
+      "h": 20,
+      "fs": 13
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.4,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Instagram   ·   E-mail",
+    "ah": true
+   }
+  ]
+ }
+}

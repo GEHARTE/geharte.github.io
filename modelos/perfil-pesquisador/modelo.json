@@ -1,0 +1,1622 @@
+{
+ "format": "artatk-modelo",
+ "v": 1,
+ "id": "perfil-pesquisador",
+ "nome": "Perfil — pesquisador(a) e escritor(a)",
+ "descricao": "Página de perfil voltada ao texto: abertura em cor de destaque, biografia em parágrafos, linhas de pesquisa e publicações em cartões e contato. Serifada (Lora) sobre fundo claro, para leitura confortável.",
+ "categoria": "Perfil",
+ "origem": "spec",
+ "doc": {
+  "page": {
+   "bg": {
+    "c": "#fbf9f4",
+    "g": null
+   },
+   "h": {
+    "d": 2433,
+    "m": 2436
+   }
+  },
+  "elements": [
+   {
+    "id": "g1",
+    "t": "shape",
+    "name": "Fundo do destaque",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 0,
+      "w": 1200,
+      "h": 408,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 305
+     }
+    },
+    "s": {
+     "fill": "#cfe3d4",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g2",
+    "t": "text",
+    "name": "Etiqueta",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 88,
+      "w": 1000,
+      "h": 18,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 44,
+      "w": 342,
+      "h": 16,
+      "fs": 13
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": true,
+     "align": "left",
+     "color": "#ffffff",
+     "lh": 1.2,
+     "ls": 0.18
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Pesquisa e escrita",
+    "ah": true
+   },
+   {
+    "id": "g3",
+    "t": "text",
+    "name": "Título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 124,
+      "w": 1000,
+      "h": 70,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 72,
+      "w": 342,
+      "h": 39,
+      "fs": 34
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 64,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1f3a34",
+     "lh": 1.08,
+     "ls": -0.015
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.12,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Seu Nome",
+    "ah": true
+   },
+   {
+    "id": "g4",
+    "t": "text",
+    "name": "Texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 218,
+      "w": 1000,
+      "h": 66,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 127,
+      "w": 342,
+      "h": 106,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 21,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1f3a34",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.24,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Estudo, escrevo e organizo ideias sobre o tema que me interessa. Esta página reúne minha trajetória, minhas linhas de pesquisa e o que já publiquei.",
+    "ah": true
+   },
+   {
+    "id": "g5",
+    "t": "text",
+    "name": "Título da seção",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 496,
+      "w": 1000,
+      "h": 49,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 349,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 42,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Biografia",
+    "ah": true
+   },
+   {
+    "id": "g6",
+    "t": "text",
+    "name": "Parágrafo 1",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 567,
+      "w": 760,
+      "h": 68,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 398,
+      "w": 342,
+      "h": 87,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.7,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Comece pela formação: curso, universidade e ano. Depois conte o que despertou o seu interesse pelo tema.",
+    "ah": true
+   },
+   {
+    "id": "g7",
+    "t": "text",
+    "name": "Parágrafo 2",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 653,
+      "w": 760,
+      "h": 68,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 499,
+      "w": 342,
+      "h": 87,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.7,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Descreva projetos de pesquisa, extensão ou iniciação científica de que participa e com quem trabalha.",
+    "ah": true
+   },
+   {
+    "id": "g8",
+    "t": "text",
+    "name": "Parágrafo 3",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 739,
+      "w": 760,
+      "h": 68,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 600,
+      "w": 342,
+      "h": 87,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.7,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Termine com o que vem a seguir: o que você está lendo, escrevendo ou planejando.",
+    "ah": true
+   },
+   {
+    "id": "g9",
+    "t": "text",
+    "name": "Título da seção",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 983,
+      "w": 1000,
+      "h": 49,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 775,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 42,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Linhas de pesquisa",
+    "ah": true
+   },
+   {
+    "id": "g10",
+    "t": "shape",
+    "name": "Cartão 1",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 1068,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 832,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#ece7da",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 12,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g11",
+    "t": "text",
+    "name": "Cartão 1 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1094,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 852,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Tema 1",
+    "ah": true
+   },
+   {
+    "id": "g12",
+    "t": "text",
+    "name": "Cartão 1 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1138,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 889,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#585349",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Uma frase sobre a pergunta que você investiga.",
+    "ah": true
+   },
+   {
+    "id": "g13",
+    "t": "shape",
+    "name": "Cartão 2",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 441,
+      "y": 1068,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 977,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#ece7da",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 12,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g14",
+    "t": "text",
+    "name": "Cartão 2 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 467,
+      "y": 1094,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 997,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Tema 2",
+    "ah": true
+   },
+   {
+    "id": "g15",
+    "t": "text",
+    "name": "Cartão 2 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 467,
+      "y": 1138,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1034,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#585349",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Uma frase sobre a pergunta que você investiga.",
+    "ah": true
+   },
+   {
+    "id": "g16",
+    "t": "shape",
+    "name": "Cartão 3",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 782,
+      "y": 1068,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1122,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#ece7da",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 12,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g17",
+    "t": "text",
+    "name": "Cartão 3 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 808,
+      "y": 1094,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1142,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Tema 3",
+    "ah": true
+   },
+   {
+    "id": "g18",
+    "t": "text",
+    "name": "Cartão 3 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 808,
+      "y": 1138,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1179,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#585349",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Uma frase sobre a pergunta que você investiga.",
+    "ah": true
+   },
+   {
+    "id": "g19",
+    "t": "text",
+    "name": "Título da seção",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 1404,
+      "w": 1000,
+      "h": 49,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1339,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 42,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Publicações",
+    "ah": true
+   },
+   {
+    "id": "g20",
+    "t": "shape",
+    "name": "Cartão 1",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 1489,
+      "w": 488,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1396,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#ece7da",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 12,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g21",
+    "t": "text",
+    "name": "Cartão 1 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1515,
+      "w": 436,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1416,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Título do artigo ou texto",
+    "ah": true
+   },
+   {
+    "id": "g22",
+    "t": "text",
+    "name": "Cartão 1 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1559,
+      "w": 436,
+      "h": 28,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1453,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#585349",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Revista ou veículo, ano. Resumo em uma linha.",
+    "ah": true
+   },
+   {
+    "id": "g23",
+    "t": "shape",
+    "name": "Cartão 2",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 612,
+      "y": 1489,
+      "w": 488,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1541,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#ece7da",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 12,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g24",
+    "t": "text",
+    "name": "Cartão 2 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 638,
+      "y": 1515,
+      "w": 436,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1561,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Título do artigo ou texto",
+    "ah": true
+   },
+   {
+    "id": "g25",
+    "t": "text",
+    "name": "Cartão 2 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 638,
+      "y": 1559,
+      "w": 436,
+      "h": 28,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1598,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#585349",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Revista ou veículo, ano. Resumo em uma linha.",
+    "ah": true
+   },
+   {
+    "id": "g26",
+    "t": "shape",
+    "name": "Cartão 3",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 1673,
+      "w": 488,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1686,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#ece7da",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 12,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g27",
+    "t": "text",
+    "name": "Cartão 3 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1699,
+      "w": 436,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1706,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Título do artigo ou texto",
+    "ah": true
+   },
+   {
+    "id": "g28",
+    "t": "text",
+    "name": "Cartão 3 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1743,
+      "w": 436,
+      "h": 28,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1743,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#585349",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Revista ou veículo, ano. Resumo em uma linha.",
+    "ah": true
+   },
+   {
+    "id": "g29",
+    "t": "shape",
+    "name": "Cartão 4",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 612,
+      "y": 1673,
+      "w": 488,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1831,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#ece7da",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 12,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g30",
+    "t": "text",
+    "name": "Cartão 4 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 638,
+      "y": 1699,
+      "w": 436,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1851,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#1e1c18",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Título do artigo ou texto",
+    "ah": true
+   },
+   {
+    "id": "g31",
+    "t": "text",
+    "name": "Cartão 4 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 638,
+      "y": 1743,
+      "w": 436,
+      "h": 28,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1888,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#585349",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Revista ou veículo, ano. Resumo em uma linha.",
+    "ah": true
+   },
+   {
+    "id": "g32",
+    "t": "shape",
+    "name": "Fundo da chamada",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 1921,
+      "w": 1200,
+      "h": 362,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 2004,
+      "w": 390,
+      "h": 262
+     }
+    },
+    "s": {
+     "fill": "#1f3a34",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g33",
+    "t": "text",
+    "name": "Título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 200,
+      "y": 2009,
+      "w": 800,
+      "h": 51,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2048,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Lora",
+     "fontSize": 44,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Vamos trocar ideias",
+    "ah": true
+   },
+   {
+    "id": "g34",
+    "t": "text",
+    "name": "Texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 250,
+      "y": 2078,
+      "w": 700,
+      "h": 31,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2095,
+      "w": 342,
+      "h": 53,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.12,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Para convites, colaborações e perguntas sobre os textos, escreva.",
+    "ah": true
+   },
+   {
+    "id": "g35",
+    "t": "shape",
+    "name": "Botão Entrar em contato",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 480,
+      "y": 2139,
+      "w": 240,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 85,
+      "y": 2172,
+      "w": 220,
+      "h": 50,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fill": "#cfe3d4",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 9999,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.24,
+      "ease": "ease-out"
+     }
+    },
+    "link": {
+     "href": "mailto:",
+     "blank": false
+    },
+    "shape": "rect",
+    "label": "Entrar em contato",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#1f3a34"
+    }
+   },
+   {
+    "id": "g36",
+    "t": "shape",
+    "name": "Rodapé",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 2283,
+      "w": 1200,
+      "h": 150,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 2266,
+      "w": 390,
+      "h": 170
+     }
+    },
+    "s": {
+     "fill": "#1f3a34",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g37",
+    "t": "text",
+    "name": "Rodapé — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 2323,
+      "w": 1000,
+      "h": 45,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2302,
+      "w": 342,
+      "h": 42,
+      "fs": 14
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.5,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Seu Nome · Pesquisa e escrita\nFeito no Gehrarte · UEM",
+    "ah": true
+   },
+   {
+    "id": "g38",
+    "t": "text",
+    "name": "Rodapé — links",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 2373,
+      "w": 1000,
+      "h": 20,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2362,
+      "w": 342,
+      "h": 20,
+      "fs": 13
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.4,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Lattes   ·   E-mail",
+    "ah": true
+   }
+  ]
+ }
+}

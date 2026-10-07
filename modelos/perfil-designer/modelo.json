@@ -1,0 +1,1607 @@
+{
+ "format": "artatk-modelo",
+ "v": 1,
+ "id": "perfil-designer",
+ "nome": "Perfil — designer",
+ "descricao": "Página de perfil limpa para portfólio de design: abertura clara com imagem, faixa de especialidades, projetos em dois cartões grandes, processo de trabalho e chamada final. Fundo branco, Space Grotesk e acento violeta.",
+ "categoria": "Perfil",
+ "origem": "spec",
+ "doc": {
+  "page": {
+   "bg": {
+    "c": "#ffffff",
+    "g": null
+   },
+   "h": {
+    "d": 2167,
+    "m": 2424
+   }
+  },
+  "elements": [
+   {
+    "id": "g1",
+    "t": "text",
+    "name": "Etiqueta",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 88,
+      "w": 560,
+      "h": 18,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 44,
+      "w": 342,
+      "h": 16,
+      "fs": 13
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": true,
+     "align": "left",
+     "color": "#7b5cff",
+     "lh": 1.2,
+     "ls": 0.18
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Design",
+    "ah": true
+   },
+   {
+    "id": "g2",
+    "t": "text",
+    "name": "Título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 124,
+      "w": 560,
+      "h": 139,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 72,
+      "w": 342,
+      "h": 77,
+      "fs": 34
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 64,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.08,
+     "ls": -0.015
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.12,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Olá, eu sou Seu Nome",
+    "ah": true
+   },
+   {
+    "id": "g3",
+    "t": "text",
+    "name": "Texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 287,
+      "w": 560,
+      "h": 98,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 165,
+      "w": 342,
+      "h": 80,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 21,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.24,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Desenho identidades, interfaces e peças gráficas. Aqui estão alguns dos meus projetos e a forma como eu trabalho.",
+    "ah": true
+   },
+   {
+    "id": "g4",
+    "t": "shape",
+    "name": "Botão Falar comigo",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 421,
+      "w": 240,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 273,
+      "w": 220,
+      "h": 50,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fill": "#7b5cff",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 9999,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.36,
+      "ease": "ease-out"
+     }
+    },
+    "link": {
+     "href": "mailto:",
+     "blank": false
+    },
+    "shape": "rect",
+    "label": "Falar comigo",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g5",
+    "t": "shape",
+    "name": "Imagem do destaque",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 680,
+      "y": 48,
+      "w": 420,
+      "h": 477,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "fs": 14,
+      "x": 24,
+      "y": 331,
+      "w": 342,
+      "h": 220
+     }
+    },
+    "s": {
+     "fill": "#d9d4c7",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 20,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.48,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "shape": "rect",
+    "label": "Seu retrato",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 500,
+     "color": "#6a6458"
+    }
+   },
+   {
+    "id": "g6",
+    "t": "shape",
+    "name": "Faixa",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 573,
+      "w": 1200,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 623,
+      "w": 390,
+      "h": 64
+     }
+    },
+    "s": {
+     "fill": "#7b5cff",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g7",
+    "t": "text",
+    "name": "Texto da faixa",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 591,
+      "w": 1000,
+      "h": 18,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 635,
+      "w": 342,
+      "h": 40,
+      "fs": 14
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.2,
+     "ls": 0.02
+    },
+    "an": null,
+    "link": null,
+    "text": "Identidade visual ◆ Interfaces ◆ Ilustração ◆ Tipografia ◆ Motion",
+    "ah": true
+   },
+   {
+    "id": "g8",
+    "t": "text",
+    "name": "Título da seção",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 717,
+      "w": 1000,
+      "h": 49,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 731,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 42,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Projetos em destaque",
+    "ah": true
+   },
+   {
+    "id": "g9",
+    "t": "shape",
+    "name": "Cartão 1",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 802,
+      "w": 488,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 788,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#f1eefc",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 20,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g10",
+    "t": "text",
+    "name": "Cartão 1 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 828,
+      "w": 436,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 808,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Projeto 1",
+    "ah": true
+   },
+   {
+    "id": "g11",
+    "t": "text",
+    "name": "Cartão 1 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 872,
+      "w": 436,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 845,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Cliente ou disciplina, o desafio e o que você entregou.",
+    "ah": true
+   },
+   {
+    "id": "g12",
+    "t": "shape",
+    "name": "Cartão 2",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 612,
+      "y": 802,
+      "w": 488,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 933,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#f1eefc",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 20,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g13",
+    "t": "text",
+    "name": "Cartão 2 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 638,
+      "y": 828,
+      "w": 436,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 953,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Projeto 2",
+    "ah": true
+   },
+   {
+    "id": "g14",
+    "t": "text",
+    "name": "Cartão 2 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 638,
+      "y": 872,
+      "w": 436,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 990,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Cliente ou disciplina, o desafio e o que você entregou.",
+    "ah": true
+   },
+   {
+    "id": "g15",
+    "t": "shape",
+    "name": "Cartão 3",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 986,
+      "w": 488,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1078,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#f1eefc",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 20,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g16",
+    "t": "text",
+    "name": "Cartão 3 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1012,
+      "w": 436,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1098,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Projeto 3",
+    "ah": true
+   },
+   {
+    "id": "g17",
+    "t": "text",
+    "name": "Cartão 3 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1056,
+      "w": 436,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1135,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Cliente ou disciplina, o desafio e o que você entregou.",
+    "ah": true
+   },
+   {
+    "id": "g18",
+    "t": "shape",
+    "name": "Cartão 4",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 612,
+      "y": 986,
+      "w": 488,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1223,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#f1eefc",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 20,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g19",
+    "t": "text",
+    "name": "Cartão 4 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 638,
+      "y": 1012,
+      "w": 436,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1243,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Projeto 4",
+    "ah": true
+   },
+   {
+    "id": "g20",
+    "t": "text",
+    "name": "Cartão 4 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 638,
+      "y": 1056,
+      "w": 436,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1280,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Cliente ou disciplina, o desafio e o que você entregou.",
+    "ah": true
+   },
+   {
+    "id": "g21",
+    "t": "text",
+    "name": "Título da seção",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 1322,
+      "w": 1000,
+      "h": 49,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1440,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 42,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Como eu trabalho",
+    "ah": true
+   },
+   {
+    "id": "g22",
+    "t": "shape",
+    "name": "Cartão 1",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 1407,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1497,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#f1eefc",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 20,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g23",
+    "t": "text",
+    "name": "Cartão 1 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1433,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1517,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "1 · Entender",
+    "ah": true
+   },
+   {
+    "id": "g24",
+    "t": "text",
+    "name": "Cartão 1 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1477,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1554,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Conversa, pesquisa e referências antes de desenhar.",
+    "ah": true
+   },
+   {
+    "id": "g25",
+    "t": "shape",
+    "name": "Cartão 2",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 441,
+      "y": 1407,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1642,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#f1eefc",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 20,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g26",
+    "t": "text",
+    "name": "Cartão 2 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 467,
+      "y": 1433,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1662,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "2 · Explorar",
+    "ah": true
+   },
+   {
+    "id": "g27",
+    "t": "text",
+    "name": "Cartão 2 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 467,
+      "y": 1477,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1699,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Esboços e variações até a ideia certa aparecer.",
+    "ah": true
+   },
+   {
+    "id": "g28",
+    "t": "shape",
+    "name": "Cartão 3",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 782,
+      "y": 1407,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1787,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#f1eefc",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 20,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g29",
+    "t": "text",
+    "name": "Cartão 3 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 808,
+      "y": 1433,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1807,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "3 · Entregar",
+    "ah": true
+   },
+   {
+    "id": "g30",
+    "t": "text",
+    "name": "Cartão 3 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 808,
+      "y": 1477,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1844,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Arquivos finais, guia de uso e acompanhamento.",
+    "ah": true
+   },
+   {
+    "id": "g31",
+    "t": "shape",
+    "name": "Fundo da chamada",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 1655,
+      "w": 1200,
+      "h": 362,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 1960,
+      "w": 390,
+      "h": 294
+     }
+    },
+    "s": {
+     "fill": "#1d1a2b",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g32",
+    "t": "text",
+    "name": "Título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 200,
+      "y": 1743,
+      "w": 800,
+      "h": 51,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2004,
+      "w": 342,
+      "h": 65,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 44,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Tem um projeto em mente?",
+    "ah": true
+   },
+   {
+    "id": "g33",
+    "t": "text",
+    "name": "Texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 250,
+      "y": 1812,
+      "w": 700,
+      "h": 31,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2083,
+      "w": 342,
+      "h": 53,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.12,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Conte o que você precisa e eu respondo em até dois dias úteis.",
+    "ah": true
+   },
+   {
+    "id": "g34",
+    "t": "shape",
+    "name": "Botão Escrever agora",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 480,
+      "y": 1873,
+      "w": 240,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 85,
+      "y": 2160,
+      "w": 220,
+      "h": 50,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fill": "#7b5cff",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 9999,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.24,
+      "ease": "ease-out"
+     }
+    },
+    "link": {
+     "href": "mailto:",
+     "blank": false
+    },
+    "shape": "rect",
+    "label": "Escrever agora",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g35",
+    "t": "shape",
+    "name": "Rodapé",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 2017,
+      "w": 1200,
+      "h": 150,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 2254,
+      "w": 390,
+      "h": 170
+     }
+    },
+    "s": {
+     "fill": "#1d1a2b",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g36",
+    "t": "text",
+    "name": "Rodapé — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 2057,
+      "w": 1000,
+      "h": 45,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2290,
+      "w": 342,
+      "h": 42,
+      "fs": 14
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.5,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Seu Nome · Designer\nFeito no Gehrarte · UEM",
+    "ah": true
+   },
+   {
+    "id": "g37",
+    "t": "text",
+    "name": "Rodapé — links",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 2107,
+      "w": 1000,
+      "h": 20,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2350,
+      "w": 342,
+      "h": 20,
+      "fs": 13
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.4,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Behance   ·   Instagram   ·   E-mail",
+    "ah": true
+   }
+  ]
+ }
+}

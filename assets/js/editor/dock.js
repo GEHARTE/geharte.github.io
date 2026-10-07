@@ -12,7 +12,9 @@ import { ajustar, ancorar, caixaVisivel, telaDisponivel, posicaoJanela, corrigir
 
 const KEY = (slug) => `gehrarte.layout.${slug}`;
 const COMPACT_Q = '(max-width: 720px), (pointer: coarse) and (max-height: 560px)';
-const DRAWER_SIDE = { lib: 'left', layers: 'left', props: 'right', rail: 'left' };
+// Celular: cada botão da gaveta abre um grupo de painéis (a biblioteca vira uma sanfona: um aberto por vez)
+const DRAWER_SIDE = { lib: 'left', layers: 'right', props: 'right' };
+const drawerKeyOf = (id) => Object.keys(D.DRAWER_GROUPS).find((k) => D.DRAWER_GROUPS[k].includes(id));
 const WHERE = { left: 'à esquerda', right: 'à direita' };
 
 // ---------- menu pequeno (reaproveitado pelo ⋯ do painel e pelo botão Painéis) ----------
@@ -43,11 +45,33 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
   const ids = Object.keys(panels);
   const mq = matchMedia(COMPACT_Q);
   const wins = new Map();            // id -> { win, tick }
-  let compact = mq.matches, drawerOpen = null, drag = null, locked = false;
+  let compact = mq.matches, drawerOpen = null, drawerPick = null, drag = null, locked = false;
+  const clickTimers = new Map();     // clique no cabeçalho recolhe/expande, mas espera um instante para não atrapalhar o duplo clique
 
+  // ---------- persistência ----------
+  // A disposição é da PESSOA (uma por usuário neste navegador), não do arquivo aberto: trocar de arquivo, fechar e voltar noutra hora
+  // mostra tudo como foi deixado. Grava na hora (nada de espera que se perde ao fechar a aba), acompanha o que outra aba/janela do
+  // editor mudou (senão a aba antiga sobrescreveria a disposição nova) e pede ao navegador para não descartar os dados do site.
+  const chave = KEY(slug);
   let L = D.normalize(read(), ids);
-  function read() { try { return JSON.parse(localStorage.getItem(KEY(slug))); } catch { return null; } }
-  const persist = debounce(() => { try { localStorage.setItem(KEY(slug), JSON.stringify(D.serialize(L))); } catch { /* sem armazenamento: vale só nesta sessão */ } }, 250);
+  function read() { try { return JSON.parse(localStorage.getItem(chave)); } catch { return null; } }
+  let avisouFalha = false, pediuPersistencia = false;
+  function persist() {
+    try { localStorage.setItem(chave, JSON.stringify(D.serialize(L))); }
+    catch { if (!avisouFalha) { avisouFalha = true; toast('Não consegui guardar a disposição dos painéis: o navegador bloqueou o armazenamento do site. Ela vale só nesta sessão.', 'err'); } return; }
+    if (!pediuPersistencia) { pediuPersistencia = true; try { navigator.storage?.persisted?.().then((ok) => ok || navigator.storage.persist?.()).catch(() => {}); } catch { /* sem a API */ } }
+  }
+  // outra aba/janela do editor gravou uma disposição nova: adota (os painéis que esta janela separou continuam separados)
+  function adotar(raw) {
+    if (drag) return;
+    const nova = D.normalize(raw, ids);
+    for (const id of wins.keys()) D.windowPanel(nova, id, L.windows.find((w) => w.id === id));
+    if (JSON.stringify(D.serialize(nova)) === JSON.stringify(D.serialize(L))) return;
+    L = nova;
+    render();
+  }
+  addEventListener('storage', (e) => { if (e.key === chave && e.newValue) { try { adotar(JSON.parse(e.newValue)); } catch { /* valor ilegível: fica com o que tem */ } } });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { const r = read(); if (r) adotar(r); } });
 
   // ---------- molduras ----------
   const frames = {};
@@ -67,7 +91,8 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
     const rz = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'].map((k) => h('i', { class: 'rz rz-' + k, 'data-rz': k }));
     const f = h('section', { class: 'pnl', 'data-id': id }, head, h('div', { class: 'pnl-body' }, p.el), rz);
     head.addEventListener('pointerdown', (e) => onHeadDown(e, id));
-    head.addEventListener('dblclick', (e) => { if (!e.target.closest('button')) toggleFloat(id); });
+    head.addEventListener('dblclick', (e) => { if (!e.target.closest('button')) { clearTimeout(clickTimers.get(id)); toggleFloat(id); } });
+    head.addEventListener('click', (e) => { if (compact && !e.target.closest('button')) pickInDrawer(id); });
     head.addEventListener('contextmenu', (e) => { if (compact || wins.has(id)) return; e.preventDefault(); menuFor(id, null, { x: e.clientX, y: e.clientY }); });
     f.addEventListener('pointerdown', () => { if (D.locate(L, id)?.zone === 'float') raise(id); }, true);
     f.addEventListener('click', (e) => {
@@ -95,12 +120,16 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
     document.body.classList.toggle('compact', compact);
     keepScroll(() => (compact ? renderCompact() : renderDesktop()));
     for (const id of ids) {
-      const f = frames[id], zone = D.locate(L, id)?.zone;
-      f.classList.toggle('is-collapsed', !!L.panels[id].collapsed && !compact);
+      const f = frames[id], zone = D.locate(L, id)?.zone, inDrawer = compact && f.parentNode === drawerEl;
+      // desktop: o que a pessoa recolheu; celular: na gaveta da biblioteca, só o painel escolhido fica aberto
+      const collapsed = compact ? inDrawer && drawerGroup().length > 1 && id !== drawerPick : !!L.panels[id].collapsed;
+      f.classList.toggle('is-collapsed', collapsed);
       f.classList.toggle('is-float', zone === 'float' && !compact);
       f.classList.toggle('in-window', wins.has(id));
-      f.classList.toggle('is-drawer', compact && f.parentNode === drawerEl);
-      onVisible?.(id, compact ? true : D.isVisible(L, id));
+      f.classList.toggle('is-drawer', inDrawer);
+      f.classList.toggle('stack-rest', inDrawer && drawerGroup().length > 1 && id !== drawerGroup()[0]);   // só o primeiro da sanfona leva o botão de fechar a gaveta
+      const vis = compact ? inDrawer : D.isVisible(L, id);
+      onVisible?.(id, vis, vis && !collapsed);      // `open` = à vista e não recolhido (painéis pesados só montam o conteúdo aí)
     }
   }
 
@@ -143,6 +172,7 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
   }
 
   // No celular a barra de ferramentas fica sempre à vista e o resto abre em gaveta sobre o canvas.
+  const drawerGroup = () => (drawerOpen ? D.DRAWER_GROUPS[drawerOpen].filter((id) => ids.includes(id)) : []);
   function renderCompact() {
     for (const side of D.SIDES) { dockEl[side].replaceChildren(); dockEl[side].classList.add('empty'); }
     floatsEl.replaceChildren();
@@ -151,15 +181,21 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
     rail.append(frames.rail);
     dockEl.left.replaceChildren(rail); dockEl.left.classList.remove('empty');
     drawerEl.replaceChildren();
-    for (const id of ids) if (id !== 'rail' && id !== drawerOpen) frames[id].remove();
-    drawerEl.hidden = !drawerOpen;
-    if (drawerOpen) {
-      frames[drawerOpen].style.cssText = '';
+    const group = drawerGroup();
+    for (const id of ids) if (id !== 'rail' && !group.includes(id)) frames[id].remove();
+    drawerEl.hidden = !group.length;
+    if (group.length) {
+      if (!group.includes(drawerPick)) drawerPick = group[0];
       drawerEl.dataset.side = DRAWER_SIDE[drawerOpen] || 'right';
-      drawerEl.append(frames[drawerOpen]);
+      for (const id of group) {
+        frames[id].style.cssText = group.length === 1 || id === drawerPick ? 'flex:1 1 0' : 'flex:0 0 auto';
+        drawerEl.append(frames[id]);
+      }
     }
     document.querySelectorAll('#drawerseg [data-drawer]').forEach((b) => b.classList.toggle('on', b.dataset.drawer === drawerOpen));
   }
+  // toque no cabeçalho de um painel da gaveta: abre esse e recolhe os outros do grupo
+  function pickInDrawer(id) { if (frames[id].classList.contains('is-drawer') && drawerGroup().length > 1 && drawerPick !== id) { drawerPick = id; render(); } }
 
   const change = () => { render(); persist(); };
   // só z-index: mexer no DOM no meio de um clique faria o navegador perder o clique dos botões do cabeçalho
@@ -168,17 +204,24 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
   // ---------- menus ----------
   function menuFor(id, anchor, at) {
     const zone = D.locate(L, id)?.zone;
+    const loc = D.locate(L, id), col = loc?.zone === 'dock' ? L.docks[loc.side][loc.col] : null;
     popMenu(anchor, [
       zone === 'float' ? { label: 'Encaixar de volta', icon: 'dockin', onClick: () => redock(id) } : { label: 'Soltar sobre o canvas', icon: 'floatwin', onClick: () => toggleFloat(id) },
       { label: 'Separar em outra janela', icon: 'popout', onClick: () => detach(id) },
       '-',
-      { label: 'Encaixar à esquerda', icon: 'chevR', onClick: () => dockSide(id, 'left') },
-      { label: 'Encaixar à direita', icon: 'chevR', onClick: () => dockSide(id, 'right') },
+      // trocar de lugar sem arrastar: dentro da coluna, para a outra lateral (empilhando) ou numa coluna nova na borda
+      { label: 'Subir na coluna', icon: 'up', disabled: !col || loc.idx === 0, onClick: () => { D.movePanel(L, id, -1); change(); } },
+      { label: 'Descer na coluna', icon: 'down', disabled: !col || loc.idx === col.ids.length - 1, onClick: () => { D.movePanel(L, id, +1); change(); } },
+      { label: 'Empilhar na coluna da esquerda', icon: 'chevR', onClick: () => stackSide(id, 'left') },
+      { label: 'Empilhar na coluna da direita', icon: 'chevR', onClick: () => stackSide(id, 'right') },
+      { label: 'Coluna nova à esquerda', icon: 'chevR', onClick: () => dockSide(id, 'left') },
+      { label: 'Coluna nova à direita', icon: 'chevR', onClick: () => dockSide(id, 'right') },
       '-',
       { label: L.panels[id].collapsed ? 'Expandir' : 'Recolher', icon: 'chevD', onClick: () => { D.toggleCollapsed(L, id); change(); } },
       { label: 'Ocultar painel', icon: 'x', onClick: () => { D.hidePanel(L, id); change(); } },
     ], at);
   }
+  function stackSide(id, side) { closeWin(id, false); D.dockInSide(L, id, side); change(); }
   function dockSide(id, side) { D.dockNewCol(L, id, side, side === 'left' ? L.docks.left.length : L.docks.right.length); closeWin(id, false); change(); }
 
   const where = (id) => {
@@ -198,7 +241,19 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
   if (panelsBtn) panelsBtn.onclick = () => panelsMenu(panelsBtn);
 
   // ---------- ações ----------
-  function show(id) { if (compact) return openDrawer(id); closeWin(id, false); D.showPanel(L, id); change(); }
+  function show(id) {
+    if (compact) { const k = drawerKeyOf(id); if (drawerOpen !== k) { drawerOpen = k; } drawerPick = id; return render(); }
+    closeWin(id, false); D.showPanel(L, id); change();
+  }
+  // Mostra o painel, abre e (com `exclusive`) recolhe os que dividem a coluna com ele: usado quando o editor quer chamar a atenção para uma ferramenta.
+  function reveal(id, { exclusive = false } = {}) {
+    if (!ids.includes(id)) return;
+    if (compact) return show(id);
+    closeWin(id, false);
+    D.showPanel(L, id);
+    if (exclusive) D.expandOnly(L, id); else L.panels[id].collapsed = false;
+    change();
+  }
   function hide(id) { closeWin(id, false); D.hidePanel(L, id); change(); }
   function redock(id) { closeWin(id, false); D.dockBack(L, id); change(); }
   function toggleFloat(id) {
@@ -216,7 +271,7 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
   function reset() { for (const id of [...wins.keys()]) closeWin(id, false); L = D.normalize(null, ids); change(); }
 
   // ---------- gavetas (celular) ----------
-  function openDrawer(id) { drawerOpen = drawerOpen === id ? null : id; render(); }
+  function openDrawer(key) { drawerOpen = drawerOpen === key ? null : key; render(); }
   function closeDrawer() { drawerOpen = null; render(); }
   document.querySelectorAll('#drawerseg [data-drawer]').forEach((b) => b.addEventListener('click', () => openDrawer(b.dataset.drawer)));
 
@@ -328,7 +383,14 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
       frame.classList.remove('is-moving');
       document.body.classList.remove('dragging-panel'); app.classList.remove('dragging-panel');
       drag = null;
-      if (!on) { if (wasFloat) raise(id); return; }
+      if (!on) {
+        if (wasFloat) raise(id);
+        else if (apply) {                                    // clique simples no cabeçalho: recolhe/expande (o duplo clique solta o painel)
+          clearTimeout(clickTimers.get(id));
+          clickTimers.set(id, setTimeout(() => { clickTimers.delete(id); D.toggleCollapsed(L, id); change(); }, 230));
+        }
+        return;
+      }
       if (!apply || !target) { render(); return; }
       const t = target;
       if (t.kind === 'col') { closeWin(id, false); D.dockNewCol(L, id, t.side, t.at); }
@@ -447,7 +509,7 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
   document.addEventListener('pointerdown', () => setActiveDoc(document), true);
 
   return {
-    show, hide, toggleAll, reset, redock, detach, panelsMenu, openDrawer, closeDrawer,
+    show, reveal, hide, toggleAll, reset, redock, detach, panelsMenu, openDrawer, closeDrawer,
     // publicação em andamento: painéis em outra janela também ficam inertes
     setLocked(on) { locked = on; for (const { d } of wins.values()) d.body.toggleAttribute('inert', on); },
     isCompact: () => compact,

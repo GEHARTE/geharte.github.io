@@ -1,4 +1,4 @@
-// Biblioteca lateral: elementos, SVGs animados, mídia, Drive, modelos e camadas.
+// Ferramentas da biblioteca, cada uma um painel do dock: elementos, SVGs animados, mídia, Drive e modelos.
 import '../core/migracao.js';
 import { h } from '../core/dom.js';
 import { makeElement, K, W } from '../core/model.js';
@@ -6,10 +6,8 @@ import { sanitizeSvg } from '../core/sanitize.js';
 import { SHAPE_LIST, shapeSvg } from '../core/render.js';
 import { S, on, emit, commit, select } from './state.js';
 import { createShape, createAbas, addTextPreset, insertSvg, insertSvgBackground, insertImageFile, insertAsset } from './tools.js';
-import { renderLayers } from './layers.js';
 import { driveTab } from './drive.js';
-import { icon } from './icons.js';
-import { btn, toast, modal } from './ui.js';
+import { btn, toast, modal, section } from './ui.js';
 import { montarGaleria } from '../core/galeria.js';
 import { abrirGerador } from '../core/gerador-ui.js';
 import { criarMeusModelos, carregarCatalogo, aplicarModeloAoDoc, ehModeloDeSite, FORMATO, MODELO_V, slugModelo } from '../core/modelos.js';
@@ -127,73 +125,69 @@ function applyModelo(modelo) {
 }
 
 // ---------- UI ----------
-const TABS = [['els', 'square', 'Elementos'], ['svg', 'burst', 'SVG animado'], ['media', 'image', 'Mídia'], ['drive', 'cloud', 'Drive'], ['tpl', 'template', 'Modelos'], ['layers', 'layers', 'Camadas']];
+// Cada ferramenta da biblioteca é um PAINEL do dock (Elementos, SVG animado, Mídia, Drive, Modelos): recolher, empilhar onde a
+// pessoa quiser, soltar sobre o canvas ou levar para outra janela. O conteúdo é montado na primeira vez que o painel abre (o
+// catálogo de modelos, por exemplo, só é buscado quando se abre Modelos) e refeito, se o que ele mostra mudou, na abertura seguinte.
+const grupo = (chave, titulo, filhos) => section(titulo, filhos, { aberta: true, chave: 'lib.' + chave });
 
-export function initLibrary(root) {
-  const tabs = h('div', { class: 'lib-tabs' });
-  const body = h('div', { class: 'lib-body' });
-  root.append(tabs, body);
-  let cur = localStorage.getItem('gehrarte.libtab') || 'els';
-  let cleanup = null;   // aba que precisa limpar algo ao sair (Drive)
+export function initLibraryPanels(roots) {
+  const P = {};   // id -> { root, build, built, open, stale, cleanup }
+  const def = (id, build) => { if (roots[id]) { P[id] = { root: roots[id], build, built: false, open: false, stale: false, cleanup: null }; roots[id].classList.add('lib-body'); } };
 
-  const tabEls = {};
-  const TABS_ATIVAS = TABS.filter(([id]) => id !== 'drive' || S.host?.capacidades.drive);   // o Drive só existe nos hosts que o oferecem
-  if (!TABS_ATIVAS.some(([id]) => id === cur)) cur = 'els';
-  for (const [id, ic, title] of TABS_ATIVAS) {
-    tabEls[id] = h('button', { title, 'aria-label': title, html: icon(ic, 18), onclick: () => show(id) });
-    tabs.append(tabEls[id]);
+  function paint(id) {
+    const p = P[id];
+    p.cleanup?.(); p.cleanup = null;
+    p.root.replaceChildren();
+    p.cleanup = p.build(p.root) || null;
+    p.built = true; p.stale = false;
+  }
+  const refresh = (id) => { const p = P[id]; if (p) (p.open ? paint(id) : (p.stale = true)); };
+  // `open` = o painel está à vista e não recolhido. Ao fechar, o Drive solta o que prendeu e reabre do zero.
+  function setOpen(id, open) {
+    const p = P[id];
+    if (!p || p.open === open) return;
+    p.open = open;
+    if (open) { if (!p.built || p.stale) paint(id); }
+    else if (p.cleanup) { p.cleanup(); p.cleanup = null; p.built = false; p.root.replaceChildren(); }
   }
 
-  function show(id) {
-    cur = id;
-    cleanup?.(); cleanup = null;
-    try { localStorage.setItem('gehrarte.libtab', id); } catch { /* ok */ }
-    for (const k in tabEls) tabEls[k].classList.toggle('on', k === id);
-    body.innerHTML = '';
-    body.dataset.tab = id;
-    ({ els, svg, media, drive, tpl, layers })[id]();
-  }
-
-  function els() {
-    body.append(h('h4', {}, 'Texto'));
-    body.append(h('div', { class: 'tpresets' }, TEXTS.map(([name, p, txt]) => h('button', { class: 'tp', style: { fontFamily: `'${p.fontFamily}'`, fontWeight: p.fontWeight, fontStyle: p.italic ? 'italic' : 'normal', textTransform: p.upper ? 'uppercase' : 'none', letterSpacing: (p.ls || 0) + 'em' }, onclick: () => addTextPreset(p, txt) }, name))));
-    body.append(h('h4', {}, 'Formas'));
-    body.append(h('div', { class: 'grid shapes' }, SHAPE_LIST.map(([k, label]) => {
-      const prev = makeElement('shape', { shape: k, s: k === 'line' || k === 'arrow' ? { fill: null, stroke: '#cfcbe0', sw: 4 } : { fill: '#cfcbe0' } });
-      return h('button', { class: 'cell', title: label, onclick: () => { S.shapeKind = k; createShape(k); } }, h('div', { class: 'pv', html: shapeSvg(prev, 52, 52) }));
-    })));
-    body.append(h('p', { class: 'hint pad' }, 'Clique para inserir. Para desenhar no tamanho que quiser, use a ferramenta Forma (R) e arraste no canvas.'));
+  def('els', (body) => {
+    body.append(grupo('texto', 'Texto', h('div', { class: 'tpresets' }, TEXTS.map(([name, p, txt]) => h('button', { class: 'tp', style: { fontFamily: `'${p.fontFamily}'`, fontWeight: p.fontWeight, fontStyle: p.italic ? 'italic' : 'normal', textTransform: p.upper ? 'uppercase' : 'none', letterSpacing: (p.ls || 0) + 'em' }, onclick: () => addTextPreset(p, txt) }, name)))));
+    body.append(grupo('formas', 'Formas', [
+      h('div', { class: 'grid shapes' }, SHAPE_LIST.map(([k, label]) => {
+        const prev = makeElement('shape', { shape: k, s: k === 'line' || k === 'arrow' ? { fill: null, stroke: '#cfcbe0', sw: 4 } : { fill: '#cfcbe0' } });
+        return h('button', { class: 'cell', title: label, onclick: () => { S.shapeKind = k; createShape(k); } }, h('div', { class: 'pv', html: shapeSvg(prev, 52, 52) }));
+      })),
+      h('p', { class: 'hint pad' }, 'Clique para inserir. Para desenhar no tamanho que quiser, use a ferramenta Forma (R) e arraste no canvas.'),
+    ]));
     if (S.doc?.kind === 'site') {
-      body.append(h('h4', {}, 'Projeto de site'));
-      body.append(h('div', { class: 'pad' }, btn({ label: 'Barra de abas', ic: 'layers', onClick: createAbas }), h('p', { class: 'hint' }, 'Menu funcional: lista as abas do projeto e leva de uma a outra. Para links soltos (cartões, botões), use “Ir para a aba” em Link.')));
+      body.append(grupo('site', 'Projeto de site', h('div', { class: 'pad' }, btn({ label: 'Barra de abas', ic: 'layers', onClick: createAbas }), h('p', { class: 'hint' }, 'Menu funcional: lista as abas do projeto e leva de uma a outra. Para links soltos (cartões, botões), use “Ir para a aba” em Link.'))));
     }
-  }
+  });
 
-  function svg() {
-    const cats = [...new Set(SVG_LIB.map((s) => s.cat))];
-    for (const cat of cats) {
-      body.append(h('h4', {}, cat));
-      body.append(h('div', { class: 'grid svgs' }, SVG_LIB.filter((s) => s.cat === cat).map((s, i) => {
+  def('svg', (body) => {
+    for (const cat of [...new Set(SVG_LIB.map((s) => s.cat))]) {
+      body.append(grupo('svg-' + cat, cat, h('div', { class: 'grid svgs' }, SVG_LIB.filter((s) => s.cat === cat).map((s) => {
         const r = sanitizeSvg(s.code, 'lib-' + SVG_LIB.indexOf(s));
         return h('button', { class: 'cell wide' + (s.bg ? ' bgcell' : ''), title: s.name, onclick: () => (s.bg ? insertSvgBackground(s.code, s.name) : insertSvg(s.code, s.name)) },
           h('div', { class: 'pv', html: r.ok ? r.svg : '' }), h('span', {}, s.name));
-      })));
+      }))));
     }
     body.append(h('div', { class: 'pad' }, btn({ label: 'Colar meu SVG…', ic: 'code', onClick: pasteSvg }), h('p', { class: 'hint' }, 'Suporta animações CSS e SMIL. Dica: exporte do Figma/Inkscape como SVG e cole aqui.')));
-  }
+  });
 
-  function media() {
-    const file = h('input', { type: 'file', accept: 'image/*', multiple: true, hidden: true, onchange: async () => { for (const f of file.files) await insertImageFile(f); file.value = ''; show('media'); } });
+  def('media', (body) => {
+    const file = h('input', { type: 'file', accept: 'image/*', multiple: true, hidden: true, onchange: async () => { for (const f of file.files) await insertImageFile(f); file.value = ''; refresh('media'); } });
     body.append(h('div', { class: 'pad' }, btn({ label: 'Enviar imagem', ic: 'upload', cls: 'primary', onClick: () => file.click() }), file,
       h('p', { class: 'hint' }, 'PNG, JPG, WebP, GIF ou SVG. Também dá para arrastar arquivos para o canvas ou colar (Ctrl+V). As imagens são otimizadas automaticamente.')));
     const used = [...S.assets.entries()];
     if (!used.length) body.append(h('p', { class: 'hint pad' }, 'Nenhuma imagem enviada ainda.'));
     body.append(h('div', { class: 'grid media' }, used.map(([id, a]) => h('button', { class: 'cell', title: 'Inserir', onclick: () => insertAsset(id) }, h('img', { src: a.url, alt: '' })))));
-  }
+  });
 
-  function drive() { cleanup = driveTab(body); }
+  def('drive', (body) => driveTab(body));
 
-  function tpl() {
+  def('tpl', (body) => {
     const meus = criarMeusModelos();
     const catalogo = async () => [...modelosInternos(), ...(await carregarCatalogo(getJson).catch(() => [])), ...(await S.host?.modelos?.catalogo().catch(() => []) || [])];
     const raiz = h('div', { class: 'pad' });
@@ -203,19 +197,14 @@ export function initLibrary(root) {
       onUsar: applyModelo,
       onGerar: (recarregar) => abrirGerador({ docAtual: S.doc, meus, aoSalvar: recarregar, onUsar: applyModelo }),
     });
-  }
+  });
 
-  function layers() { renderLayers(body); }
-
-  function setTabHidden(id, hidden) {
-    tabEls[id].hidden = hidden;
-    if (hidden && cur === id) show('els');
-  }
-
-  on('assets', () => { if (cur === 'media') show('media'); });
-  for (const ev of ['struct', 'select', 'struct-lite', 'layers']) on(ev, () => { if (cur === 'layers') renderLayers(body); });
-  show(cur);
-  return { show, setTabHidden };
+  on('assets', () => refresh('media'));
+  // "Projeto de site" só aparece em Elementos quando o documento é um projeto de site
+  let tipo = S.doc?.kind;
+  const tipoMudou = () => { if (S.doc?.kind !== tipo) { tipo = S.doc?.kind; refresh('els'); } };
+  on('struct', tipoMudou); on('page', tipoMudou);
+  return { setOpen, refresh };
 }
 
 function pasteSvg() {

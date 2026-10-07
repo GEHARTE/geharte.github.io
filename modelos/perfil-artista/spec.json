@@ -1,0 +1,19 @@
+{
+ "id": "perfil-artista",
+ "nome": "Perfil — artista",
+ "descricao": "Página de perfil para quem mostra trabalhos: abertura escura com seu nome, sobre você, três séries em cartões, galeria e convite para conversar. Fundo creme, títulos em Playfair Display e acento laranja.",
+ "categoria": "Perfil",
+ "tema": { "fundo": "#f6f1e9", "texto": "#17161d", "suave": "#5a5766", "escuro": "#17161d", "sobreEscuro": "#ffffff", "acento": "#e4572e", "sobreAcento": "#ffffff", "superficie": "#ebe3d4", "fonteTitulo": "Playfair Display", "fonteTexto": "Inter", "raio": 18 },
+ "secoes": [
+  { "tipo": "hero", "fundo": "escuro", "kicker": "Artista visual", "titulo": "Seu Nome", "texto": "Uma frase sobre o que você faz e o que move o seu trabalho. Troque este texto e a imagem ao lado pelos seus.", "botao": { "rotulo": "Escrever para mim", "href": "mailto:" }, "imagem": true, "imagemRotulo": "Seu retrato ou uma obra" },
+  { "tipo": "texto", "titulo": "Sobre mim", "paragrafos": ["Conte quem você é: onde estuda, com o que trabalha e o que procura na arte. Dois ou três parágrafos bastam.", "Fale das suas referências, das técnicas que usa e de um projeto de que você tem orgulho."] },
+  { "tipo": "cards", "titulo": "Séries e trabalhos", "colunas": 3, "itens": [
+   { "titulo": "Série 1", "texto": "Nome, ano e técnica. Uma linha sobre a ideia por trás." },
+   { "titulo": "Série 2", "texto": "Nome, ano e técnica. Uma linha sobre a ideia por trás." },
+   { "titulo": "Série 3", "texto": "Nome, ano e técnica. Uma linha sobre a ideia por trás." }
+  ] },
+  { "tipo": "galeria", "titulo": "Galeria", "quantidade": 6, "colunas": 3 },
+  { "tipo": "chamada", "titulo": "Vamos conversar?", "texto": "Para encomendas, exposições e parcerias, escreva para mim.", "botao": { "rotulo": "Enviar mensagem", "href": "mailto:" } },
+  { "tipo": "rodape", "texto": "Seu Nome · Artista visual\nFeito no Gehrarte · UEM", "links": ["Instagram", "E-mail"] }
+ ]
+}

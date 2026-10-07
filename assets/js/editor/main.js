@@ -11,7 +11,7 @@ import { BASE } from '../core/util.js';
 import { S, on, emit, touch, loadDoc, setDevice, setTool, undo, redo, canUndo, canRedo, select, selEls, removeEls, duplicate, copy, paste, reorder, saveNow, commit } from './state.js';
 import { initStage, fit, setZoom, nudge, editText, applyAnimState } from './stage.js';
 import { initPanel } from './panels.js';
-import { initLibrary } from './library.js';
+import { initLibraryPanels } from './library.js';
 import { renderLayers } from './layers.js';
 import { initDock } from './dock.js';
 import { instalar as vigiarAreaVisivel } from '../core/janelas.js';
@@ -126,7 +126,10 @@ async function main() {
 
   initStage({ vp: $('#viewport'), stage: $('#stage'), holder: $('#holder'), overlay: $('#overlay') });
   initPanel($('#props'));
-  const lib = initLibrary($('#lib'));
+  // cada ferramenta da biblioteca é um painel (o Drive só existe nos hosts que o oferecem)
+  const libRoots = { els: $('#p-els'), svg: $('#p-svg'), media: $('#p-media'), tpl: $('#p-tpl') };
+  if (S.host?.capacidades.drive) libRoots.drive = $('#p-drive');
+  const lib = initLibraryPanels(libRoots);
   initLayersPanel($('#layerspane'));
   loadDoc(doc, updatedAt);
   initAbas($('#abas-bar'));   // só aparece em projetos de site
@@ -134,11 +137,17 @@ async function main() {
   // painéis reorganizáveis (docks, soltos, outra janela; no celular, gavetas): ver dock.js
   dock = initDock({
     app: $('#app'), slug: S.slug, rotateEl: $('#rotate'),
-    panels: { rail: { el: $('#rail'), title: 'Ferramentas' }, lib: { el: $('#lib'), title: 'Biblioteca' }, props: { el: $('#props'), title: 'Propriedades' }, layers: { el: $('#layerspane'), title: 'Camadas' } },
+    panels: {
+      rail: { el: $('#rail'), title: 'Ferramentas' },
+      els: { el: libRoots.els, title: 'Elementos' }, svg: { el: libRoots.svg, title: 'SVG animado' }, media: { el: libRoots.media, title: 'Mídia' },
+      ...(libRoots.drive ? { drive: { el: libRoots.drive, title: 'Drive' } } : {}),
+      tpl: { el: libRoots.tpl, title: 'Modelos' },
+      props: { el: $('#props'), title: 'Propriedades' }, layers: { el: $('#layerspane'), title: 'Camadas' },
+    },
     onDocument: bindKeys,
     onMode: () => fit(),
-    // com o painel Camadas à vista, a aba "Camadas" da biblioteca some (seria o mesmo conteúdo duas vezes)
-    onVisible: (id, vis) => { if (id === 'layers') { lib.setTabHidden('layers', vis); if (vis) emit('layers'); } },
+    // as ferramentas da biblioteca montam o conteúdo quando abrem (à vista e não recolhidas); Camadas se refaz ao aparecer
+    onVisible: (id, vis, open) => { lib.setOpen(id, open); if (id === 'layers' && vis) emit('layers'); },
   });
   S.dock = dock;
   fit();
@@ -146,7 +155,7 @@ async function main() {
   await retomarPublicacao(doc);
   emit('zoom');   // o fit() inicial rodou antes do rótulo de zoom estar ligado
   on('fit', fit);
-  if (fresh) { lib.show('tpl'); toast('Bem-vindo! Escolha um modelo ou comece do zero.'); }
+  if (fresh) { dock.reveal('tpl', { exclusive: true }); toast('Bem-vindo! Escolha um modelo ou comece do zero.'); }
   emit('history');
 }
 

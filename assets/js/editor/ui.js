@@ -21,14 +21,17 @@ export function toast(msg, kind = '') {
 export const btn = ({ label, ic, title, onClick, cls = '', active = false, disabled = false }) =>
   h('button', { class: `btn ${cls}${active ? ' on' : ''}`, title: title || label || '', type: 'button', disabled, onclick: onClick, html: (ic ? icon(ic) : '') + (label ? `<span>${label}</span>` : '') });
 
-// Seções do painel de propriedades: FECHADAS por padrão (abertas demais confundiam); a escolha da pessoa é lembrada por seção, neste navegador.
+// Seções recolhíveis (painel de propriedades e ferramentas da biblioteca). Nas propriedades começam FECHADAS (abertas demais confundiam);
+// a escolha da pessoa é lembrada por seção, neste navegador.
 const CHAVE_SECOES = 'artatk.secoes';
 const lerSecoes = () => { try { return JSON.parse(localStorage.getItem(CHAVE_SECOES) || '{}') || {}; } catch { return {}; } };
 const guardarSecao = (titulo, aberta) => { try { localStorage.setItem(CHAVE_SECOES, JSON.stringify({ ...lerSecoes(), [titulo]: aberta })); } catch { /* sem armazenamento */ } };
-export function section(title, body) {
-  const aberta = lerSecoes()[title] === true;
+// `aberta`: como a seção começa quando a pessoa ainda não escolheu (a biblioteca começa aberta); `chave`: nome sob o qual a escolha é lembrada.
+export function section(title, body, { aberta: padrao = false, chave = title } = {}) {
+  const guardado = lerSecoes()[chave];
+  const aberta = typeof guardado === 'boolean' ? guardado : padrao;
   const wrap = h('section', { class: 'sec' + (aberta ? ' open' : '') });
-  const head = h('button', { class: 'sec-h', type: 'button', 'aria-expanded': String(aberta), onclick: () => { const on = wrap.classList.toggle('open'); head.setAttribute('aria-expanded', String(on)); guardarSecao(title, on); } }, h('span', { html: icon('chevR', 12) }), title);
+  const head = h('button', { class: 'sec-h', type: 'button', 'aria-expanded': String(aberta), onclick: () => { const on = wrap.classList.toggle('open'); head.setAttribute('aria-expanded', String(on)); guardarSecao(chave, on); } }, h('span', { html: icon('chevR', 12) }), title);
   wrap.append(head, h('div', { class: 'sec-b' }, body));
   return wrap;
 }

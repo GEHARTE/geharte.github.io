@@ -1,0 +1,1459 @@
+{
+ "format": "artatk-modelo",
+ "v": 1,
+ "id": "perfil-artista",
+ "nome": "Perfil — artista",
+ "descricao": "Página de perfil para quem mostra trabalhos: abertura escura com seu nome, sobre você, três séries em cartões, galeria e convite para conversar. Fundo creme, títulos em Playfair Display e acento laranja.",
+ "categoria": "Perfil",
+ "origem": "spec",
+ "doc": {
+  "page": {
+   "bg": {
+    "c": "#f6f1e9",
+    "g": null
+   },
+   "h": {
+    "d": 2595,
+    "m": 2467
+   }
+  },
+  "elements": [
+   {
+    "id": "g1",
+    "t": "shape",
+    "name": "Fundo do destaque",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 0,
+      "w": 1200,
+      "h": 504,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 585
+     }
+    },
+    "s": {
+     "fill": "#17161d",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g2",
+    "t": "text",
+    "name": "Etiqueta",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 88,
+      "w": 560,
+      "h": 18,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 44,
+      "w": 342,
+      "h": 16,
+      "fs": 13
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": true,
+     "align": "left",
+     "color": "#ffffff",
+     "lh": 1.2,
+     "ls": 0.18
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Artista visual",
+    "ah": true
+   },
+   {
+    "id": "g3",
+    "t": "text",
+    "name": "Título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 124,
+      "w": 560,
+      "h": 70,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 72,
+      "w": 342,
+      "h": 39,
+      "fs": 34
+     }
+    },
+    "s": {
+     "fontFamily": "Playfair Display",
+     "fontSize": 64,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#ffffff",
+     "lh": 1.08,
+     "ls": -0.015
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.12,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Seu Nome",
+    "ah": true
+   },
+   {
+    "id": "g4",
+    "t": "text",
+    "name": "Texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 218,
+      "w": 560,
+      "h": 98,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 127,
+      "w": 342,
+      "h": 80,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 21,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#ffffff",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.24,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Uma frase sobre o que você faz e o que move o seu trabalho. Troque este texto e a imagem ao lado pelos seus.",
+    "ah": true
+   },
+   {
+    "id": "g5",
+    "t": "shape",
+    "name": "Botão Escrever para mim",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 352,
+      "w": 240,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 235,
+      "w": 220,
+      "h": 50,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fill": "#e4572e",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 9999,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.36,
+      "ease": "ease-out"
+     }
+    },
+    "link": {
+     "href": "mailto:",
+     "blank": false
+    },
+    "shape": "rect",
+    "label": "Escrever para mim",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g6",
+    "t": "shape",
+    "name": "Imagem do destaque",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 680,
+      "y": 48,
+      "w": 420,
+      "h": 408,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "fs": 14,
+      "x": 24,
+      "y": 293,
+      "w": 342,
+      "h": 220
+     }
+    },
+    "s": {
+     "fill": "#d9d4c7",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 18,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.48,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "shape": "rect",
+    "label": "Seu retrato ou uma obra",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 500,
+     "color": "#6a6458"
+    }
+   },
+   {
+    "id": "g7",
+    "t": "text",
+    "name": "Título da seção",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 592,
+      "w": 1000,
+      "h": 49,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 629,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Playfair Display",
+     "fontSize": 42,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Sobre mim",
+    "ah": true
+   },
+   {
+    "id": "g8",
+    "t": "text",
+    "name": "Parágrafo 1",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 663,
+      "w": 760,
+      "h": 68,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 678,
+      "w": 342,
+      "h": 87,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.7,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Conte quem você é: onde estuda, com o que trabalha e o que procura na arte. Dois ou três parágrafos bastam.",
+    "ah": true
+   },
+   {
+    "id": "g9",
+    "t": "text",
+    "name": "Parágrafo 2",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 749,
+      "w": 760,
+      "h": 68,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 779,
+      "w": 342,
+      "h": 87,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.7,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Fale das suas referências, das técnicas que usa e de um projeto de que você tem orgulho.",
+    "ah": true
+   },
+   {
+    "id": "g10",
+    "t": "text",
+    "name": "Título da seção",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 993,
+      "w": 1000,
+      "h": 49,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 954,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Playfair Display",
+     "fontSize": 42,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Séries e trabalhos",
+    "ah": true
+   },
+   {
+    "id": "g11",
+    "t": "shape",
+    "name": "Cartão 1",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 1078,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1011,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#ebe3d4",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 18,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g12",
+    "t": "text",
+    "name": "Cartão 1 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1104,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1031,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Playfair Display",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Série 1",
+    "ah": true
+   },
+   {
+    "id": "g13",
+    "t": "text",
+    "name": "Cartão 1 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 126,
+      "y": 1148,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1068,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Nome, ano e técnica. Uma linha sobre a ideia por trás.",
+    "ah": true
+   },
+   {
+    "id": "g14",
+    "t": "shape",
+    "name": "Cartão 2",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 441,
+      "y": 1078,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1156,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#ebe3d4",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 18,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g15",
+    "t": "text",
+    "name": "Cartão 2 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 467,
+      "y": 1104,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1176,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Playfair Display",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Série 2",
+    "ah": true
+   },
+   {
+    "id": "g16",
+    "t": "text",
+    "name": "Cartão 2 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 467,
+      "y": 1148,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1213,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Nome, ano e técnica. Uma linha sobre a ideia por trás.",
+    "ah": true
+   },
+   {
+    "id": "g17",
+    "t": "shape",
+    "name": "Cartão 3",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 782,
+      "y": 1078,
+      "w": 317,
+      "h": 160,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1301,
+      "w": 342,
+      "h": 129
+     }
+    },
+    "s": {
+     "fill": "#ebe3d4",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 18,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g18",
+    "t": "text",
+    "name": "Cartão 3 — título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 808,
+      "y": 1104,
+      "w": 265,
+      "h": 32,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1321,
+      "w": 302,
+      "h": 27,
+      "fs": 22
+     }
+    },
+    "s": {
+     "fontFamily": "Playfair Display",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.2,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Série 3",
+    "ah": true
+   },
+   {
+    "id": "g19",
+    "t": "text",
+    "name": "Cartão 3 — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 808,
+      "y": 1148,
+      "w": 265,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 44,
+      "y": 1358,
+      "w": 302,
+      "h": 50,
+      "fs": 16
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#5a5766",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Nome, ano e técnica. Uma linha sobre a ideia por trás.",
+    "ah": true
+   },
+   {
+    "id": "g20",
+    "t": "text",
+    "name": "Título da seção",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 1414,
+      "w": 1000,
+      "h": 49,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 1518,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Playfair Display",
+     "fontSize": 42,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "left",
+     "color": "#17161d",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Galeria",
+    "ah": true
+   },
+   {
+    "id": "g21",
+    "t": "shape",
+    "name": "Imagem 1",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 1495,
+      "w": 320,
+      "h": 240,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "fs": 14,
+      "x": 24,
+      "y": 1571,
+      "w": 165,
+      "h": 132
+     }
+    },
+    "s": {
+     "fill": "#d9d4c7",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 18,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "Imagem",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 500,
+     "color": "#6a6458"
+    }
+   },
+   {
+    "id": "g22",
+    "t": "shape",
+    "name": "Imagem 2",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 440,
+      "y": 1495,
+      "w": 320,
+      "h": 240,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "fs": 14,
+      "x": 201,
+      "y": 1571,
+      "w": 165,
+      "h": 132
+     }
+    },
+    "s": {
+     "fill": "#d9d4c7",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 18,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "Imagem",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 500,
+     "color": "#6a6458"
+    }
+   },
+   {
+    "id": "g23",
+    "t": "shape",
+    "name": "Imagem 3",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 780,
+      "y": 1495,
+      "w": 320,
+      "h": 240,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "fs": 14,
+      "x": 24,
+      "y": 1715,
+      "w": 165,
+      "h": 132
+     }
+    },
+    "s": {
+     "fill": "#d9d4c7",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 18,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "Imagem",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 500,
+     "color": "#6a6458"
+    }
+   },
+   {
+    "id": "g24",
+    "t": "shape",
+    "name": "Imagem 4",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 1755,
+      "w": 320,
+      "h": 240,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "fs": 14,
+      "x": 201,
+      "y": 1715,
+      "w": 165,
+      "h": 132
+     }
+    },
+    "s": {
+     "fill": "#d9d4c7",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 18,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "Imagem",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 500,
+     "color": "#6a6458"
+    }
+   },
+   {
+    "id": "g25",
+    "t": "shape",
+    "name": "Imagem 5",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 440,
+      "y": 1755,
+      "w": 320,
+      "h": 240,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "fs": 14,
+      "x": 24,
+      "y": 1859,
+      "w": 165,
+      "h": 132
+     }
+    },
+    "s": {
+     "fill": "#d9d4c7",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 18,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "Imagem",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 500,
+     "color": "#6a6458"
+    }
+   },
+   {
+    "id": "g26",
+    "t": "shape",
+    "name": "Imagem 6",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 780,
+      "y": 1755,
+      "w": 320,
+      "h": 240,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "fs": 14,
+      "x": 201,
+      "y": 1859,
+      "w": 165,
+      "h": 132
+     }
+    },
+    "s": {
+     "fill": "#d9d4c7",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 18,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "Imagem",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "fontWeight": 500,
+     "color": "#6a6458"
+    }
+   },
+   {
+    "id": "g27",
+    "t": "shape",
+    "name": "Fundo da chamada",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 2083,
+      "w": 1200,
+      "h": 362,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 2035,
+      "w": 390,
+      "h": 262
+     }
+    },
+    "s": {
+     "fill": "#17161d",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g28",
+    "t": "text",
+    "name": "Título",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 200,
+      "y": 2171,
+      "w": 800,
+      "h": 51,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2079,
+      "w": 342,
+      "h": 33,
+      "fs": 28
+     }
+    },
+    "s": {
+     "fontFamily": "Playfair Display",
+     "fontSize": 44,
+     "fontWeight": 700,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.15,
+     "ls": 0
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Vamos conversar?",
+    "ah": true
+   },
+   {
+    "id": "g29",
+    "t": "text",
+    "name": "Texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 250,
+      "y": 2240,
+      "w": 700,
+      "h": 31,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2126,
+      "w": 342,
+      "h": 53,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.55,
+     "ls": 0
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.12,
+      "ease": "ease-out"
+     }
+    },
+    "link": null,
+    "text": "Para encomendas, exposições e parcerias, escreva para mim.",
+    "ah": true
+   },
+   {
+    "id": "g30",
+    "t": "shape",
+    "name": "Botão Enviar mensagem",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 480,
+      "y": 2301,
+      "w": 240,
+      "h": 56,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 85,
+      "y": 2203,
+      "w": 220,
+      "h": 50,
+      "fs": 17
+     }
+    },
+    "s": {
+     "fill": "#e4572e",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 9999,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": {
+     "in": {
+      "k": "fade-up",
+      "dur": 0.7,
+      "delay": 0.24,
+      "ease": "ease-out"
+     }
+    },
+    "link": {
+     "href": "mailto:",
+     "blank": false
+    },
+    "shape": "rect",
+    "label": "Enviar mensagem",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g31",
+    "t": "shape",
+    "name": "Rodapé",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 0,
+      "y": 2445,
+      "w": 1200,
+      "h": 150,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 0,
+      "y": 2297,
+      "w": 390,
+      "h": 170
+     }
+    },
+    "s": {
+     "fill": "#17161d",
+     "grad": null,
+     "stroke": null,
+     "sw": 0,
+     "dash": 0,
+     "radius": 0,
+     "sides": 5,
+     "inner": 0.45
+    },
+    "an": null,
+    "link": null,
+    "shape": "rect",
+    "label": "",
+    "ls": {
+     "fontFamily": "Inter",
+     "fontSize": 24,
+     "fontWeight": 600,
+     "color": "#ffffff"
+    }
+   },
+   {
+    "id": "g32",
+    "t": "text",
+    "name": "Rodapé — texto",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 2485,
+      "w": 1000,
+      "h": 45,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2333,
+      "w": 342,
+      "h": 42,
+      "fs": 14
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 400,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.5,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Seu Nome · Artista visual\nFeito no Gehrarte · UEM",
+    "ah": true
+   },
+   {
+    "id": "g33",
+    "t": "text",
+    "name": "Rodapé — links",
+    "lock": false,
+    "hide": false,
+    "f": {
+     "d": {
+      "x": 100,
+      "y": 2535,
+      "w": 1000,
+      "h": 20,
+      "r": 0
+     },
+     "m": {
+      "r": 0,
+      "x": 24,
+      "y": 2393,
+      "w": 342,
+      "h": 20,
+      "fs": 13
+     }
+    },
+    "s": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "italic": false,
+     "underline": false,
+     "upper": false,
+     "align": "center",
+     "color": "#ffffff",
+     "lh": 1.4,
+     "ls": 0
+    },
+    "an": null,
+    "link": null,
+    "text": "Instagram   ·   E-mail",
+    "ah": true
+   }
+  ]
+ }
+}
