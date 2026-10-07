@@ -318,6 +318,7 @@ function bindKeys(doc) {
     else if (k === 'r') setTool('shape');
     else if (k === 'p') setTool('pencil');
     else if (k === 'h') setTool('hand');
+    else if (k === 'w') setTool('wand');
   });
   doc.addEventListener('keyup', (e) => { if (e.key === ' ') { S.space = false; vp.classList.remove('panning'); } });
 

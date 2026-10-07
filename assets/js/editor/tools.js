@@ -140,15 +140,19 @@ async function processImage(file) {
   return { blob, ext, mime, w: cv.width, h: cv.height };
 }
 
-export async function addAsset(file) {
-  const p = await processImage(file);
-  const id = (await sha256Hex(await p.blob.arrayBuffer())).slice(0, 10);
-  const meta = { ext: p.ext, mime: p.mime, w: p.w, h: p.h };
-  if (!S.assets.has(id)) S.assets.set(id, { ...meta, blob: p.blob, url: URL.createObjectURL(p.blob) });
+// Guarda uma imagem já pronta (PNG/WebP/… gerada pelo editor de imagem) como arquivo do documento. O id vem do conteúdo.
+export async function addAssetBlob(blob, { ext, mime, w, h }) {
+  const id = (await sha256Hex(await blob.arrayBuffer())).slice(0, 10);
+  const meta = { ext, mime, w, h };
+  if (!S.assets.has(id)) S.assets.set(id, { ...meta, blob, url: URL.createObjectURL(blob) });
   S.doc.assets[id] = meta;
-  await Store.putAsset(S.slug, id, p.blob, meta);
+  await Store.putAsset(S.slug, id, blob, meta);
   emit('assets');
   return { id, ...meta };
+}
+export async function addAsset(file) {
+  const p = await processImage(file);
+  return addAssetBlob(p.blob, { ext: p.ext, mime: p.mime, w: p.w, h: p.h });
 }
 
 export async function insertImageFile(file, at) {

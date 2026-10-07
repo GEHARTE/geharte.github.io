@@ -14,6 +14,7 @@ import { sanitizeSvg } from '../core/sanitize.js';
 import { S, on, emit, selEls, mutate, mutateGeom, commit, touch, setPage, byId, select as selecionar } from './state.js';
 import { inkColor, alignSel, distribute, autoStack, resetMobile, fitPageHeight, replaceImage } from './tools.js';
 import { measureAll, playEntrance, nodeOf, refreshOverlay } from './stage.js';
+import { abrirEditorImagem } from './imagem.js';
 import { icon } from './icons.js';
 import { toast, btn, section, row, hint, num, range, select, seg, toggle, textInput, colorField } from './ui.js';
 
@@ -184,8 +185,13 @@ function secImage() {
   resEl = h('p', { class: 'hint res-img', id: 'img-res' });
   pintaResolucao(el);
   const file = h('input', { type: 'file', accept: 'image/*', hidden: true, onchange: async () => { if (file.files[0] && el) await replaceImage(el, file.files[0]); } });
+  const podeEditar = S.sel.length === 1 && el && !/gif|svg/.test(S.doc.assets?.[el.asset]?.mime || '');
   return section('Imagem', [
     resEl,
+    // varinha mágica (tirar fundo, fazer PNG com transparência) e recorte: abrem o editor de imagem
+    S.sel.length === 1 ? h('div', { class: 'btnrow' },
+      btn({ label: 'Varinha mágica', ic: 'wand', disabled: !podeEditar, title: podeEditar ? 'Selecionar por cor e apagar: tirar o fundo e salvar como PNG com transparência' : 'GIF e SVG não podem ser editados aqui', onClick: () => abrirEditorImagem(el, { ferramenta: 'varinha' }) }),
+      btn({ label: 'Recortar', ic: 'crop', disabled: !podeEditar, title: podeEditar ? 'Recortar com proporção, em círculo ou com cantos arredondados' : 'GIF e SVG não podem ser editados aqui', onClick: () => abrirEditorImagem(el, { ferramenta: 'recorte' }) })) : null,
     seg({ value: val((e) => e.s.fit), options: [['cover', 'Preencher'], ['contain', 'Conter'], ['fill', 'Esticar']], onChange: (v) => set((e) => { e.s.fit = v; }) }),
     range({ label: 'Cantos', value: val((e) => e.s.radius), min: 0, max: 600, onChange: (v) => set((e) => { e.s.radius = v; }), fmt: (v) => v + 'px' }),
     h('div', { class: 'btnrow' }, btn({ label: 'Círculo', onClick: () => { set((e) => { e.s.radius = 9999; e.s.fit = 'cover'; }); build(); } }),
@@ -364,7 +370,7 @@ function pagePanel() {
 
   out.push(section('Animações', [btn({ label: 'Tocar todas as entradas', ic: 'play', onClick: () => playEntrance() })]));
   out.push(section('Atalhos', [h('ul', { class: 'keys' },
-    ...[['V', 'Selecionar'], ['T', 'Texto'], ['R', 'Forma'], ['P', 'Lápis'], ['Espaço + arrastar', 'Mover a tela'], ['Ctrl + roda', 'Zoom'], ['Shift', 'Manter proporção / eixo'], ['Alt', 'Sem ímã'], ['Setas', 'Mover (Shift = 10)'], ['Ctrl+D', 'Duplicar'], ['Ctrl+C / V', 'Copiar / colar'], ['Ctrl+Z / Y', 'Desfazer / refazer'], ['[  ]', 'Atrás / frente'], ['Del', 'Excluir'], ['Dois cliques', 'Editar texto / SVG']].map(([k, d]) => h('li', {}, h('kbd', {}, k), d)))
+    ...[['V', 'Selecionar'], ['T', 'Texto'], ['R', 'Forma'], ['P', 'Lápis'], ['W', 'Varinha mágica (clique numa imagem)'], ['Espaço + arrastar', 'Mover a tela'], ['Ctrl + roda', 'Zoom'], ['Shift', 'Manter proporção / eixo'], ['Alt', 'Sem ímã'], ['Setas', 'Mover (Shift = 10)'], ['Ctrl+D', 'Duplicar'], ['Ctrl+C / V', 'Copiar / colar'], ['Ctrl+Z / Y', 'Desfazer / refazer'], ['[  ]', 'Atrás / frente'], ['Del', 'Excluir'], ['Dois cliques', 'Editar texto / SVG']].map(([k, d]) => h('li', {}, h('kbd', {}, k), d)))
   ]));
   return out;
 }

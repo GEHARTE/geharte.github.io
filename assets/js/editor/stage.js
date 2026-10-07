@@ -5,6 +5,9 @@ import { W, frameOf, setFrame, pageH, pageW, aabb, unionBox, bgCss } from '../co
 import { clamp, round } from '../core/util.js';
 import { S, on, emit, byId, selEls, select, mutateGeom, mutate, commit, touch, assetUrl, setTool, removeEls, duplicate, reorder } from './state.js';
 import { createShape, createText, createPath, insertImageFile, ensureHeight, defaultShapeSize, inkColor } from './tools.js';
+import { abrirEditorImagem } from './imagem.js';
+import { toast } from './ui.js';
+import { pontoNaImagem } from '../core/imagem-edicao.js';
 import { icon } from './icons.js';
 import { guiasDe, candidatosDeGuias } from '../core/reguas.js';
 import { cabeNaTela, ajustarNaGrade } from '../core/grade.js';
@@ -204,7 +207,9 @@ export function refreshOverlay() {
   const u = unionBox(els.map((e) => aabb(boxOf(e))));
   const bar = h('div', { class: 'floatbar' });
   const fb = (ic, title, fn) => h('button', { type: 'button', title, html: icon(ic, 15), onclick: fn });
+  const unica = els.length === 1 && els[0].t === 'image' && !/gif|svg/.test(S.doc.assets?.[els[0].asset]?.mime || '') ? els[0] : null;
   bar.append(
+    ...(unica ? [fb('wand', 'Varinha mágica: tirar o fundo / fazer PNG', () => abrirEditorImagem(unica, { ferramenta: 'varinha' })), fb('crop', 'Recortar imagem', () => abrirEditorImagem(unica, { ferramenta: 'recorte' }))] : []),
     fb('copy', 'Duplicar (Ctrl+D)', () => duplicate()),
     fb(els.every((e) => e.lock) ? 'lock' : 'unlock', 'Travar / destravar', () => { const lock = !els.every((e) => e.lock); mutate(S.sel, (e) => { e.lock = lock; }, 'struct'); commit(); refreshOverlay(); emit('struct-lite'); }),
     fb('front', 'Trazer para frente (])', () => reorder(S.sel, 'front')),
@@ -416,6 +421,17 @@ function startMarquee(e) {
 }
 
 // ----- ferramentas de desenho -----
+// Ferramenta "Varinha mágica" da barra lateral: clique numa imagem abre o editor já com a varinha no ponto clicado.
+function usarVarinha(e) {
+  const node = e.target.closest('.el'), el = node && byId(node.dataset.id);
+  setTool('select');
+  if (!el || el.t !== 'image') { toast('Clique em cima de uma imagem para usar a varinha mágica.'); return; }
+  const m = S.doc.assets?.[el.asset];
+  const ponto = m ? pontoNaImagem(toDoc(e), frameOf(el, S.dev), { w: m.w, h: m.h }, el.s?.fit || 'cover') : null;
+  select([el.id]);
+  abrirEditorImagem(el, { ferramenta: 'varinha', ponto });
+}
+
 function startDraw(e) {
   const p0 = toDoc(e), tool = S.tool;
   const r0 = stage.getBoundingClientRect();
@@ -545,6 +561,7 @@ export function initStage(refs) {
     if (e.button === 1 || S.space || S.tool === 'hand') return startPan(e);
     const hd = e.target.closest('[data-h]');
     if (hd) { e.preventDefault(); const k = hd.dataset.h; return k === 'rot' ? startRotate(e) : S.sel.length > 1 ? startGroupScale(k, e) : startResize(k, e); }
+    if (S.tool === 'wand') { e.preventDefault(); return usarVarinha(e); }
     if (S.tool !== 'select') { e.preventDefault(); return startDraw(e); }
     const node = e.target.closest('.el');
     if (node && ab.contains(node)) {
