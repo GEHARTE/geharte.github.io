@@ -187,6 +187,15 @@ export function createDrive({
     async download(id) { return (await api(`${API}/files/${encodeURIComponent(id)}?alt=media`)).blob(); },
     async trash(id) { return json(`${API}/files/${encodeURIComponent(id)}?fields=id`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trashed: true }) }); },
 
+    // Lê o texto de um arquivo da pasta pelo nome (o que `saveText` gravou). null se não existe.
+    async loadText(name) {
+      const parent = await self.ensureFolder();
+      const q = `'${parent}' in parents and name='${esc(name)}' and trashed=false`;
+      const found = await json(`${API}/files?${new URLSearchParams({ q, fields: 'files(id)', pageSize: '1' })}`);
+      const id = found.files?.[0]?.id;
+      return id ? (await self.download(id)).text() : null;
+    },
+
     // Grava um texto (ex.: cópia do projeto .json) na pasta; se já existe arquivo com esse nome, atualiza.
     async saveText(name, text, mime = 'application/json') {
       const parent = await self.ensureFolder();

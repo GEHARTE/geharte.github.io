@@ -8,6 +8,8 @@ import * as D from './dock-layout.js';
 import { icon } from './icons.js';
 import { addDoc, dropDoc, setActiveDoc, activeDoc, winOf } from './docs.js';
 import { toast } from './ui.js';
+import { criarSincronia, montar, ler as lerPreferencias } from '../core/preferencias.js';
+import { downloadBlob } from '../core/util.js';
 import { ajustar, ancorar, caixaVisivel, telaDisponivel, posicaoJanela, corrigirJanela, retanguloJanela, instalar } from '../core/janelas.js';
 
 const KEY = (slug) => `gehrarte.layout.${slug}`;
@@ -39,7 +41,7 @@ export function popMenu(anchor, items, at) {
   return close;
 }
 
-export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, onMode, onVisible }) {
+export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, onMode, onVisible, preferencias = null }) {
   const dockEl = { left: app.querySelector('#dock-left'), right: app.querySelector('#dock-right') };
   const floatsEl = app.querySelector('#floats'), drawerEl = app.querySelector('#drawer');
   const ids = Object.keys(panels);
@@ -56,22 +58,90 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
   let L = D.normalize(read(), ids);
   function read() { try { return JSON.parse(localStorage.getItem(chave)); } catch { return null; } }
   let avisouFalha = false, pediuPersistencia = false;
-  function persist() {
-    try { localStorage.setItem(chave, JSON.stringify(D.serialize(L))); }
-    catch { if (!avisouFalha) { avisouFalha = true; toast('Não consegui guardar a disposição dos painéis: o navegador bloqueou o armazenamento do site. Ela vale só nesta sessão.', 'err'); } return; }
-    if (!pediuPersistencia) { pediuPersistencia = true; try { navigator.storage?.persisted?.().then((ok) => ok || navigator.storage.persist?.()).catch(() => {}); } catch { /* sem a API */ } }
+  // O que vai para o navegador é a disposição + o carimbo `t` (quando a PESSOA mudou por último): é ele que decide, na conta, quem é mais novo.
+  function gravarLocal(t) {
+    try { localStorage.setItem(chave, JSON.stringify({ ...D.serialize(L), t })); return true; }
+    catch { if (!avisouFalha) { avisouFalha = true; toast('Não consegui guardar a disposição dos painéis: o navegador bloqueou o armazenamento do site. Ela vale só nesta sessão.', 'err'); } return false; }
   }
-  // outra aba/janela do editor gravou uma disposição nova: adota (os painéis que esta janela separou continuam separados)
-  function adotar(raw) {
-    if (drag) return;
+  function persist() {
+    const t = Date.now();
+    if (!gravarLocal(t)) return;
+    if (!pediuPersistencia) { pediuPersistencia = true; try { navigator.storage?.persisted?.().then((ok) => ok || navigator.storage.persist?.()).catch(() => {}); } catch { /* sem a API */ } }
+    sync?.agendar(D.serialize(L), t);
+  }
+  // Troca a disposição inteira (outra aba, a conta ou um arquivo importado). Os painéis que esta janela separou continuam separados.
+  // Devolve false se não mudou nada (ou se há um arraste em andamento).
+  function aplicar(raw) {
+    if (drag) return false;
     const nova = D.normalize(raw, ids);
     for (const id of wins.keys()) D.windowPanel(nova, id, L.windows.find((w) => w.id === id));
-    if (JSON.stringify(D.serialize(nova)) === JSON.stringify(D.serialize(L))) return;
+    if (JSON.stringify(D.serialize(nova)) === JSON.stringify(D.serialize(L))) return false;
     L = nova;
     render();
+    return true;
+  }
+  const adotar = aplicar;
+
+  // ---------- na conta da pessoa (host.preferencias) ----------
+  // Opcional e por escolha: a pessoa liga em Painéis › "Guardar a disposição na conta". Daí em diante cada mudança sobe sozinha
+  // (se o Drive estiver conectado nesta sessão) e, ao abrir o editor ou voltar à aba, a disposição mais nova da conta é adotada.
+  const SYNC = `gehrarte.layout.sync.${slug}`;
+  const syncLigada = () => { try { return localStorage.getItem(SYNC) === '1'; } catch { return false; } };
+  const ctx = { slug };
+  let avisouSync = false;
+  const sync = preferencias ? criarSincronia({
+    backend: preferencias, ctx, ligada: syncLigada,
+    lerLocal: () => { const raw = read(); if (!raw) return null; const { t, ...layout } = raw; return { t: Number(t) > 0 ? Number(t) : 1, layout }; },   // sem carimbo = gravado por versão antiga: vale, mas perde para qualquer um com carimbo
+    aoAdotar: (layout, t) => { if (aplicar(layout)) toast('Disposição dos painéis atualizada pela sua conta.', 'ok'); gravarLocal(t); },
+    aoFalhar: (e) => { if (!avisouSync) { avisouSync = true; toast(`Não consegui sincronizar a disposição com a sua conta: ${e?.message || e}`, 'err'); } },
+  }) : null;
+  let ultimoPuxar = 0;
+  async function puxarDaConta({ avisar = false } = {}) {
+    if (!sync || !syncLigada()) return null;
+    ultimoPuxar = Date.now();
+    const r = await sync.puxar();
+    if (avisar) {
+      const msg = { adotado: null, enviado: 'Disposição enviada para a sua conta.', igual: 'A sua conta já está com a mesma disposição.', indisponivel: 'A conta não está conectada nesta sessão.' }[r.estado];
+      if (msg) toast(msg, r.estado === 'indisponivel' ? 'err' : 'ok');
+    } else if (r.estado === 'indisponivel' && !avisouSync) {
+      avisouSync = true;
+      toast(`A disposição está ligada à sua conta, mas o ${preferencias.rotulo || 'armazenamento'} não está conectado nesta sessão. Painéis › Sincronizar agora.`);
+    }
+    return r;
+  }
+  function ligarNaConta() {
+    if (!preferencias) return;
+    if (syncLigada()) { try { localStorage.removeItem(SYNC); } catch { /* ok */ } sync.cancelar(); toast('Desligado. A cópia que está na conta continua lá, mas deixa de ser atualizada.'); return; }
+    // `conectar` abre o login do Google: tem de ser chamada direto do clique, antes de qualquer espera
+    Promise.resolve(preferencias.conectar?.(ctx)).then(() => {
+      try { localStorage.setItem(SYNC, '1'); } catch { toast('O navegador bloqueou o armazenamento: não deu para ligar.', 'err'); return; }
+      return puxarDaConta({ avisar: true });
+    }).catch((e) => toast(e?.message || String(e), 'err'));
+  }
+  function sincronizarAgora() {
+    Promise.resolve(preferencias.conectar?.(ctx)).then(() => puxarDaConta({ avisar: true })).catch((e) => toast(e?.message || String(e), 'err'));
+  }
+  // Exportar/importar funciona sem conta nenhuma: é o mesmo arquivo que vai para a conta.
+  function exportarDisposicao() {
+    downloadBlob('artatk-disposicao.json', new Blob([JSON.stringify(montar(D.serialize(L), Date.now()), null, 1)], { type: 'application/json' }));
+    toast('Disposição salva na pasta de Downloads.', 'ok');
+  }
+  function importarDisposicao() {
+    const inp = h('input', { type: 'file', accept: 'application/json,.json', hidden: true });
+    inp.addEventListener('change', async () => {
+      const r = lerPreferencias(await inp.files[0]?.text().catch(() => ''));
+      inp.remove();
+      if (!r) { toast('Esse arquivo não é uma disposição do ArtAtk.', 'err'); return; }
+      if (aplicar(r.layout)) { persist(); toast('Disposição importada.', 'ok'); } else toast('A disposição já era essa.');
+    });
+    document.body.append(inp); inp.click();
   }
   addEventListener('storage', (e) => { if (e.key === chave && e.newValue) { try { adotar(JSON.parse(e.newValue)); } catch { /* valor ilegível: fica com o que tem */ } } });
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { const r = read(); if (r) adotar(r); } });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    const r = read(); if (r) adotar(r);
+    if (Date.now() - ultimoPuxar > 60e3) puxarDaConta();      // voltou à aba: vê se a conta tem algo mais novo (no máximo 1×/min)
+  });
 
   // ---------- molduras ----------
   const frames = {};
@@ -235,6 +305,13 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
       '-',
       { label: 'Ocultar / mostrar todos', hint: 'Ctrl \\', icon: 'eye', onClick: toggleAll },
       { label: 'Restaurar disposição original', icon: 'reset', onClick: reset },
+      '-',
+      ...(preferencias ? [
+        { label: 'Guardar a disposição na conta', checked: syncLigada(), hint: preferencias.rotulo, onClick: ligarNaConta },
+        ...(syncLigada() ? [{ label: 'Sincronizar agora', icon: 'reset', onClick: sincronizarAgora }] : []),
+      ] : []),
+      { label: 'Exportar disposição (.json)', icon: 'download', onClick: exportarDisposicao },
+      { label: 'Importar disposição…', icon: 'upload', onClick: importarDisposicao },
     ]);
   }
   const panelsBtn = document.getElementById('btn-panels');
@@ -505,6 +582,7 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
 
   render();
   syncMode();
+  if (sync && syncLigada()) setTimeout(() => puxarDaConta(), 800);      // ao abrir: a conta tem uma disposição mais nova?
   onDocument?.(document);
   document.addEventListener('pointerdown', () => setActiveDoc(document), true);
 

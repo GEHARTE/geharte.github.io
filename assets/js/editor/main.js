@@ -137,6 +137,7 @@ async function main() {
   // painéis reorganizáveis (docks, soltos, outra janela; no celular, gavetas): ver dock.js
   dock = initDock({
     app: $('#app'), slug: S.slug, rotateEl: $('#rotate'),
+    preferencias: S.host?.preferencias || null,     // a conta da pessoa (hoje: Google Drive no Gehrarte); sem isto a disposição fica só neste navegador
     panels: {
       rail: { el: $('#rail'), title: 'Ferramentas' },
       els: { el: libRoots.els, title: 'Elementos' }, svg: { el: libRoots.svg, title: 'SVG animado' }, media: { el: libRoots.media, title: 'Mídia' },

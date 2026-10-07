@@ -8,6 +8,7 @@ import { getDrive, uploadAll } from '../core/drive-ui.js';
 import { FOLDER_NAME, folderUrl, humanSize, isImage, isProject } from '../core/drive.js';
 import { insertImageFile } from './tools.js';
 import { importProject } from './publish.js';
+import { NOME_ARQUIVO } from '../core/preferencias.js';
 
 const fmtQuota = (c) => (c.limite ? `${humanSize(c.usado)} de ${humanSize(c.limite)} usados no seu Drive` : `${humanSize(c.usado)} usados no seu Drive`);
 
@@ -43,7 +44,8 @@ export function driveTab(body) {
       if (!info) info = await drive.about();
       folder ||= await drive.ensureFolder();
       const r = await drive.list({ pageToken: next });
-      files = reset ? r.files : [...files, ...r.files]; next = r.next;
+      const materiais = r.files.filter((f) => f.name !== NOME_ARQUIVO);          // o arquivo de preferências (disposição dos painéis) não é material
+      files = reset ? materiais : [...files, ...materiais]; next = r.next;
       if (alive) paint();
     } catch (e) {
       if (e.reason === 'expired' || e.reason === 'noToken') disconnected('A conexão com o Drive expirou. Conecte de novo.');

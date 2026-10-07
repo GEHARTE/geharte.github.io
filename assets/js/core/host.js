@@ -17,6 +17,13 @@
 //                                                         // botões de saída no topo, no lugar do "Publicar" do Gehrarte
 //                                                         // (MUVVI: "Salvar rascunho", "Enviar para curadoria"…)
 //   modelos?: { catalogo(): Promise<modelo[]> },          // modelos extras do host (formato artatk-modelo v1)
+//   preferencias?: {                                      // guarda as preferências da PESSOA (hoje: a disposição dos painéis) na conta dela
+//     rotulo: 'Google Drive',                             //   nome do lugar, para o menu ("Guardar a disposição na conta (Google Drive)")
+//     disponivel(ctx): Promise<boolean>,                  //   dá para ler/gravar agora? (no Gehrarte: o Drive está conectado nesta sessão)
+//     conectar?(ctx): Promise<void>,                      //   prepara o acesso; chamada num CLIQUE (pode abrir a janela de login)
+//     ler(ctx): Promise<string|null>,                     //   texto guardado (formato artatk-preferencias, core/preferencias.js) ou null
+//     gravar(ctx, texto): Promise<void>,                  //   guarda o texto
+//   },                                                    //   ctx = { slug }. Sem isto o editor guarda só neste navegador
 //   fluxo?: …                                             // RESERVADO (ED-16): etapas da tela de acompanhamento da saída;
 //                                                         // hoje só o fluxo do Gehrarte existe (Editor → … → No ar)
 // }
@@ -51,6 +58,10 @@ export function validarHost(h) {
     else h.acoes.forEach((a, i) => { if (!a?.id || !a?.rotulo || typeof a.executar !== 'function') erros.push(`host.acoes[${i}] precisa de id, rotulo e executar().`); });
   }
   if (h.modelos != null && typeof h.modelos.catalogo !== 'function') erros.push('host.modelos.catalogo deve ser uma função.');
+  if (h.preferencias != null) {
+    for (const f of ['disponivel', 'ler', 'gravar']) if (typeof h.preferencias[f] !== 'function') erros.push(`host.preferencias.${f} deve ser uma função.`);
+    if (h.preferencias.conectar != null && typeof h.preferencias.conectar !== 'function') erros.push('host.preferencias.conectar deve ser uma função.');
+  }
   if (h.capacidades != null) for (const k of Object.keys(h.capacidades)) if (!(k in CAPACIDADES_PADRAO)) erros.push(`Capacidade desconhecida: ${k}.`);
   return erros;
 }
