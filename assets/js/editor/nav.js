@@ -7,6 +7,12 @@ export async function goToDoc(id) {
   location.href = `${location.pathname}?doc=${encodeURIComponent(id)}`;
 }
 
+// Abre o painel de documentos já com o diálogo "Novo arquivo em branco" (o rascunho é salvo antes).
+export async function goToNovoArquivo() {
+  if (S.doc) { try { await saveNow(); } catch { /* segue mesmo assim */ } }
+  location.href = `${S.host?.urls.documentos || '../documentos/'}?novo=1`;
+}
+
 // Volta ao painel de documentos (o rascunho é salvo antes).
 export async function goToDocuments() {
   if (S.doc) { try { await saveNow(); } catch { /* segue mesmo assim */ } }

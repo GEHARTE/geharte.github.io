@@ -244,6 +244,8 @@ async function main() {
     : 'Estas são as páginas que estão no ar. Só quem tem permissão de edição pode alterá-las; você pode ver como cada uma está.';
   pinta('meu', '#g-meu', cap.drive ? [cartaoDrive(slug, cfg)] : []);
   pinta('artigos', '#g-artigos', [azulejoNovoArquivo(slug)]);
+  // vindo do editor (Opções › Novo arquivo): já abre o diálogo
+  if (new URLSearchParams(location.search).has('novo')) { history.replaceState(null, '', location.pathname); abrirNovoArquivo(slug); }
   pinta('equipe', '#g-equipe');
   $('#carregando').hidden = true;
   filtra();

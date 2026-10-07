@@ -12,7 +12,7 @@ import { criarSincronia, montar, ler as lerPreferencias } from '../core/preferen
 import { downloadBlob } from '../core/util.js';
 import { ajustar, ancorar, caixaVisivel, telaDisponivel, posicaoJanela, corrigirJanela, retanguloJanela, instalar } from '../core/janelas.js';
 
-const KEY = (slug) => `gehrarte.layout.${slug}`;
+const KEY = D.chaveLayout;
 const COMPACT_Q = '(max-width: 720px), (pointer: coarse) and (max-height: 560px)';
 // Celular: cada botão da gaveta abre um grupo de painéis (a biblioteca vira uma sanfona: um aberto por vez)
 const DRAWER_SIDE = { lib: 'left', layers: 'right', props: 'right' };
@@ -85,7 +85,7 @@ export function initDock({ app, slug, panels, topY = 52, rotateEl, onDocument, o
   // ---------- na conta da pessoa (host.preferencias) ----------
   // Opcional e por escolha: a pessoa liga em Painéis › "Guardar a disposição na conta". Daí em diante cada mudança sobe sozinha
   // (se o Drive estiver conectado nesta sessão) e, ao abrir o editor ou voltar à aba, a disposição mais nova da conta é adotada.
-  const SYNC = `gehrarte.layout.sync.${slug}`;
+  const SYNC = D.chaveSync(slug);
   const syncLigada = () => { try { return localStorage.getItem(SYNC) === '1'; } catch { return false; } };
   const ctx = { slug };
   let avisouSync = false;

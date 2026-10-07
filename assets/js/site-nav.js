@@ -22,8 +22,7 @@ function build(host) {
   const editorHref = sess ? U('documentos/') : U('login.html?next=documentos/');
   const sub = h('ul', { class: 'sn-sub', id: toolsId, 'aria-label': 'Ferramentas' },
     h('li', {}, h('a', { href: editorHref }, 'Editor de páginas', h('small', {}, sess ? 'Documentos, perfil e artigos, com animações em SVG' : 'Entre para usar — perfil e artigos'))),
-    h('li', {}, h('span', { class: 'sn-soon', 'aria-disabled': 'true' }, 'Máquina de escrever', h('small', {}, 'em breve'))),
-    h('li', {}, h('span', { class: 'sn-soon', 'aria-disabled': 'true' }, 'Tipografia', h('small', {}, 'em breve'))),
+    h('li', {}, h('span', { class: 'sn-soon', 'aria-disabled': 'true' }, 'Oficina de letras', h('small', {}, 'em breve'))),
     h('li', { class: 'sep' }, h('a', { href: U('ferramentas/') }, 'Todas as ferramentas →')));
   dd.append(ddBtn, sub);
 

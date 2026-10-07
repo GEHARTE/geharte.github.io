@@ -27,6 +27,9 @@ const DEFAULTS = {
 export const PANEL_IDS = Object.keys(DEFAULTS);
 export const panelTitle = (id) => DEFAULTS[id]?.title || id;
 export const LAYOUT_V = 2;
+// Onde a disposição fica no navegador (e a chave que liga a sincronização com a conta): uma por pessoa, nunca por arquivo.
+export const chaveLayout = (slug) => `gehrarte.layout.${slug}`;
+export const chaveSync = (slug) => `gehrarte.layout.sync.${slug}`;
 // Painéis que antes eram abas da "Biblioteca" (layout v1 guardava o painel único `lib`)
 export const LIB_IDS = ['els', 'svg', 'media', 'drive', 'tpl'];
 // Celular: cada botão da gaveta mostra um grupo (a biblioteca vira uma sanfona)

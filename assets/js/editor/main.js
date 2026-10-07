@@ -22,6 +22,7 @@ import { goToDocuments } from './nav.js';
 import { saveCopyToDrive } from './drive.js';
 import { initAbas } from './abas.js';
 import { openExportPdf } from './pdf.js';
+import { abrirOpcoes } from './opcoes.js';
 import { initReguas, alternarReguas, reguasVisiveis, alternarGrade, gradeAtual } from './reguas.js';
 import { rotuloDaPagina } from '../core/formatos.js';
 import { toast, modal, btn } from './ui.js';
@@ -239,6 +240,9 @@ function wireTop() {
   }));
   const syncTool = () => toolBtns.forEach((b) => b.classList.toggle('on', b.dataset.tool === S.tool));
   on('tool', syncTool); syncTool();
+
+  // Opções (logo depois da logo): novo arquivo, salvar em PDF e onde ficam os dados
+  $('#btn-opcoes').onclick = (e) => abrirOpcoes(e.currentTarget);
 
   // menu ⋯
   $('#btn-more').onclick = (e) => {
