@@ -13,6 +13,7 @@ import { larguraFinal } from './core/gabarito.js';
 import { loadFonts } from './core/fonts.js';
 import { pageW, KINDS, STATE_LABEL, PROFILE_ID, docState, siteDocId, publisherName, publishDir, bgCss } from './core/model.js';
 import { BASE } from './core/util.js';
+import { CHAVE_TEMA, temaEfetivo, alternarTema } from './core/tema.js';
 import { loadRegistry, canEditSite, fetchPublished, fetchModel, getJson, pageDir, publicUrl, publishedUrl, siteHost } from './core/site.js';
 import { createDoc, createArquivoEmBranco, createDocFromModelo, duplicateDoc, docPath } from './core/docs.js';
 import { GRUPOS_FORMATO, FORMATO_PADRAO, formatoPorId, orientacaoNatural, rotuloDoItem, medidasDoItem, rotuloDaPagina } from './core/formatos.js';
@@ -406,3 +407,18 @@ function filtra() {
 $('#busca').addEventListener('input', filtra);
 
 main().catch((e) => { console.error(e); $('#carregando').textContent = 'Não consegui carregar os documentos: ' + (e?.message || e); });
+
+// ---------- modo noturno ----------
+// A escolha da pessoa vale; sem escolha segue o sistema (e acompanha quando ele muda). O <head> já aplicou a escolha guardada.
+(() => {
+  const btn = document.getElementById('tema'), raiz = document.documentElement, mq = matchMedia('(prefers-color-scheme: dark)');
+  const guardado = () => { try { return localStorage.getItem(CHAVE_TEMA); } catch { return null; } };
+  const mostrar = () => {
+    const t = temaEfetivo(guardado(), mq.matches);
+    raiz.dataset.tema = t;
+    if (btn) { btn.setAttribute('aria-pressed', String(t === 'escuro')); btn.title = btn.ariaLabel = t === 'escuro' ? 'Voltar ao modo claro' : 'Modo noturno'; }
+  };
+  btn?.addEventListener('click', () => { const novo = alternarTema(raiz.dataset.tema); try { localStorage.setItem(CHAVE_TEMA, novo); } catch { /* sem armazenamento: vale só agora */ } raiz.dataset.tema = novo; mostrar(); });
+  mq.addEventListener?.('change', () => { if (!guardado()) mostrar(); });
+  mostrar();
+})();

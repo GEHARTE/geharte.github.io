@@ -43,8 +43,8 @@ dialog.gal-dlg.larga { width: min(1040px, 96vw); }
 /* novo arquivo em branco: modelo à esquerda, tamanho à direita */
 .na-corpo { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 18px; align-items: start; }
 .na-esq h3, .na-lado h3 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
-.na-esq { max-height: 52vh; overflow: auto; padding-right: 4px; }
-.na-lado { display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow: auto; }
+.na-esq { max-height: min(340px, 42vh); overflow: auto; padding-right: 4px; }
+.na-lado { display: flex; flex-direction: column; gap: 8px; max-height: min(340px, 42vh); overflow: auto; }
 .na-grupo { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
 .na-grupo legend { font-size: 12px; opacity: .65; padding: 0; margin-bottom: 2px; }
 .gal-dlg label.na-op { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; padding: 6px 9px; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); cursor: pointer; font-weight: 400; text-align: left; }
@@ -64,7 +64,12 @@ dialog.gal-dlg.larga { width: min(1040px, 96vw); }
 .gal-glifo { font-size: 44px; opacity: .55; }
 @media (max-width: 720px) { .na-corpo { grid-template-columns: 1fr; } .na-esq, .na-lado { max-height: none; } }
 .na-esq .gal.compacta .gal-grade { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-.na-esq .gal-thumb { aspect-ratio: 4 / 3; }
+.na-esq .gal-thumb { aspect-ratio: 16 / 10; }
+/* o diálogo de novo arquivo não precisa ser alto: sem o respiro dos parágrafos e com folgas menores */
+dialog.novo-arq .gal-dlg-c { gap: 8px; padding: 14px 16px; }
+dialog.novo-arq p { margin: 0; }
+dialog.novo-arq .campo { margin: 0; }
+dialog.novo-arq .na-corpo { gap: 14px; }
 .na-esq .gal-corpo { padding: 7px 8px 8px; }
 .gal-dlg label.na-sel { flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; font-weight: 500; }
 .na-sel select { flex: 1; max-width: 170px; }
