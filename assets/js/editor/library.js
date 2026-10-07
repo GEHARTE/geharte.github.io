@@ -173,6 +173,7 @@ export function initLibraryPanels(roots) {
           h('div', { class: 'pv', html: r.ok ? r.svg : '' }), h('span', {}, s.name));
       }))));
     }
+    body.append(h('div', { class: 'pad' }, btn({ label: 'Criar SVG animado…', ic: 'wand', cls: 'primary', title: 'Rig de peças e pinos de deformação (estilo puppet animation)', onClick: abrirCriador }), h('p', { class: 'hint' }, 'Monte um personagem ou desenho animado a partir de um SVG: peças com articulações ou pinos que deformam.')));
     body.append(h('div', { class: 'pad' }, btn({ label: 'Colar meu SVG…', ic: 'code', onClick: pasteSvg }), h('p', { class: 'hint' }, 'Suporta animações CSS e SMIL. Dica: exporte do Figma/Inkscape como SVG e cole aqui.')));
   });
 
@@ -205,6 +206,14 @@ export function initLibraryPanels(roots) {
   const tipoMudou = () => { if (S.doc?.kind !== tipo) { tipo = S.doc?.kind; refresh('els'); } };
   on('struct', tipoMudou); on('page', tipoMudou);
   return { setOpen, refresh };
+}
+
+// O criador é pesado (rig, pinos, linha do tempo): só é carregado quando alguém abre. Usado também pela seção SVG das Propriedades.
+export async function abrirCriador({ svg = null, nome = 'SVG animado' } = {}) {
+  try {
+    const { abrirCriadorDeSvg } = await import('./criador-svg.js');
+    abrirCriadorDeSvg({ svg, nome, aoInserir: (texto, n) => { if (insertSvg(texto, n || nome)) toast('SVG animado inserido na página.', 'ok'); } });   // insertSvg sanitiza
+  } catch (e) { console.error(e); toast('Não consegui abrir o criador de SVG animado.', 'err'); }
 }
 
 function pasteSvg() {

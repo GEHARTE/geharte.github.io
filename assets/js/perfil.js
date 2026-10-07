@@ -15,6 +15,7 @@ import { Store } from './core/store.js';
 import { docDeAba, abaDoHash } from './core/sites.js';
 import { BASE } from './core/util.js';
 import { tamanhoPagina, cssPagina, folhaPdf, congelarSvgsDasImagens, esperarPronto } from './core/pdf.js';
+import { iniciarRolagem, iniciarLeitura } from './core/anim-runtime.js';
 
 const q = new URLSearchParams(location.search);
 const slug = q.get('u') || '';
@@ -142,6 +143,19 @@ function toolbar(dev) {
   tb.innerHTML = link('d', 'PC') + link('m', 'Celular');
 }
 
+// Controladores de animação (rolagem e tempo em tela). Cada vez que a página é redesenhada (largura, aba) os elementos são NOVOS: religa tudo.
+//   · ?leitura=1  teste do autor (painel ao vivo, sem enviar nada);
+//   · visitantes: só com destino em config.json › medicao.url, fora do rascunho, do embutido e do "não rastrear".
+let controladores = [], configSite = null;
+async function ligarControladores(dev) {
+  controladores.forEach((c) => c.parar()); controladores = [];
+  const view = vista(), teste = q.get('leitura') === '1', publico = !teste && q.get('src') !== 'draft' && !q.get('embed');
+  if (publico && configSite === null) configSite = await fetch(`${BASE}config.json`).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+  const destino = publico ? configSite?.medicao?.url || null : null;
+  controladores.push(iniciarRolagem(root, view, { dev }));
+  if (teste || destino) controladores.push(iniciarLeitura(root, view, { modo: teste ? 'teste' : 'visitante', dev, destino, pagina: { id: doc.id, kind: doc.kind } }));
+}
+
 try {
   await load();
   loadFonts(usedFonts(doc));
@@ -157,10 +171,11 @@ try {
     // a barra de rolagem aparece depois que o conteúdo entra: se a largura útil mudou, redesenha (senão 15px da direita ficam cortados)
     for (let i = 0; i < 2 && lastVw !== document.documentElement.clientWidth; i++) dev = draw();
     toolbar(dev);
+    await ligarControladores(dev);
     let t;
-    addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { dev = draw(); toolbar(dev); }, 120); });
+    addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => { dev = draw(); toolbar(dev); ligarControladores(dev); }, 120); });
     // navegação entre abas do projeto de site
-    addEventListener('hashchange', () => { if (doc.kind === 'site') { dev = draw(); toolbar(dev); scrollTo(0, 0); } });
+    addEventListener('hashchange', () => { if (doc.kind === 'site') { dev = draw(); toolbar(dev); scrollTo(0, 0); ligarControladores(dev); } });
   }
 } catch (e) {
   msg(e.message);

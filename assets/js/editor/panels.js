@@ -14,6 +14,8 @@ import { sanitizeSvg } from '../core/sanitize.js';
 import { S, on, emit, selEls, mutate, mutateGeom, commit, touch, setPage, byId, select as selecionar } from './state.js';
 import { inkColor, alignSel, distribute, autoStack, resetMobile, fitPageHeight, replaceImage } from './tools.js';
 import { measureAll, playEntrance, nodeOf, refreshOverlay } from './stage.js';
+import { secControladores } from './controladores.js';
+import { abrirCriador } from './library.js';
 import { abrirEditorImagem } from './imagem.js';
 import { icon } from './icons.js';
 import { toast, btn, section, row, hint, num, range, select, seg, toggle, textInput, colorField } from './ui.js';
@@ -210,7 +212,8 @@ function secSvg() {
   }, 350);
   const ta = textInput({ label: 'Código SVG', value: el.code, multiline: true, mono: true, rows: 12, onChange: apply });
   ta.input.id = 'svg-code';
-  return section('SVG', [ta, status, hint('Animações CSS (@keyframes) e SMIL (<animate>) funcionam. Scripts e links externos são removidos.')]);
+  return section('SVG', [ta, status, hint('Animações CSS (@keyframes) e SMIL (<animate>) funcionam. Scripts e links externos são removidos.'),
+    h('div', { class: 'btnrow' }, btn({ label: 'Animar no criador…', ic: 'wand', title: 'Abre este SVG no criador (rig de peças ou pinos); o resultado entra como um novo elemento', onClick: () => abrirCriador({ svg: el.code, nome: el.name || 'SVG animado' }) }))]);
 }
 
 // ---------- projeto de site: barra de abas, compartilhar entre abas e link para aba ----------
@@ -405,7 +408,7 @@ export function build() {
   }
   if (t0 === 'abas' && types.size === 1) root.append(secAbas());
   if (eSite()) root.append(secCompartilhar());
-  root.append(secAppearance(), secAnim(), secLink());
+  root.append(secAppearance(), secAnim(), secControladores({ els, set, build }), secLink());
   root.scrollTop = top;
 }
 
