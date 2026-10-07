@@ -9,8 +9,10 @@ import { frameOf, aabb, pageW, pageH } from '../core/model.js';
 import { marcasDaRegua, UNIDADES, formatar, dePx } from '../core/medidas.js';
 import { UNIDADES_REGUA, unidadePadrao, posNaTela, posNoDoc, faixaVisivel, guiasDe, adicionarGuia, moverGuia, removerGuia, limparGuias, totalDeGuias, textoParaPx } from '../core/reguas.js';
 import { sangriaPx, larguraFinal, alturaFinal } from '../core/gabarito.js';
+import { vistaDoAlvo, listaDeAlvos, alvoValido, temAlvos, rotuloDoAlvo } from '../core/alvos.js';
+import { popMenu } from './dock.js';
 import { familiaDaMedida, PASSOS, PASSO_PADRAO, passoValido, passoEmPx, rotuloDoPasso } from '../core/grade.js';
-import { S, on, emit, selEls, commit } from './state.js';
+import { S, on, emit, selEls, commit, setDevice } from './state.js';
 import { modal, btn, toast } from './ui.js';
 
 const CHAVE = 'artatk.regua';
@@ -19,7 +21,7 @@ const COR = { fundo: '#15141c', sangria: 'rgba(255,59,107,.22)', pagina: '#22213
 
 let el = {};                                      // { wrap, canto, ch, cv, vp, holder, overlay }
 const gradePadrao = () => ({ papel: { visivel: false, ima: false, passo: PASSO_PADRAO.papel }, tela: { visivel: false, ima: false, passo: PASSO_PADRAO.tela } });
-let pref = { visivel: true, unidade: { papel: null, tela: null }, grade: gradePadrao() };
+let pref = { visivel: true, unidade: { papel: null, tela: null }, grade: gradePadrao(), alvo: null };
 let ponteiro = null;                              // { x, y } em px do documento, só enquanto o mouse está sobre o canvas
 let quadro = 0;
 
@@ -29,7 +31,7 @@ const lerPref = () => {
     if (!p) return;
     const grade = gradePadrao();
     for (const f of ['papel', 'tela']) { const g = p.grade?.[f]; if (g) grade[f] = { visivel: g.visivel === true, ima: g.ima === true, passo: passoValido(f, g.passo) ? Number(g.passo) : PASSO_PADRAO[f] }; }
-    pref = { visivel: p.visivel !== false, unidade: { papel: null, tela: null, ...(p.unidade || {}) }, grade };
+    pref = { visivel: p.visivel !== false, unidade: { papel: null, tela: null, ...(p.unidade || {}) }, grade, alvo: alvoValido(p.alvo) ? p.alvo : null };
   } catch { /* padrão */ }
 };
 const gravarPref = () => { try { localStorage.setItem(CHAVE, JSON.stringify(pref)); } catch { /* sem armazenamento */ } };
@@ -45,6 +47,28 @@ export function gradeAtual() {
 }
 export function definirGrade(patch) { Object.assign(pref.grade[familia()], patch); gravarPref(); emit('grade'); }
 export const alternarGrade = () => definirGrade({ visivel: !gradeAtual().visivel });
+
+// Alvo de tela (RG-09): escolhe uma tela de referência e o palco mostra a moldura do que ela vê sem rolar. A moldura só aparece no
+// layout que aquela tela usa (celular × PC); escolher um alvo troca para esse layout.
+export function alvoAtual() {
+  if (!pref.alvo || !temAlvos(S.doc)) return null;
+  const v = vistaDoAlvo(S.doc, pref.alvo);
+  return v && v.dev === S.dev ? v : null;
+}
+export const alvoEscolhido = () => (temAlvos(S.doc) ? pref.alvo : null);
+export function definirAlvo(id) {
+  pref.alvo = alvoValido(id) ? id : null; gravarPref();
+  const v = pref.alvo && vistaDoAlvo(S.doc, pref.alvo);
+  if (v && v.dev !== S.dev) setDevice(v.dev);
+  emit('alvo');
+}
+function menuAlvos(ancora) {
+  const lista = listaDeAlvos(S.doc), atual = alvoEscolhido();
+  popMenu(ancora, [
+    { label: 'Sem alvo', checked: !atual, onClick: () => definirAlvo(null) }, '-',
+    ...lista.map((a) => ({ label: a.rotulo, hint: `${a.w} × ${a.h}${a.layout === 'm' ? ' · layout de celular' : ''}`, checked: a.id === atual, onClick: () => definirAlvo(a.id) })),
+  ]);
+}
 
 function definirUnidade(u) { pref.unidade[familia()] = u; gravarPref(); emit('regua'); }
 export function alternarReguas(v = !pref.visivel) { pref.visivel = v; gravarPref(); aplicar(); }
@@ -177,6 +201,8 @@ function adicionarPorTexto() {
   pos.focus();
 }
 
+const alvoAtualRotulo = () => { const v = vistaDoAlvo(S.doc, alvoEscolhido()); return v ? rotuloDoAlvo(v) : ''; };
+
 function menuCanto(ancora) {
   const old = document.querySelector('#menu-regua'); if (old) { old.remove(); return; }
   const un = unidadeAtual(), n = totalDeGuias(S.doc), g = gradeAtual();
@@ -187,6 +213,8 @@ function menuCanto(ancora) {
     item('Mostrar grade (Alt+G)', () => alternarGrade(), g.visivel),
     item('Encaixar na grade', () => definirGrade({ ima: !g.ima }), g.ima),
     ...PASSOS[g.familia].map((p) => item(`Grade de ${rotuloDoPasso(g.familia, p)}`, () => definirGrade({ passo: p }), p === g.passo)),
+    h('hr'),
+    item(alvoEscolhido() ? `Alvo de tela: ${alvoAtualRotulo()}…` : 'Alvo de tela…', () => menuAlvos(ancora), !!alvoEscolhido(), !temAlvos(S.doc)),
     h('hr'),
     item('Adicionar guia…', adicionarPorTexto),
     item(`Limpar guias${n ? ` (${n})` : ''}`, () => { if (limparGuias(S.doc)) { commit(); emit('guias'); } }, false, !n),

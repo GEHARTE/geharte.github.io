@@ -450,6 +450,10 @@ body.compact #reg-canto,body.compact #reg-h,body.compact #reg-v{display:none}
 #menu-regua button.on span::after{content:" ✓"}
 .ov-grade{position:absolute;inset:0;pointer-events:none}
 .grade-u{position:absolute;pointer-events:none;background-image:linear-gradient(to right,rgba(79,140,255,.28) 1px,transparent 1px),linear-gradient(to bottom,rgba(79,140,255,.28) 1px,transparent 1px)}
+.ov-alvo{position:absolute;inset:0;pointer-events:none}
+.alvo-moldura{position:absolute;box-sizing:border-box;border:2px solid #22d3ee;box-shadow:0 0 0 4000px rgba(10,9,18,.38)}
+.alvo-moldura.cel{border-width:3px}
+.alvo-rot{position:absolute;pointer-events:none;background:#0e7490;color:#fff;font:600 10.5px var(--f);padding:2px 7px;border-radius:5px;white-space:nowrap}
 .ov-gabarito{position:absolute;inset:0;pointer-events:none}
 .gab-sangria{position:absolute;background:rgba(255,59,107,.2)}
 .gab-corte{position:absolute;outline:1px dashed #ff3b6b;box-sizing:border-box}

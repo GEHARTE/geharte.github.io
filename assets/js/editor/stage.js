@@ -11,11 +11,12 @@ import { pontoNaImagem } from '../core/imagem-edicao.js';
 import { icon } from './icons.js';
 import { guiasDe, candidatosDeGuias } from '../core/reguas.js';
 import { cabeNaTela, ajustarNaGrade } from '../core/grade.js';
-import { gradeAtual } from './reguas.js';
+import { gradeAtual, alvoAtual } from './reguas.js';
+import { rotuloDoAlvo } from '../core/alvos.js';
 import { temGabarito, margemMm, sangriaPx, caixaDeCorte, caixaSegura, candidatosDeGabarito } from '../core/gabarito.js';
 
 const PAD = 48;
-let vp, stage, holder, selLayer, fxLayer, guiasLayer, gabLayer, gradeLayer, ab;
+let vp, stage, holder, selLayer, fxLayer, guiasLayer, gabLayer, gradeLayer, alvoLayer, ab;
 let previaGuia = null;   // guia sendo arrastada a partir da régua (editor/reguas.js)
 
 const ctx = () => ({ dev: S.dev, assetUrl, editing: true, doc: S.doc });
@@ -51,6 +52,7 @@ function layout() {
   Object.assign(holder.style, { left: PAD + 'px', top: PAD + 'px', width: w * z + 'px', height: hh * z + 'px' });
   if (ab) { ab.style.transform = `scale(${z})`; ab.style.width = w + 'px'; ab.style.height = hh + 'px'; }
   desenharGrade();
+  desenharAlvo();
   desenharGuias();
   desenharGabarito();
 }
@@ -64,6 +66,21 @@ function desenharGrade() {
   if (!g.visivel || !cabeNaTela(g.passoPx, z)) return;
   const s = g.passoPx * z, o = g.origemPx * z;
   gradeLayer.append(h('i', { class: 'grade-u', style: { left: PAD + 'px', top: PAD + 'px', width: pageW(S.doc, S.dev) * z + 'px', height: pageH(S.doc, S.dev) * z + 'px', backgroundSize: `${s}px ${s}px`, backgroundPosition: `${o}px ${o}px` } }));
+}
+
+// Alvo de tela (RG-09): a moldura é o que a tela de referência mostra ao abrir; o resto escurece e a borda de baixo é a DOBRA (o que passa
+// dali só aparece rolando). Mais larga que a página = sobram faixas dos lados (a página é centralizada, como no visualizador).
+function desenharAlvo() {
+  if (!alvoLayer || !S.doc) return;
+  alvoLayer.replaceChildren();
+  const v = alvoAtual();
+  if (!v) return;
+  const z = S.zoom, a = v.area, celular = v.tipo === 'celular';
+  alvoLayer.append(
+    h('i', { class: 'alvo-moldura' + (celular ? ' cel' : ''), style: { left: sx(a.x) + 'px', top: sx(a.y) + 'px', width: a.w * z + 'px', height: a.h * z + 'px', borderRadius: (celular ? 30 : 6) * z + 'px' } }),
+    h('span', { class: 'alvo-rot', style: { left: sx(a.x) + 8 + 'px', top: sx(a.y + a.h) + 6 + 'px' } },
+      `${rotuloDoAlvo(v)} — ${v.temDobra ? 'abaixo daqui só rolando' : 'a página cabe inteira'}`),
+  );
 }
 
 // Gabarito de impressão (papel): faixa da SANGRIA (rosa, além do corte), linha do CORTE (tracejada) e MARGEM SEGURA (verde, dentro do corte).
@@ -523,9 +540,11 @@ export function initStage(refs) {
   guiasLayer = h('div', { class: 'ov-guias' });
   gabLayer = h('div', { class: 'ov-gabarito' });
   gradeLayer = h('div', { class: 'ov-grade' });
-  refs.overlay.append(gradeLayer, gabLayer, guiasLayer, selLayer, fxLayer);
+  alvoLayer = h('div', { class: 'ov-alvo' });
+  refs.overlay.append(gradeLayer, alvoLayer, gabLayer, guiasLayer, selLayer, fxLayer);
   on('guias', desenharGuias);
   on('grade', desenharGrade);
+  on('alvo', desenharAlvo); on('device', desenharAlvo); on('page', desenharAlvo);
   on('guia-previa', (p) => { previaGuia = p; desenharGuias(); });
 
   S.viewCenter = () => {
