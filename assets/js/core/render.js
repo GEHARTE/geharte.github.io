@@ -10,6 +10,7 @@ import { h } from './dom.js';
 import { W, frameOf, pageH, pageW, bgCss, ABAS_PADRAO } from './model.js';
 import { abasDaBarra, hrefDaAba } from './sites.js';
 import { sangriaPx, larguraFinal, alturaFinal } from './gabarito.js';
+import { corSegura, idSeguro, numeroSeguro, caminhoSeguro } from './seguranca.js';
 import { sanitizeSvg } from './sanitize.js';
 import { safeHref } from './util.js';
 import { fontStack } from './fonts.js';
@@ -45,22 +46,24 @@ const ngon = (cx, cy, rx, ry, n, rot = -Math.PI / 2, inner = 1) => {
 };
 
 export function shapeSvg(el, w, hgt) {
-  const s = el.s, sw = +s.sw || 0, i = sw / 2;
+  // tudo que entra na string de SVG passa pelo filtro de core/seguranca.js: o page.json pode vir de fora (projeto importado, página publicada)
+  w = numeroSeguro(w, 1); hgt = numeroSeguro(hgt, 1);
+  const s = el.s, sw = numeroSeguro(s.sw), i = sw / 2, stroke = corSegura(s.stroke, '#000000');
   const iw = Math.max(1, w - sw), ih = Math.max(1, hgt - sw);
-  const gid = `gr-${el.id}`;
+  const gid = `gr-${idSeguro(el.id)}`;
   let defs = '';
-  let fill = s.fill || 'none';
+  let fill = corSegura(s.fill, 'none');
   if (s.grad) {
-    const a = ((s.grad.a - 90) * Math.PI) / 180, dx = Math.cos(a) / 2, dy = Math.sin(a) / 2;
-    defs = `<defs><linearGradient id="${gid}" x1="${0.5 - dx}" y1="${0.5 - dy}" x2="${0.5 + dx}" y2="${0.5 + dy}"><stop offset="0" stop-color="${s.grad.c1}"/><stop offset="1" stop-color="${s.grad.c2}"/></linearGradient></defs>`;
+    const a = ((numeroSeguro(s.grad.a) - 90) * Math.PI) / 180, dx = Math.cos(a) / 2, dy = Math.sin(a) / 2;
+    defs = `<defs><linearGradient id="${gid}" x1="${0.5 - dx}" y1="${0.5 - dy}" x2="${0.5 + dx}" y2="${0.5 + dy}"><stop offset="0" stop-color="${corSegura(s.grad.c1, '#000000')}"/><stop offset="1" stop-color="${corSegura(s.grad.c2, '#000000')}"/></linearGradient></defs>`;
     fill = `url(#${gid})`;
   }
   const mk = (w) => {
     const dash = s.dash === 1 ? `stroke-dasharray="${w * 3} ${w * 2}"` : s.dash === 2 ? `stroke-dasharray="0.01 ${w * 2}" stroke-linecap="round"` : '';
-    return `fill="${fill}" stroke="${sw ? s.stroke : 'none'}" stroke-width="${w}" stroke-linejoin="round" ${dash}`;
+    return `fill="${fill}" stroke="${sw ? stroke : 'none'}" stroke-width="${w}" stroke-linejoin="round" ${dash}`;
   };
   const common = mk(sw);
-  const lineCommon = `fill="none" stroke="${s.stroke}" stroke-width="${sw || 4}" stroke-linecap="round" stroke-linejoin="round" ${s.dash === 1 ? `stroke-dasharray="${sw * 3} ${sw * 2}"` : s.dash === 2 ? `stroke-dasharray="0.01 ${sw * 2}"` : ''}`;
+  const lineCommon = `fill="none" stroke="${stroke}" stroke-width="${sw || 4}" stroke-linecap="round" stroke-linejoin="round" ${s.dash === 1 ? `stroke-dasharray="${sw * 3} ${sw * 2}"` : s.dash === 2 ? `stroke-dasharray="0.01 ${sw * 2}"` : ''}`;
   let body = '';
   switch (el.shape) {
     case 'rect': { const r = Math.min(+s.radius || 0, iw / 2, ih / 2); body = `<rect x="${i}" y="${i}" width="${iw}" height="${ih}" rx="${r}" ${common}/>`; break; }
@@ -81,10 +84,10 @@ export function shapeSvg(el, w, hgt) {
 }
 
 function pathSvg(el, fr) {
-  const s = el.s;
+  const s = el.s, vb = [numeroSeguro(el.vb?.[0], 1), numeroSeguro(el.vb?.[1], 1)];
   // sem non-scaling-stroke: assim "desenhar o traço" (dasharray em pathLength=1) funciona; a espessura compensa a escala
-  const k = Math.sqrt((fr.w / el.vb[0]) * (fr.h / el.vb[1])) || 1;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 ${el.vb[0]} ${el.vb[1]}" preserveAspectRatio="none" style="overflow:visible;display:block"><path d="${el.d}" fill="${s.fill || 'none'}" stroke="${s.stroke}" stroke-width="${s.sw / k}" stroke-linecap="${s.cap || 'round'}" stroke-linejoin="round"/></svg>`;
+  const k = Math.sqrt((fr.w / vb[0]) * (fr.h / vb[1])) || 1;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 ${vb[0]} ${vb[1]}" preserveAspectRatio="none" style="overflow:visible;display:block"><path d="${caminhoSeguro(el.d)}" fill="${corSegura(s.fill, 'none')}" stroke="${corSegura(s.stroke, '#000000')}" stroke-width="${numeroSeguro(s.sw) / k}" stroke-linecap="${s.cap === 'butt' || s.cap === 'square' ? s.cap : 'round'}" stroke-linejoin="round"/></svg>`;
 }
 
 // ---------- elementos ----------
