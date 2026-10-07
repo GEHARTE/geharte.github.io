@@ -260,6 +260,7 @@ function wireTop() {
       item('layers', reguasVisiveis() ? 'Ocultar réguas (Alt+R)' : 'Mostrar réguas (Alt+R)', () => alternarReguas()),
       item('layers', gradeAtual().visivel ? 'Ocultar grade (Alt+G)' : 'Mostrar grade (Alt+G)', () => alternarGrade()),
       item('download', 'Exportar PDF…', openExportPdf),
+      item('image', 'Exportar como imagem (PNG)…', openExportPng),
       item('download', 'Exportar projeto (.json)', exportProject),
       item('code', S.doc.kind === 'site' ? 'Exportar site em HTML (.html)' : 'Exportar página em HTML (.html)', async () => { try { toast('Montando o arquivo HTML…'); const r = await exportHtml(); toast(`HTML salvo na pasta de Downloads (${r.paginas} ${r.paginas > 1 ? 'páginas' : 'página'}, ${(r.bytes / 1024).toFixed(0)} KB).`, 'ok'); } catch (e) { toast(e.message || String(e), 'err'); } }),
       item('upload', 'Importar projeto…', () => imp.click()), imp,
