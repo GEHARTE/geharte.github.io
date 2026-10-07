@@ -78,7 +78,7 @@ async function main() {
   const host = await carregarHost({ carregarConfig: loadConfig });
   S.host = host;
   const sess = await host.identidade();
-  if (!sess) { host.entrar('documentos/'); return; }
+  if (!sess) { host.entrar('arquivos/'); return; }
   if (!identidadeValida(sess)) { alert('O host devolveu uma identidade inválida.'); return; }
   S.user = sess; S.slug = sess.slug;
   $('#who').textContent = sess.nome;

@@ -128,7 +128,7 @@ const aberto = (path) => BASE + path;   // endereço "de verdade" deste ambiente
 async function main() {
   const H = await carregarHost({ carregarConfig: loadConfig });
   const sess = await H.identidade();
-  if (!sess) { H.entrar('documentos/'); return; }
+  if (!sess) { H.entrar('arquivos/'); return; }
   const slug = sess.slug;
   meuSlug = slug;
   const cap = H.capacidades;

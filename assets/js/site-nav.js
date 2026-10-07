@@ -19,7 +19,7 @@ function build(host) {
   const toolsId = 'sn-tools';
   const dd = h('li', { class: 'sn-dd' + (active === 'ferramentas' ? ' on' : '') });
   const ddBtn = h('button', { type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': toolsId }, 'Ferramentas', h('i', { class: 'sn-caret', 'aria-hidden': 'true' }));
-  const editorHref = sess ? U('documentos/') : U('login.html?next=documentos/');
+  const editorHref = sess ? U('arquivos/') : U('login.html?next=arquivos/');
   const sub = h('ul', { class: 'sn-sub', id: toolsId, 'aria-label': 'Ferramentas' },
     h('li', {}, h('a', { href: editorHref }, 'Editor de páginas', h('small', {}, sess ? 'Arquivos, perfil e artigos, com animações em SVG' : 'Entre para usar — perfil e artigos'))),
     h('li', {}, h('span', { class: 'sn-soon', 'aria-disabled': 'true' }, 'Oficina de letras', h('small', {}, 'em breve'))),
@@ -39,7 +39,7 @@ function build(host) {
   if (sess) {
     user.append(
       h('span', { class: 'sn-quem', title: sess.nome }, sess.nome),
-      h('a', { class: 'sn-btn solid', href: U('documentos/') }, 'Meu espaço'),
+      h('a', { class: 'sn-btn solid', href: U('arquivos/') }, 'Meu espaço'),
       h('button', { class: 'sn-btn', type: 'button', onclick: () => { logout(); location.reload(); } }, 'Sair'));
   } else {
     user.append(h('a', { class: 'sn-btn solid', href: U(`login.html?next=${next}`) }, 'Login'));

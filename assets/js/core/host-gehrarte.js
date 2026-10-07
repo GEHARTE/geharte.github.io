@@ -25,8 +25,8 @@ export function criarHostGehrarte(cfg = {}) {
       async ler({ slug }) { const { getDrive } = await import('./drive-ui.js'); const { NOME_ARQUIVO } = await import('./preferencias.js'); return (await getDrive(slug)).loadText(NOME_ARQUIVO); },
       async gravar({ slug }, texto) { const { getDrive } = await import('./drive-ui.js'); const { NOME_ARQUIVO } = await import('./preferencias.js'); await (await getDrive(slug)).saveText(NOME_ARQUIVO, texto); },
     },
-    entrar(proximo = 'documentos/') { location.replace(`${BASE}login.html?next=${proximo}`); },
+    entrar(proximo = 'arquivos/') { location.replace(`${BASE}login.html?next=${proximo}`); },
     sair() { logout(); location.href = BASE; },
-    urls: { documentos: BASE + 'documentos/', inicio: BASE },
+    urls: { documentos: BASE + 'arquivos/', inicio: BASE },
   };
 }

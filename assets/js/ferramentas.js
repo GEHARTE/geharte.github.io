@@ -3,6 +3,6 @@ import { session } from './core/auth.js';
 
 const card = document.getElementById('card-editor');
 if (card && session()) {
-  card.href = '../documentos/';
+  card.href = '../arquivos/';
   document.getElementById('acao-editor').textContent = 'Abrir o editor';
 }

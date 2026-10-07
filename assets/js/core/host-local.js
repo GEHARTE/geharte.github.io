@@ -11,6 +11,6 @@ export function criarHostLocal(cfg = {}) {
     identidade: async () => ({ slug: 'local', nome: cfg.nomeLocal || 'Você', perfil: 'completo', podeSite: false }),
     entrar() { /* sempre "logado" */ },
     sair: null,
-    urls: { documentos: BASE + 'documentos/', inicio: BASE + 'documentos/' },
+    urls: { documentos: BASE + 'arquivos/', inicio: BASE + 'arquivos/' },
   };
 }

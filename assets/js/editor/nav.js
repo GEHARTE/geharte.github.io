@@ -10,11 +10,11 @@ export async function goToDoc(id) {
 // Abre o painel de arquivos já com o diálogo "Novo arquivo em branco" (o rascunho é salvo antes).
 export async function goToNovoArquivo() {
   if (S.doc) { try { await saveNow(); } catch { /* segue mesmo assim */ } }
-  location.href = `${S.host?.urls.documentos || '../documentos/'}?novo=1`;
+  location.href = `${S.host?.urls.documentos || '../arquivos/'}?novo=1`;
 }
 
 // Volta ao painel de arquivos (o rascunho é salvo antes).
 export async function goToDocuments() {
   if (S.doc) { try { await saveNow(); } catch { /* segue mesmo assim */ } }
-  location.href = S.host?.urls.documentos || '../documentos/';
+  location.href = S.host?.urls.documentos || '../arquivos/';
 }

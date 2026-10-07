@@ -2,74 +2,16 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <link rel="icon" href="../assets/logo/favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="../assets/logo/favicon-192.png">
-  <link rel="apple-touch-icon" href="../assets/logo/apple-touch-icon.png">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
   <title>Arquivos — Gehrarte</title>
-  <meta name="description" content="Arquivos do Gehrarte: os seus últimos arquivos, as páginas do site, o perfil, os artigos e os materiais da equipe.">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <script>try{var t=localStorage.getItem("artatk.tema");if(t==="claro"||t==="escuro")document.documentElement.dataset.tema=t}catch(e){}</script>
-  <link rel="stylesheet" href="../assets/css/anim.css">
-  <link rel="stylesheet" href="../assets/css/galeria.css">
-  <link rel="stylesheet" href="../assets/css/documentos.css">
+  <link rel="icon" href="../assets/logo/favicon.ico" sizes="any">
+  <link rel="canonical" href="../arquivos/">
+  <!-- O endereço antigo (documentos/) segue funcionando para links, favoritos e ?next= já publicados: leva a arquivos/, mantendo ?novo=1 etc. -->
+  <script>location.replace('../arquivos/' + location.search + location.hash);</script>
+  <noscript><meta http-equiv="refresh" content="0; url=../arquivos/"></noscript>
 </head>
-<body class="docs">
-  <header class="dtop">
-    <a class="dlogo" href="../home/" title="Gehrarte — voltar ao blog"><img src="../assets/logo/gehrarte-logo.png" alt="Gehrarte" width="38" height="38"></a>
-    <span class="dtitle">Arquivos</span>
-    <label class="dsearch">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input id="busca" type="search" placeholder="Buscar nos arquivos" aria-label="Buscar nos arquivos" autocomplete="off">
-    </label>
-    <nav class="dnav" aria-label="Ferramentas">
-      <a href="../ferramentas/">Ferramentas</a>
-      <button id="tema" type="button" class="dbtn dtema" title="Modo noturno" aria-label="Modo noturno" aria-pressed="false"><svg class="lua" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg class="sol" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg></button>
-      <span class="dquem" id="quem"></span>
-      <button id="sair" type="button" class="dbtn">Sair</button>
-    </nav>
-  </header>
-
-  <main id="conteudo">
-    <p class="carregando" id="carregando">Carregando os arquivos…</p>
-
-    <!-- 1. Por onde começar: "Novo arquivo em branco" e, ao lado, os últimos arquivos editados (no máximo 3) -->
-    <section class="dsec" id="sec-recentes" aria-labelledby="h-rec">
-      <header class="dsec-h"><h2 id="h-rec">Recentes</h2><p>Comece um arquivo em branco ou continue de onde parou: os últimos que você editou.</p></header>
-      <div class="dgrid recentes" id="g-recentes"></div>
-    </section>
-
-    <!-- 2. O que já está postado no site (editável só por quem tem permissão: hoje, a equipe de desenvolvimento) -->
-    <section class="dsec" id="sec-site" hidden aria-labelledby="h-site">
-      <header class="dsec-h">
-        <h2 id="h-site">Páginas do site</h2>
-        <p id="sub-site">O que já está postado no site. Só quem tem permissão de edição pode alterar estas páginas; Publicar leva a mudança ao site público.</p>
-      </header>
-      <div class="dgrid" id="g-site"></div>
-    </section>
-
-    <section class="dsec" id="sec-equipe" hidden aria-labelledby="h-eq">
-      <header class="dsec-h"><h2 id="h-eq">Perfis da equipe no ar</h2><p>As páginas de perfil publicadas pelas outras pessoas — só para ver.</p></header>
-      <div class="dgrid" id="g-equipe"></div>
-    </section>
-
-    <!-- 3. O que a PESSOA criou (fica neste navegador até ser exportado ou publicado) -->
-    <section class="dsec" id="sec-meu" hidden aria-labelledby="h-meu">
-      <header class="dsec-h"><h2 id="h-meu">Meu espaço</h2><p>Sua página de perfil e os seus materiais no Drive.</p></header>
-      <div class="dgrid" id="g-meu"></div>
-    </section>
-
-    <section class="dsec" id="sec-artigos" hidden aria-labelledby="h-art">
-      <header class="dsec-h"><h2 id="h-art">Todos os meus arquivos</h2><p>Tudo o que você criou, guardado neste navegador — inclusive o que não aparece nos recentes.</p></header>
-      <div class="dgrid" id="g-artigos"></div>
-    </section>
-
-    <p class="vazio" id="vazio" hidden>Nenhum arquivo encontrado para essa busca.</p>
-  </main>
-
-  <div id="menu-pop" class="pop" hidden role="menu"></div>
-  <script type="module" src="../assets/js/documentos.js"></script>
+<body>
+  <p>Esta página mudou de endereço: <a href="../arquivos/">arquivos/</a>.</p>
 </body>
 </html>
