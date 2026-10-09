@@ -29,6 +29,7 @@
 //  - SMIL não obedece a prefers-reduced-motion; o SVG exportado não faz nada a respeito (limitação conhecida).
 //  - Funções que mudam o modelo devolvem um modelo NOVO (as formas, imutáveis, são compartilhadas por referência).
 import { CURVAS, valorEm, porQuadro, semQuadro, clamp } from './anim-motor.js';
+import { IDENTIDADE, multiplicar as mult, lerTransform, segmentosPorMatriz, RE_NUM as NUM_G } from './matriz.js';
 
 export const LIMITES = { pinos: 12, pontos: 4000, formas: 200, duracaoMin: 100, duracaoMax: 60000, quadrosExport: 120, bytesExport: 600000, quadrosKey: 200 };
 const EPS = 1e-9;
@@ -41,7 +42,6 @@ const r4 = (n) => Math.round(n * 1e4) / 1e4;
 //   M [x y]   L [x y]   C [x1 y1 x2 y2 x y]   Q [x1 y1 x y]   Z []
 // H, V → L;  S → C;  T → Q;  A (arco) → uma ou mais C.  Leitor tolerante: ao achar lixo, devolve o que já leu.
 const NUM = /[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/y;
-const NUM_G = /[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g;
 const ARGS = { M: 2, L: 2, H: 1, V: 1, C: 6, S: 4, Q: 4, T: 2, A: 7, Z: 0 };
 
 // Ângulo (com sinal) do vetor u ao vetor v — usado na conversão de arco.
@@ -324,31 +324,10 @@ function estiloEmAtributos(estilo) {
   return o;
 }
 
-// Matrizes 2D [a b c d e f]: x' = a·x + c·y + e ; y' = b·x + d·y + f
-const IDENTIDADE = [1, 0, 0, 1, 0, 0];
-const mult = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
-export function lerTransformacao(texto) {
-  let m = IDENTIDADE;
-  for (const g of String(texto || '').matchAll(/([a-zA-Z]+)\s*\(([^)]*)\)/g)) {
-    const a = (g[2].match(NUM_G) || []).map(Number), nome = g[1].toLowerCase();
-    let n = null;
-    if (nome === 'matrix' && a.length >= 6) n = a.slice(0, 6);
-    else if (nome === 'translate' && a.length >= 1) n = [1, 0, 0, 1, a[0], a[1] || 0];
-    else if (nome === 'scale' && a.length >= 1) n = [a[0], 0, 0, a.length > 1 ? a[1] : a[0], 0, 0];
-    else if (nome === 'rotate' && a.length >= 1) {
-      const r = (a[0] * Math.PI) / 180, cs = Math.cos(r), sn = Math.sin(r), cx = a[1] || 0, cy = a[2] || 0;
-      n = [cs, sn, -sn, cs, cx - cs * cx + sn * cy, cy - sn * cx - cs * cy];
-    } else if (nome === 'skewx' && a.length >= 1) n = [1, 0, Math.tan((a[0] * Math.PI) / 180), 1, 0, 0];
-    else if (nome === 'skewy' && a.length >= 1) n = [1, Math.tan((a[0] * Math.PI) / 180), 0, 1, 0, 0];
-    if (n) m = mult(m, n);
-  }
-  return m;
-}
-const aplicarMatriz = (segs, m) => (m === IDENTIDADE ? segs : segs.map((g) => {
-  const p = [];
-  for (let k = 0; k < g.p.length; k += 2) p.push(m[0] * g.p[k] + m[2] * g.p[k + 1] + m[4], m[1] * g.p[k] + m[3] * g.p[k + 1] + m[5]);
-  return { c: g.c, p };
-}));
+// Matrizes: a álgebra mora em core/matriz.js (era igual à de core/puppet.js, e `aplicarMatriz` tinha nomes iguais para
+// operações diferentes nos dois). Aqui, `lerTransformacao` continua existindo com o nome antigo — é o que os testes e o
+// resto do módulo chamam.
+export { lerTransform as lerTransformacao };
 
 // Lê o SVG e devolve { viewBox, formas:[{tag, attrs, d, matriz}], avisos }. Lança Error se ilegível ou perigoso.
 export function lerFormasDoSvg(texto) {
@@ -380,7 +359,7 @@ export function lerFormasDoSvg(texto) {
     if (['text', 'image', 'use'].includes(tag) && !pai.ignorar) avisos.add(`Elemento <${tag}> ignorado (só caminhos e formas básicas são deformáveis).`);
     const estilo = { ...attrs, ...estiloEmAtributos(attrs.style) };
     for (const k of PINTURA) if (estilo[k] != null) filho.heranca[k] = String(estilo[k]);
-    if (attrs.transform) filho.matriz = mult(pai.matriz, lerTransformacao(attrs.transform));
+    if (attrs.transform) filho.matriz = mult(pai.matriz, lerTransform(attrs.transform));
     if (FORMAS.has(tag) && !filho.ignorar && estilo.display !== 'none') {
       const d = formaParaCaminho(tag, attrs);
       if (d) formas.push({ tag, attrs: { ...filho.heranca }, d, matriz: filho.matriz });
@@ -466,7 +445,7 @@ export function normalizarModelo(obj, { maxPontos = LIMITES.pontos } = {}) {
 // SVG → modelo. A densificação acontece AQUI, uma única vez: o nº de pontos de cada forma não muda mais.
 export function modeloDePinos(svgTexto, { maxPontos = LIMITES.pontos, duracao = 2000 } = {}) {
   const { viewBox, formas: brutas, avisos } = lerFormasDoSvg(svgTexto);
-  const prontas = brutas.map((f) => ({ f, segs: aplicarMatriz(lerCaminho(f.d), f.matriz) })).filter((x) => x.segs.length);
+  const prontas = brutas.map((f) => ({ f, segs: segmentosPorMatriz(lerCaminho(f.d), f.matriz) })).filter((x) => x.segs.length);
   if (!prontas.length) throw new Error('Os caminhos do SVG estão vazios ou ilegíveis.');
   const sem = prontas.reduce((n, x) => n + contarPontos(x.segs), 0);
   if (sem > maxPontos) throw new Error(`Desenho complexo demais: ${sem} pontos (o limite é ${maxPontos}). Simplifique o SVG.`);

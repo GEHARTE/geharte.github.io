@@ -9,9 +9,14 @@ export const criarMascara = (width, height, valor = 0) => new Uint8Array(width *
 export const contar = (m) => { let n = 0; for (let i = 0; i < m.length; i++) if (m[i]) n++; return n; };
 
 // ---------- varinha mágica ----------
-// Distância (0–255) entre o pixel `i` e a cor da semente. É a maior entre a diferença de cor (média quadrática dos 3 canais) e a de
-// transparência; dois pixels quase transparentes valem como iguais (a cor "por baixo" do nada não conta).
-function distancia(d, i, r, g, b, a) {
+// O critério de "parecido" (uma vez só, usado por tudo que seleciona por cor): a maior entre a diferença de cor (média
+// quadrática dos 3 canais) e a de transparência; dois pixels quase transparentes valem como iguais (a cor "por baixo" do
+// nada não conta).
+//
+// No laço quente a comparação é feita AO QUADRADO: `sqrt(s/3) <= lim` é o mesmo que `s <= 3·lim²` para s e lim não
+// negativos, e assim não há uma raiz quadrada por pixel. `distancia` continua aqui porque é ela que define o critério em
+// forma legível — e um teste prova que as duas concordam.
+export function distancia(d, i, r, g, b, a) {
   const pa = d[i + 3];
   if (pa < 8 && a < 8) return 0;
   const dr = d[i] - r, dg = d[i + 1] - g, db = d[i + 2] - b;
@@ -19,50 +24,141 @@ function distancia(d, i, r, g, b, a) {
 }
 export const limiarDaTolerancia = (tolerancia) => (Math.max(0, Math.min(100, Number(tolerancia) || 0)) * 255) / 100;
 
+// A seleção por cor acontece em DUAS fases, e é daí que vem a velocidade:
+//
+//   1. `candidatos` passa UMA vez pela imagem, em ordem, e marca quais pixels se parecem com cada cor de referência
+//      (um bit por cor, até 8). Leitura sequencial: é o que a memória do computador faz de melhor.
+//   2. `inundar` espalha a partir das sementes lendo só esse byte por vizinho — sem reler quatro canais, sem refazer a
+//      conta de distância e sem criar função dentro do laço.
+//
+// Antes, cada travessia relia a imagem em ordem aleatória e refazia a conta por vizinho; com quatro cantos, quatro vezes.
+function candidatos(img, cores, tolerancia) {
+  const { width: w, height: h, data: d } = img;
+  const lw = w + 2, n = w * h, out = new Uint8Array(lw * (h + 2)), nc = cores.length;
+  const lim = limiarDaTolerancia(tolerancia), limCor = 3 * lim * lim;
+  const R = new Int32Array(nc), G = new Int32Array(nc), B = new Int32Array(nc), A = new Int32Array(nc);
+  for (let c = 0; c < nc; c++) { R[c] = cores[c].r; G[c] = cores[c].g; B[c] = cores[c].b; A[c] = cores[c].a; }
+
+  if (nc === 1) {                                   // o caso da varinha: sem laço interno
+    const r = R[0], g = G[0], b = B[0], a = A[0], transp = a < 8;
+    for (let y = 0, i = 0; y < h; y++) {
+      const base = (y + 1) * lw + 1;
+      for (let x = 0; x < w; x++, i += 4) {
+        const pa = d[i + 3];
+        if (pa < 8 && transp) { out[base + x] = 1; continue; }
+        const da = pa - a;
+        if (da > lim || -da > lim) continue;
+        const dr = d[i] - r, dg = d[i + 1] - g, db = d[i + 2] - b;
+        if (dr * dr + dg * dg + db * db <= limCor) out[base + x] = 1;
+      }
+    }
+    return out;
+  }
+  for (let y = 0, i = 0; y < h; y++) {             // os cantos: as cores são testadas na mesma leitura do pixel
+    const base = (y + 1) * lw + 1;
+    for (let x = 0; x < w; x++, i += 4) {
+      const pr = d[i], pg = d[i + 1], pb = d[i + 2], pa = d[i + 3];
+      let bits = 0;
+      for (let c = 0; c < nc; c++) {
+        if (pa < 8 && A[c] < 8) { bits |= 1 << c; continue; }
+        const da = pa - A[c];
+        if (da > lim || -da > lim) continue;
+        const dr = pr - R[c], dg = pg - G[c], db = pb - B[c];
+        if (dr * dr + dg * dg + db * db <= limCor) bits |= 1 << c;
+      }
+      out[base + x] = bits;
+    }
+  }
+  return out;
+}
+
+// Espalha a partir das sementes pelos pixels marcados com `bit` em `cand`.
+//
+// `cand` vem com uma MOLDURA de um pixel zerado em volta (ver `candidatos`): como a moldura nunca é candidata, a travessia
+// não precisa perguntar se chegou na borda nem recuperar a coluna com `p % largura` — duas contas por vizinho, quatro
+// vizinhos por pixel, em milhões de pixels.
+//
+// `pilha` é reaproveitada entre chamadas: num quadro de 1 920 × 1 440 ela sozinha são 11 MB, e alocá-la quatro vezes custa
+// mais que a própria travessia.
+function inundar(cand, bit, w, h, sementes, diagonal, pilha) {
+  const lw = w + 2;                                  // largura com a moldura
+  const dentro = new Uint8Array(cand.length);        // marcado, no mesmo layout de `cand`
+  let topo = 0;
+  for (const [sx, sy] of sementes) {
+    const p = (sy + 1) * lw + (sx + 1);
+    if (!dentro[p] && (cand[p] & bit)) { dentro[p] = 1; pilha[topo++] = p; }
+  }
+  while (topo) {
+    const p = pilha[--topo];
+    if (!dentro[p - 1] && (cand[p - 1] & bit)) { dentro[p - 1] = 1; pilha[topo++] = p - 1; }
+    if (!dentro[p + 1] && (cand[p + 1] & bit)) { dentro[p + 1] = 1; pilha[topo++] = p + 1; }
+    if (!dentro[p - lw] && (cand[p - lw] & bit)) { dentro[p - lw] = 1; pilha[topo++] = p - lw; }
+    if (!dentro[p + lw] && (cand[p + lw] & bit)) { dentro[p + lw] = 1; pilha[topo++] = p + lw; }
+    if (diagonal) {
+      if (!dentro[p - lw - 1] && (cand[p - lw - 1] & bit)) { dentro[p - lw - 1] = 1; pilha[topo++] = p - lw - 1; }
+      if (!dentro[p - lw + 1] && (cand[p - lw + 1] & bit)) { dentro[p - lw + 1] = 1; pilha[topo++] = p - lw + 1; }
+      if (!dentro[p + lw - 1] && (cand[p + lw - 1] & bit)) { dentro[p + lw - 1] = 1; pilha[topo++] = p + lw - 1; }
+      if (!dentro[p + lw + 1] && (cand[p + lw + 1] & bit)) { dentro[p + lw + 1] = 1; pilha[topo++] = p + lw + 1; }
+    }
+  }
+  const m = new Uint8Array(w * h);                   // de volta ao layout sem moldura, uma linha por vez
+  for (let y = 0; y < h; y++) m.set(dentro.subarray((y + 1) * lw + 1, (y + 1) * lw + 1 + w), y * w);
+  return m;
+}
+
+// Tira um bit de `cand` (que tem moldura) para uma máscara comum.
+const soBit = (cand, bit, w, h) => {
+  const lw = w + 2, o = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) { const base = (y + 1) * lw + 1, saida = y * w; for (let x = 0; x < w; x++) o[saida + x] = (cand[base + x] & bit) ? 1 : 0; }
+  return o;
+};
+const corEm = (d, p) => ({ r: d[p * 4], g: d[p * 4 + 1], b: d[p * 4 + 2], a: d[p * 4 + 3] });
+
 // Seleciona os pixels parecidos com o pixel clicado (x, y). `tolerancia` 0–100 (%). `contiguo`: só a área ligada ao clique
 // (como o balde de tinta); sem isso, todos os pixels parecidos da imagem inteira. `diagonal`: liga também pelas diagonais.
 export function varinha(img, x, y, { tolerancia = 25, contiguo = true, diagonal = false } = {}) {
   const { width: w, height: h, data: d } = img;
   x = Math.floor(x); y = Math.floor(y);
-  const m = criarMascara(w, h);
-  if (!(x >= 0 && y >= 0 && x < w && y < h)) return m;
-  const s = (y * w + x) * 4, r = d[s], g = d[s + 1], b = d[s + 2], a = d[s + 3], lim = limiarDaTolerancia(tolerancia);
-  const parecido = (p) => distancia(d, p * 4, r, g, b, a) <= lim;
-  if (!contiguo) { for (let p = 0; p < w * h; p++) if (parecido(p)) m[p] = 1; return m; }
-  const pilha = new Int32Array(w * h);
-  let topo = 0;
-  pilha[topo++] = y * w + x; m[y * w + x] = 1;
-  const visita = (p) => { if (!m[p] && parecido(p)) { m[p] = 1; pilha[topo++] = p; } };
-  while (topo) {
-    const p = pilha[--topo], px = p % w, py = (p - px) / w;
-    if (px > 0) visita(p - 1);
-    if (px < w - 1) visita(p + 1);
-    if (py > 0) visita(p - w);
-    if (py < h - 1) visita(p + w);
-    if (diagonal) {
-      if (px > 0 && py > 0) visita(p - w - 1);
-      if (px < w - 1 && py > 0) visita(p - w + 1);
-      if (px > 0 && py < h - 1) visita(p + w - 1);
-      if (px < w - 1 && py < h - 1) visita(p + w + 1);
-    }
-  }
-  return m;
+  if (!(x >= 0 && y >= 0 && x < w && y < h)) return criarMascara(w, h);
+  const cand = candidatos(img, [corEm(d, y * w + x)], tolerancia);
+  return contiguo ? inundar(cand, 1, w, h, [[x, y]], diagonal, new Int32Array(w * h)) : soBit(cand, 1, w, h);
 }
 
-// Fundo liso: varinha a partir dos 4 cantos, somadas. Serve para tirar o fundo de uma foto de estúdio ou de um desenho em papel branco.
-export function selecaoDosCantos(img, opcoes = {}) {
-  const { width: w, height: h } = img;
-  let m = criarMascara(w, h);
-  for (const [cx, cy] of [[0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1]]) m = combinar(m, varinha(img, cx, cy, opcoes), 'unir');
+// Fundo liso: varinha a partir dos 4 cantos, somadas. Serve para tirar o fundo de uma foto de estúdio ou de um desenho em
+// papel branco. As quatro cores são testadas na MESMA leitura da imagem, e os cantos de cor igual viajam numa travessia só
+// (com a mesma cor de referência, a união das travessias é a travessia da união das sementes).
+export function selecaoDosCantos(img, { tolerancia = 25, contiguo = true, diagonal = false } = {}) {
+  const { width: w, height: h, data: d } = img;
+  const grupos = new Map();                          // "r,g,b,a" → sementes daquela cor exata
+  for (const [cx, cy] of [[0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1]]) {
+    if (cx < 0 || cy < 0) continue;                  // imagem de 1 px de lado: os cantos se repetem
+    const i = (cy * w + cx) * 4, chave = `${d[i]},${d[i + 1]},${d[i + 2]},${d[i + 3]}`;
+    if (grupos.has(chave)) grupos.get(chave).push([cx, cy]);
+    else grupos.set(chave, [[cx, cy]]);
+  }
+  const sementesPorCor = [...grupos.values()];
+  if (!sementesPorCor.length) return criarMascara(w, h);
+  const cores = sementesPorCor.map((ss) => corEm(d, ss[0][1] * w + ss[0][0]));
+  const cand = candidatos(img, cores, tolerancia);
+
+  let m = null;
+  const pilha = contiguo ? new Int32Array(w * h) : null;
+  for (let c = 0; c < cores.length; c++) {
+    const bit = 1 << c;
+    const parcial = contiguo ? inundar(cand, bit, w, h, sementesPorCor[c], diagonal, pilha) : soBit(cand, bit, w, h);
+    m = m ? combinar(m, parcial, 'unir') : parcial;
+  }
   return m;
 }
 
 // ---------- máscaras ----------
+// O modo é decidido UMA vez, antes do laço: comparar texto a cada pixel custa mais que a conta em si.
 export function combinar(a, b, modo = 'substituir') {
-  const o = new Uint8Array(a.length);
-  for (let i = 0; i < a.length; i++) {
-    o[i] = modo === 'unir' ? (a[i] | b[i]) : modo === 'subtrair' ? (a[i] & ~b[i] & 1) : modo === 'interseccao' ? (a[i] & b[i]) : b[i];
-  }
+  const n = a.length, o = new Uint8Array(n);
+  if (modo === 'unir') { for (let i = 0; i < n; i++) o[i] = a[i] | b[i]; }
+  else if (modo === 'subtrair') { for (let i = 0; i < n; i++) o[i] = a[i] & ~b[i] & 1; }
+  else if (modo === 'interseccao') { for (let i = 0; i < n; i++) o[i] = a[i] & b[i]; }
+  else o.set(b.subarray(0, n));
   return o;
 }
 export const inverter = (m) => { const o = new Uint8Array(m.length); for (let i = 0; i < m.length; i++) o[i] = m[i] ? 0 : 1; return o; };
@@ -71,21 +167,34 @@ export const inverter = (m) => { const o = new Uint8Array(m.length); for (let i 
 export function ajustarBorda(m, width, height, n) {
   const r = Math.abs(Math.round(n));
   if (!r) return new Uint8Array(m);
-  const cresce = n > 0, vazio = cresce ? 0 : 1;      // fora da imagem conta como "o que a seleção não é" ao crescer, e como "é" ao encolher (borda da imagem não come a seleção)
-  const passo = (src, horizontal) => {
-    const o = new Uint8Array(src.length);
-    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
-      let v = cresce ? 0 : 1;
-      for (let k = -r; k <= r; k++) {
-        const xx = horizontal ? x + k : x, yy = horizontal ? y : y + k;
-        const q = xx < 0 || yy < 0 || xx >= width || yy >= height ? vazio : src[yy * width + xx];
-        if (cresce ? q : !q) { v = cresce ? 1 : 0; break; }
-      }
-      o[y * width + x] = v;
+  const cresce = n > 0;
+  // Crescer é "há algum 1 na janela"; encolher é "são todos 1". Com a CONTAGEM de 1 na janela, os dois viram comparações de
+  // inteiro: >0 e ==tamanho. A contagem anda com o pixel (entra um, sai outro), então o custo não cresce com o raio.
+  // Fora da imagem conta como "o que a seleção não é" ao crescer e como "é" ao encolher — a borda não come a seleção.
+  const fora = cresce ? 0 : 1;
+  const meio = new Uint8Array(m.length), fim = new Uint8Array(m.length);
+
+  for (let y = 0; y < height; y++) {                     // horizontal
+    const base = y * width, ultimo = width - 1;
+    let soma = 0, janela = 0;
+    for (let k = -r; k <= r; k++) { soma += k < 0 || k > ultimo ? fora : m[base + k]; janela++; }
+    for (let x = 0; x < width; x++) {
+      meio[base + x] = (cresce ? soma > 0 : soma === janela) ? 1 : 0;
+      const entra = x + r + 1, sai = x - r;
+      soma += (entra > ultimo ? fora : m[base + entra]) - (sai < 0 ? fora : m[base + sai]);
     }
-    return o;
-  };
-  return passo(passo(m, true), false);
+  }
+  for (let x = 0; x < width; x++) {                      // vertical
+    const ultimo = height - 1;
+    let soma = 0, janela = 0;
+    for (let k = -r; k <= r; k++) { soma += k < 0 || k > ultimo ? fora : meio[k * width + x]; janela++; }
+    for (let y = 0; y < height; y++) {
+      fim[y * width + x] = (cresce ? soma > 0 : soma === janela) ? 1 : 0;
+      const entra = y + r + 1, sai = y - r;
+      soma += (entra > ultimo ? fora : meio[entra * width + x]) - (sai < 0 ? fora : meio[sai * width + x]);
+    }
+  }
+  return fim;
 }
 
 // Caixa que envolve a seleção: { x, y, w, h } ou null se vazia.
@@ -96,24 +205,39 @@ export function caixaDaMascara(m, width, height) {
 }
 
 // Borda suave: desfoca a máscara (média em caixa, `raio` px) para a transparência não ter degrau.
-function desfocar(m, width, height, raio) {
+// Duas passadas de média em caixa (horizontal e vertical) com SOMA CORRENTE: ao andar um pixel, entra um valor e sai outro,
+// em vez de somar os 2r+1 de novo — trabalho que não cresce com o raio. Fora da imagem a borda se repete (era o que o
+// `clamp` fazia), e é por isso que cada janela começa com o primeiro valor contado r+1 vezes.
+//
+// Os dois sentidos são escritos separados de propósito: uma função de indexação escolhida por `horizontal` custaria três
+// chamadas por pixel e come o ganho (medido).
+export function desfocar(m, width, height, raio) {
   const r = Math.max(0, Math.round(raio));
-  let f = Float32Array.from(m);
+  const f = Float32Array.from(m);
   if (!r) return f;
-  const passo = (src, horizontal) => {
-    const o = new Float32Array(src.length), n = 2 * r + 1;
-    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
-      let soma = 0;
-      for (let k = -r; k <= r; k++) {
-        const xx = Math.min(width - 1, Math.max(0, horizontal ? x + k : x)), yy = Math.min(height - 1, Math.max(0, horizontal ? y : y + k));
-        soma += src[yy * width + xx];
-      }
-      o[y * width + x] = soma / n;
+  const n = 2 * r + 1, meio = new Float32Array(f.length), fim = new Float32Array(f.length);
+
+  for (let y = 0; y < height; y++) {                     // horizontal
+    const base = y * width, ultimo = width - 1;
+    let soma = f[base] * (r + 1);
+    for (let k = 1; k <= r; k++) soma += f[base + (k < width ? k : ultimo)];
+    for (let x = 0; x < width; x++) {
+      meio[base + x] = soma / n;
+      const entra = x + r + 1, sai = x - r;
+      soma += f[base + (entra < width ? entra : ultimo)] - f[base + (sai > 0 ? sai : 0)];
     }
-    return o;
-  };
-  f = passo(passo(f, true), false);
-  return f;
+  }
+  for (let x = 0; x < width; x++) {                      // vertical
+    const ultimo = (height - 1) * width;
+    let soma = meio[x] * (r + 1);
+    for (let k = 1; k <= r; k++) soma += meio[x + (k < height ? k * width : ultimo)];
+    for (let y = 0; y < height; y++) {
+      fim[y * width + x] = soma / n;
+      const entra = y + r + 1, sai = y - r;
+      soma += meio[x + (entra < height ? entra * width : ultimo)] - meio[x + (sai > 0 ? sai * width : 0)];
+    }
+  }
+  return fim;
 }
 
 // ---------- apagar / manter ----------

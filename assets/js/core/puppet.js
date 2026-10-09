@@ -25,6 +25,7 @@
 //  - Curvas que o SMIL não expressa (ease-out-back, bounce, degrau…) viram vários pontos amostrados com a MESMA função do motor
 //    (anim-motor.js), então o SVG exportado acompanha poseEm; só 'degrau' é aproximado por uma rampa de 1 ms.
 import { valorEm, porQuadro, semQuadro, ordenarQuadros, CURVAS } from './anim-motor.js';
+import { IDENTIDADE, multiplicar, translacao, rotacao, escalar, inverterMatriz, lerTransform, pontoPorMatriz, numerosDe as numeros, RE_NUM } from './matriz.js';
 
 export const LIMITES = { pecas: 80, duracaoMin: 100, duracaoMax: 60000, duracaoPadrao: 2000, quadrosPorTrilha: 200, textoMax: 2000000, nos: 20000, profundidade: 64 };
 export const PROPS_DO_RIG = {
@@ -193,44 +194,10 @@ export function serializar(no) {
 // ======================================================================================================================
 // 2) GEOMETRIA: matrizes afins, transform="", caminhos e caixas
 // ======================================================================================================================
-// Matriz [a,b,c,d,e,f] = [[a c e],[b d f],[0 0 1]] (a mesma ordem do matrix() do SVG).
-export const IDENTIDADE = Object.freeze([1, 0, 0, 1, 0, 0]);
-export const multiplicar = (m, n) => [
-  m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1],
-  m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3],
-  m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
-export const aplicarMatriz = (m, x, y) => ({ x: m[0] * x + m[2] * y + m[4], y: m[1] * x + m[3] * y + m[5] });
-export const translacao = (x, y) => [1, 0, 0, 1, x, y];
-export const rotacao = (graus) => { const a = (graus * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a); return [c, s, -s, c, 0, 0]; };
-export const escalar = (sx, sy = sx) => [sx, 0, 0, sy, 0, 0];
-export function inverterMatriz(m) {
-  const det = m[0] * m[3] - m[1] * m[2];
-  if (!finito(det) || Math.abs(det) < 1e-12) return null;
-  return [m[3] / det, -m[1] / det, -m[2] / det, m[0] / det, (m[2] * m[5] - m[3] * m[4]) / det, (m[1] * m[4] - m[0] * m[5]) / det];
-}
-
-const RE_NUM = /[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g;
-const numeros = (s) => (String(s ?? '').match(RE_NUM) || []).map(Number).filter(finito);
-
-// transform="translate(10 5) rotate(30) scale(2)…" → matriz. Função desconhecida ou malformada é ignorada (vale identidade).
-export function lerTransform(texto) {
-  let m = IDENTIDADE;
-  for (const mt of String(texto || '').matchAll(/([A-Za-z]+)\s*\(([^)]*)\)/g)) {
-    const a = numeros(mt[2]);
-    let t = null;
-    switch (mt[1]) {
-      case 'matrix': if (a.length >= 6) t = a.slice(0, 6); break;
-      case 'translate': t = translacao(a[0] ?? 0, a[1] ?? 0); break;
-      case 'scale': t = escalar(a[0] ?? 1, a[1] ?? a[0] ?? 1); break;
-      case 'rotate': if (a.length) { const r = rotacao(a[0]); t = a.length >= 3 ? multiplicar(multiplicar(translacao(a[1], a[2]), r), translacao(-a[1], -a[2])) : r; } break;
-      case 'skewX': if (a.length) t = [1, 0, Math.tan((a[0] * Math.PI) / 180), 1, 0, 0]; break;
-      case 'skewY': if (a.length) t = [1, Math.tan((a[0] * Math.PI) / 180), 0, 1, 0, 0]; break;
-      default: break;
-    }
-    if (t) m = multiplicar(m, t);
-  }
-  return m;
-}
+// Matrizes: a álgebra mora em core/matriz.js (era igual à de core/pinos.js). Aqui só o que esta casa chama pelo nome
+// antigo — `aplicarMatriz` daqui sempre quis dizer "a matriz aplicada a um ponto".
+export { IDENTIDADE, multiplicar, translacao, rotacao, escalar, inverterMatriz, lerTransform };
+export const aplicarMatriz = pontoPorMatriz;
 
 // ---------- caminhos (path d="…") ----------
 // Lê d="" e devolve segmentos ABSOLUTOS: M{x,y} L{x,y} C{x1,y1,x2,y2,x,y} Q{x1,y1,x,y} A{rx,ry,rot,grande,varre,x,y} Z.

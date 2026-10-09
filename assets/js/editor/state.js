@@ -1,5 +1,6 @@
 // Estado do editor: documento, seleção, histórico (desfazer/refazer) e autosave.
 import { clone, debounce, uid } from '../core/util.js';
+import { podar } from '../core/historico.js';
 import { Store } from '../core/store.js';
 import { cloneElement, ehUnico } from '../core/model.js';
 
@@ -23,6 +24,7 @@ export const selEls = () => S.doc.elements.filter((e) => S.sel.includes(e.id));
 export const assetUrl = (id) => S.assets.get(id)?.url || null;
 
 // ---------- histórico ----------
+// Dois tetos, em passos e em espaço: ver core/historico.js (um documento de verdade chegava a 13 MB só de desfazer).
 let hist = [], hi = -1;
 const snap = () => JSON.stringify(S.doc);
 function pushSnapshot() {
@@ -30,8 +32,7 @@ function pushSnapshot() {
   if (hist[hi] === s) return;
   hist = hist.slice(0, hi + 1);
   hist.push(s);
-  if (hist.length > 120) hist.shift();
-  hi = hist.length - 1;
+  ({ hist, hi } = podar(hist, hist.length - 1));
   emit('history');
 }
 const snapSoon = debounce(pushSnapshot, 450);
