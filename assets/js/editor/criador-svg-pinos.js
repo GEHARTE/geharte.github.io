@@ -107,13 +107,15 @@ function montarTela(container, ctx) {
   const bExemplo = botao('Exemplo: folha ao vento', () => { empilharAtual(); trocarModelo(modeloExemplo()); mensagem('Exemplo carregado. Aperte ▶ e depois arraste um pino para mudar a animação.'); });
   const lista = h('p', { class: 'pn-ajuda' });
 
+  const linhaFerramenta = h('div', { class: 'pn-linha' }, bCravar, bMover);
+  const grupoDeformacao = h('div', { class: 'pn-grupo' }, h('p', { class: 'pn-tit' }, 'Deformação'),
+    h('label', { class: 'pn-campo' }, h('span', {}, 'Rigidez', rigidezSaida), rigidez),
+    h('p', { class: 'pn-ajuda' }, 'Baixa: o desenho todo acompanha. Alta: cada pino só puxa o que está perto dele.'),
+    h('label', { class: 'pn-marca' }, marcaMalha, h('span', {}, 'Mostrar malha de pontos')));
   const painel = h('div', { class: 'pn-lado' },
-    h('div', { class: 'pn-grupo' }, h('p', { class: 'pn-tit' }, 'Ferramenta'), h('div', { class: 'pn-linha' }, bCravar, bMover)),
+    h('div', { class: 'pn-grupo' }, h('p', { class: 'pn-tit' }, 'Ferramenta'), linhaFerramenta),
     h('div', { class: 'pn-grupo' }, h('p', { class: 'pn-tit' }, 'Histórico'), h('div', { class: 'pn-linha' }, bDesfazer, bRefazer)),
-    h('div', { class: 'pn-grupo' }, h('p', { class: 'pn-tit' }, 'Deformação'),
-      h('label', { class: 'pn-campo' }, h('span', {}, 'Rigidez', rigidezSaida), rigidez),
-      h('p', { class: 'pn-ajuda' }, 'Baixa: o desenho todo acompanha. Alta: cada pino só puxa o que está perto dele.'),
-      h('label', { class: 'pn-marca' }, marcaMalha, h('span', {}, 'Mostrar malha de pontos'))),
+    grupoDeformacao,
     h('div', { class: 'pn-grupo' }, h('p', { class: 'pn-tit' }, 'Pino selecionado'),
       campo('Curva do quadro', selCurva), h('div', { class: 'pn-linha' }, bRemoverPino, bRemoverQuadro), bFechar, lista),
     h('div', { class: 'pn-grupo' }, h('p', { class: 'pn-tit' }, 'Duração'),
@@ -129,6 +131,10 @@ function montarTela(container, ctx) {
   const tempo = h('div', { class: 'pn-tempo' }, transporte, grade);
   const raiz = h('div', { class: 'pn', tabindex: '-1', 'aria-label': 'Pinos de deformação' }, h('div', { class: 'pn-corpo' }, h('div', { class: 'pn-centro' }, palco, status), painel), tempo);
   container.replaceChildren(raiz);
+
+  // Alvos do tutorial guiado (editor/criador-svg-ajuda.js): é por estes nomes que o tour acha o controle de que está falando.
+  palco.dataset.ajuda = 'palco'; grade.dataset.ajuda = 'linha'; bTocar.dataset.ajuda = 'tocar';
+  linhaFerramenta.dataset.ajuda = 'ferramenta'; grupoDeformacao.dataset.ajuda = 'rigidez';
 
   // ---------- consultas ----------
   const temQuadro = (id, ms) => !!modelo?.pinos.find((p) => p.id === id)?.trilha.x.some((k) => Math.abs(k.t - ms) <= 0.5);
@@ -399,6 +405,9 @@ function montarTela(container, ctx) {
       return r.svg;
     },
     temAlteracoes: () => sujo,
+    // usado pelo tutorial: "Carregar o exemplo" no primeiro passo
+    carregarExemplo: () => { empilharAtual(); trocarModelo(modeloExemplo()); mensagem('Exemplo carregado. Aperte ▶ e depois arraste um pino para mudar a animação.'); return true; },
+    focar: () => raiz.focus(),
     destruir() {
       morto = true; parar(); obs?.disconnect();
       container.replaceChildren();

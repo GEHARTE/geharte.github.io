@@ -22,7 +22,8 @@ function build(host) {
   const editorHref = sess ? U('arquivos/') : U('login.html?next=arquivos/');
   const sub = h('ul', { class: 'sn-sub', id: toolsId, 'aria-label': 'Ferramentas' },
     h('li', {}, h('a', { href: editorHref }, 'Editor de páginas', h('small', {}, sess ? 'Arquivos, perfil e artigos, com animações em SVG' : 'Entre para usar — perfil e artigos'))),
-    h('li', {}, h('span', { class: 'sn-soon', 'aria-disabled': 'true' }, 'Oficina de letras', h('small', {}, 'em breve'))),
+    h('li', {}, h('a', { href: sess ? U('editor/?animador=1') : U('login.html?next=editor/%3Fanimador%3D1') }, 'Animador', h('small', {}, sess ? 'SVG animado: rig de peças e pinos de deformação' : 'Entre para usar — SVG animado'))),
+    h('li', {}, h('span', { class: 'sn-soon', 'aria-disabled': 'true' }, 'Oficina de letras', h('small', {}, 'em breve — editor e criador de fontes'))),
     h('li', { class: 'sep' }, h('a', { href: U('ferramentas/') }, 'Todas as ferramentas →')));
   dd.append(ddBtn, sub);
 

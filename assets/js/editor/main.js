@@ -11,9 +11,10 @@ import { BASE } from '../core/util.js';
 import { S, on, emit, touch, loadDoc, setDevice, setTool, undo, redo, canUndo, canRedo, select, selEls, removeEls, duplicate, copy, paste, reorder, saveNow, commit } from './state.js';
 import { initStage, fit, setZoom, nudge, editText, applyAnimState } from './stage.js';
 import { initPanel } from './panels.js';
-import { initLibraryPanels } from './library.js';
+import { initLibraryPanels, abrirCriador } from './library.js';
 import { renderLayers } from './layers.js';
 import { initDock } from './dock.js';
+import { initFolhaPanel } from './folha.js';
 import { instalar as vigiarAreaVisivel } from '../core/janelas.js';
 import { trava, retomar, aplicarNoAr } from './publicacao.js';
 import { insertImageFile, insertSvg } from './tools.js';
@@ -131,6 +132,7 @@ async function main() {
   const libRoots = { els: $('#p-els'), svg: $('#p-svg'), media: $('#p-media'), tpl: $('#p-tpl') };
   if (S.host?.capacidades.drive) libRoots.drive = $('#p-drive');
   const lib = initLibraryPanels(libRoots);
+  initFolhaPanel($('#p-folha'));     // folha de design do projeto: cores, fontes, formas e desenhos (ao lado das ferramentas)
   initLayersPanel($('#layerspane'));
   loadDoc(doc, updatedAt);
   initAbas($('#abas-bar'));   // só aparece em projetos de site
@@ -141,7 +143,8 @@ async function main() {
     preferencias: S.host?.preferencias || null,     // a conta da pessoa (hoje: Google Drive no Gehrarte); sem isto a disposição fica só neste navegador
     panels: {
       rail: { el: $('#rail'), title: 'Ferramentas' },
-      els: { el: libRoots.els, title: 'Elementos' }, svg: { el: libRoots.svg, title: 'SVG animado' }, media: { el: libRoots.media, title: 'Mídia' },
+      els: { el: libRoots.els, title: 'Elementos' }, folha: { el: $('#p-folha'), title: 'Folha de design' },
+      svg: { el: libRoots.svg, title: 'SVG animado' }, media: { el: libRoots.media, title: 'Mídia' },
       ...(libRoots.drive ? { drive: { el: libRoots.drive, title: 'Drive' } } : {}),
       tpl: { el: libRoots.tpl, title: 'Modelos' },
       props: { el: $('#props'), title: 'Propriedades' }, layers: { el: $('#layerspane'), title: 'Camadas' },
@@ -158,6 +161,9 @@ async function main() {
   emit('zoom');   // o fit() inicial rodou antes do rótulo de zoom estar ligado
   on('fit', fit);
   if (fresh) { dock.reveal('tpl', { exclusive: true }); toast('Bem-vindo! Escolha um modelo ou comece do zero.'); }
+  // Animador: ferramenta da barra do topo (e endereço próprio, editor/?animador=1, usado pela vitrine de ferramentas)
+  $('#tn-animador')?.addEventListener('click', () => abrirCriador({}));
+  if (new URLSearchParams(location.search).has('animador')) setTimeout(() => abrirCriador({}), 150);
   emit('history');
 }
 

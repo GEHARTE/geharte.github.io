@@ -33,6 +33,7 @@ function montar(container, ctx = {}) {
   let tocando = false, repetir = true, ferramenta = 'mover', modoFinal = false, quadroRaf = 0, relogio0 = 0;
   let estrutura = null, grupos = new Map();              // da prévia (ver cabeçalho)
   const historico = E.criarHistorico(20);
+  const desligar = [];                                   // o que precisa ser solto no destruir() (ouvintes no documento)
   const tInt = () => Math.round(t);
 
   // ---------- elementos ----------
@@ -65,6 +66,8 @@ function montar(container, ctx = {}) {
   const arquivo = h('input', { type: 'file', accept: '.svg,image/svg+xml', hidden: true });
 
   // ---------- montagem da tela ----------
+  const bQuadro = botao({ rotulo: '◆ quadro', titulo: 'Grava um quadro-chave em todas as propriedades neste instante (K)', cls: 'primary', aoClicar: () => { if (sel) { parar(); mudar(E.quadrosDeTudoEm(rig, sel, tInt())); } } });
+  const rotCurva = h('label', { class: 'cs-rot' }, h('span', {}, 'Curva do quadro selecionado (até o próximo)'), curvaSel);
   const grupoProps = P.NOMES_DAS_PROPS.map(campoProp);
   const painelProps = h('aside', { class: 'cs-props' },
     h('h4', {}, 'Peça selecionada'),
@@ -79,9 +82,9 @@ function montar(container, ctx = {}) {
         botao({ ic: 'trash', titulo: 'Excluir peça (os filhos sobem para o pai dela)', cls: 'icon', aoClicar: () => { if (sel) { const antes = sel; sel = null; mudar(P.removerPeca(rig, antes)); } } }))),
     h('h4', {}, 'Nesta posição do tempo'),
     h('div', { class: 'cs-bloco' }, grupoProps,
-      h('div', { class: 'cs-btns' }, botao({ rotulo: '◆ quadro', titulo: 'Grava um quadro-chave em todas as propriedades neste instante (K)', cls: 'primary', aoClicar: () => { if (sel) { parar(); mudar(E.quadrosDeTudoEm(rig, sel, tInt())); } } }),
+      h('div', { class: 'cs-btns' }, bQuadro,
         botao({ rotulo: 'Apagar quadros aqui', titulo: 'Apaga os quadros desta peça neste instante (Delete)', aoClicar: apagarQuadros }))),
-    h('label', { class: 'cs-rot' }, h('span', {}, 'Curva do quadro selecionado (até o próximo)'), curvaSel),
+    rotCurva,
     h('p', { class: 'cs-dica' }, 'Clique num losango da linha do tempo para escolher o quadro e mudar a curva dele.'));
 
   const aside = h('aside', { class: 'cs-pecas' }, h('h4', {}, 'Peças'), lista, h('p', { class: 'cs-dica' }, 'A peça filha vai junto quando a mãe se mexe. Escolha a mãe no painel ao lado.'));
@@ -97,10 +100,15 @@ function montar(container, ctx = {}) {
     botao({ texto: '◆▶', titulo: 'Próximo quadro (→)', cls: 'icon', aoClicar: () => irParaQuadro(1) }),
     bRepetir, tempoTxt, h('span', { class: 'cs-esp' }), h('label', { class: 'cs-rot cs-inline' }, h('span', {}, 'Duração (s)'), durInp));
   const linha = h('div', { class: 'cs-lh' }, corpoLh);
+  // Alça entre a prévia e a linha do tempo: com muitas peças a linha do tempo come o palco, e é no palco que se vê a animação.
+  // A altura escolhida fica guardada neste navegador (ALTURA_LH); teclado também ajusta (setas), para não depender do mouse.
+  const baixo = h('div', { class: 'cs-baixo' }, transporte, linha);
+  const alca = h('div', { class: 'cs-alca', role: 'separator', tabindex: '0', 'aria-orientation': 'horizontal',
+    'aria-label': 'Altura da linha do tempo (arraste ou use as setas)', title: 'Arraste para dividir o espaço entre a prévia e a linha do tempo' });
   const raiz = h('div', { class: 'cs-rig', tabindex: '-1' }, barra, menuExemplos, areaColar,
-    h('div', { class: 'cs-meio' }, aside, h('div', { class: 'cs-centro' }, palco, dica), painelProps),
-    h('div', { class: 'cs-baixo' }, transporte, linha));
+    h('div', { class: 'cs-meio' }, aside, h('div', { class: 'cs-centro' }, palco, dica), painelProps), alca, baixo);
   container.append(raiz);
+  ligarAlca();
   for (const c of NOMES_DE_CURVA) curvaSel.append(h('option', { value: c }, c));
 
   function campoProp(prop) {
@@ -444,6 +452,46 @@ function montar(container, ctx = {}) {
   vazio.append(h('b', {}, 'Comece por aqui'), h('span', {}, 'Escolha um exemplo pronto ou cole/abra um SVG seu.'),
     h('div', { class: 'cs-btns' }, botao({ rotulo: 'Exemplos', ic: 'template', cls: 'primary', aoClicar: () => { menuExemplos.hidden = false; } }), botao({ rotulo: 'Colar SVG', ic: 'code', aoClicar: () => { areaColar.hidden = false; area.focus(); } })));
 
+  // ---------- alça da linha do tempo ----------
+  const ALTURA_LH = 'artatk:criador:rig:altura-linha';
+  const LH_MIN = 92;                                    // menos que isto não mostra nem a régua e uma faixa
+  const alturaMax = () => Math.max(LH_MIN, raiz.clientHeight - 260);   // sempre sobram ~260 px de prévia
+  function aplicarAltura(px) {
+    const v = Math.round(Math.min(alturaMax(), Math.max(LH_MIN, px)));
+    baixo.style.height = `${v}px`;
+    alca.setAttribute('aria-valuenow', String(v));
+    try { localStorage.setItem(ALTURA_LH, String(v)); } catch { /* sem armazenamento: vale só nesta sessão */ }
+    return v;
+  }
+  function ligarAlca() {
+    let guardada = NaN;
+    try { guardada = parseInt(localStorage.getItem(ALTURA_LH) || '', 10); } catch { /* idem */ }
+    requestAnimationFrame(() => aplicarAltura(Number.isFinite(guardada) ? guardada : Math.round(raiz.clientHeight * 0.34)));
+    let base = 0, y0 = 0, arrastando = false;              // a flag é a verdade do gesto: setPointerCapture é só conforto
+    alca.addEventListener('pointerdown', (e) => {
+      base = baixo.getBoundingClientRect().height; y0 = e.clientY; arrastando = true;
+      try { alca.setPointerCapture(e.pointerId); } catch { /* sem captura: o move no documento resolve */ }
+      alca.classList.add('on'); e.preventDefault();
+    });
+    const mover = (e) => { if (!arrastando) return; aplicarAltura(base + (y0 - e.clientY)); renderQuadro(); };
+    const soltar = (e) => {
+      if (!arrastando) return;
+      arrastando = false; alca.classList.remove('on');
+      try { alca.releasePointerCapture(e.pointerId); } catch { /* já solto */ }
+    };
+    alca.addEventListener('pointermove', mover);
+    document.addEventListener('pointermove', mover);        // o ponteiro sai da alça de 7 px no primeiro movimento
+    alca.addEventListener('pointerup', soltar); alca.addEventListener('pointercancel', soltar);
+    document.addEventListener('pointerup', soltar);
+    desligar.push(() => { document.removeEventListener('pointermove', mover); document.removeEventListener('pointerup', soltar); });
+    alca.addEventListener('keydown', (e) => {
+      const passo = e.shiftKey ? 48 : 16;
+      if (e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); aplicarAltura(baixo.getBoundingClientRect().height + passo); renderQuadro(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); aplicarAltura(baixo.getBoundingClientRect().height - passo); renderQuadro(); }
+    });
+    alca.addEventListener('dblclick', () => { aplicarAltura(Math.round(raiz.clientHeight * 0.34)); renderQuadro(); });
+  }
+
   // ---------- teclado (a janela já impede que chegue aos atalhos do editor) ----------
   raiz.addEventListener('keydown', (e) => {
     if (e.target.matches?.('input,select,textarea')) return;
@@ -460,6 +508,10 @@ function montar(container, ctx = {}) {
   });
   addEventListener('resize', () => { if (raiz.isConnected) renderQuadro(); });
 
+  // Alvos do tutorial guiado (editor/criador-svg-ajuda.js): é por estes nomes que o tour acha o controle de que está falando.
+  aside.dataset.ajuda = 'pecas'; bPivo.dataset.ajuda = 'pivo'; bQuadro.dataset.ajuda = 'quadro';
+  linha.dataset.ajuda = 'linha'; bTocar.dataset.ajuda = 'tocar'; rotCurva.dataset.ajuda = 'curva'; palco.dataset.ajuda = 'palco';
+
   escolherFerramenta('mover');
   renderTudo();
   requestAnimationFrame(renderQuadro);               // depois do primeiro layout, para o overlay medir o tamanho certo
@@ -469,10 +521,17 @@ function montar(container, ctx = {}) {
   function temAlteracoes() { return rig !== inicial; }
   return {
     exportarSvg: () => (rig.pecas.length ? P.exportarSvgAnimado(rig, { laco: repetir }) : ''),
-    destruir() { parar(); raiz.remove(); },
+    destruir() { parar(); for (const f of desligar) { try { f(); } catch { /* já solto */ } } raiz.remove(); },
     temAlteracoes,
     nome: () => rig.nome,
     carregarSvg: (texto, nome) => carregarTexto(texto, nome),
+    // usado pelo tutorial: "Carregar um exemplo" no primeiro passo (mexer num exemplo pronto ensina mais rápido que ler)
+    carregarExemplo: () => {
+      const ex = EXEMPLOS[0];
+      if (!ex || (temAlteracoes() && !confirm('Trocar o desenho descarta a animação atual. Continuar?'))) return false;
+      instalar(ex.criarRig());
+      return true;
+    },
     focar: () => raiz.focus(),
   };
 }

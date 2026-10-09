@@ -1,6 +1,10 @@
-// Criador de SVG animado do ArtAtk (estilo "puppet animation"): janela grande sobre o editor que hospeda os MODOS de criação em abas
+// Criador de SVG animado do ArtAtk (estilo "puppet animation"): TELA INTEIRA sobre o editor, hospedando os MODOS de criação em abas
 // (hoje: "Rig de peças"; o modo "Pinos de deformação" se registra em criador-svg-modos.js). A janela só cuida do que é comum a todos:
-// abas, "Inserir na página", "Baixar .svg", confirmação ao fechar com alterações e o isolamento do teclado.
+// abas, ajuda, tela cheia do navegador, "Inserir na página", "Baixar .svg", confirmação ao fechar com alterações e o teclado.
+//
+// Por que tela inteira: animar é olhar o desenho se mexer. Como a tela tem lista de peças, propriedades e linha do tempo, uma janela
+// menor que a tela deixava a prévia com pouco mais de 200 px de altura num notebook. Agora a janela ocupa tudo, as ações moram no
+// cabeçalho (não há mais rodapé) e o botão de tela cheia pede a tela cheia DO NAVEGADOR, que devolve a altura das barras dele.
 //
 // O teclado dentro da janela NÃO chega aos atalhos do editor (Delete apagaria o elemento selecionado da página): o keydown é tratado
 // na própria janela e o evento para aqui (stopPropagation), igual a editor/imagem.js. Por isso a janela tem tabindex -1 e recebe o foco.
@@ -9,9 +13,11 @@ import { downloadBlob } from '../core/util.js';
 import { nomeDeArquivo } from '../core/puppet-edicao.js';
 import { activeDoc } from './docs.js';
 import { btn, toast } from './ui.js';
+import { icon } from './icons.js';
 import { MODOS, registrarModo } from './criador-svg-modos.js';
 import { modoRig } from './criador-svg-rig.js';
 import { modoPinos } from './criador-svg-pinos.js';
+import { abrirAjuda, jaViu } from './criador-svg-ajuda.js';
 
 registrarModo(modoRig);
 registrarModo(modoPinos);          // pinos de deformação (core/pinos.js): o segundo modo; as abas aparecem sozinhas com 2 modos
@@ -55,14 +61,55 @@ export function abrirCriadorDeSvg({ svg = null, nome = 'SVG animado', aoInserir 
     for (const [mid, el] of painel) el.hidden = mid !== modo.id;
     abas.querySelectorAll('button').forEach((b) => { const on = b.dataset.modo === modo.id; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
     montados.get(modo.id)?.focar?.();
+    tour?.fechar();
+    if (!jaViu(modo.id)) requestAnimationFrame(() => ajudar());        // primeira vez neste modo: o tutorial se apresenta sozinho
   }
   for (const m of MODOS) abas.append(h('button', { type: 'button', role: 'tab', 'data-modo': m.id, onclick: () => ativar(m.id) }, m.rotulo));
   abas.hidden = MODOS.length < 2;                               // com um modo só, as abas seriam enfeite
 
   const instanciaAtiva = () => montados.get(ativo) || null;
   const temAlteracoes = () => [...montados.values()].some((m) => m?.temAlteracoes?.());
-  const sair = () => { for (const m of montados.values()) { try { m?.destruir?.(); } catch { /* já fora da tela */ } } fundo.remove(); };
+  const sair = () => { tour?.fechar(); desligarTelaCheia(); for (const m of montados.values()) { try { m?.destruir?.(); } catch { /* já fora da tela */ } } fundo.remove(); };
   const fechar = () => { if (temAlteracoes() && !confirm('Descartar a animação que você está criando?')) return; sair(); };
+
+  // ---------- tutorial ----------
+  let tour = null;
+  function ajudar() {
+    tour?.fechar();
+    tour = abrirAjuda({
+      hospede: fundo,
+      corpo: painel.get(ativo),
+      modo: ativo,
+      acoes: { exemplo: () => instanciaAtiva()?.carregarExemplo?.() },
+    });
+  }
+
+  // ---------- tela cheia do navegador ----------
+  // A janela já ocupa a página inteira; a tela cheia do navegador devolve as barras dele (umas 100 px de altura, que no palco
+  // da animação fazem diferença). A escolha fica lembrada: quem usou tela cheia uma vez abre o criador assim na próxima.
+  const PREF_FS = 'artatk:criador:telacheia';
+  const emTelaCheia = () => doc.fullscreenElement === fundo;
+  const lembrar = (v) => { try { localStorage.setItem(PREF_FS, v ? '1' : '0'); } catch { /* sem armazenamento: só não lembra */ } };
+  const queriaTelaCheia = () => { try { return localStorage.getItem(PREF_FS) === '1'; } catch { return false; } };
+  async function alternarTelaCheia() {
+    try {
+      if (emTelaCheia()) { await doc.exitFullscreen(); lembrar(false); }
+      else { await fundo.requestFullscreen?.(); lembrar(true); }
+    } catch { toast('Este navegador não deixou entrar em tela cheia.', 'err'); }
+  }
+  const bTelaCheia = btn({ ic: 'expand', title: 'Tela cheia (F)', cls: 'icon', onClick: alternarTelaCheia });
+  function sincronizarTelaCheia() {
+    const on = emTelaCheia();
+    bTelaCheia.innerHTML = icon(on ? 'shrink' : 'expand', 16);
+    bTelaCheia.title = on ? 'Sair da tela cheia (F)' : 'Tela cheia (F)';
+    bTelaCheia.classList.toggle('on', on);
+    tour?.reposicionar();
+  }
+  doc.addEventListener('fullscreenchange', sincronizarTelaCheia);
+  const desligarTelaCheia = () => {
+    doc.removeEventListener('fullscreenchange', sincronizarTelaCheia);
+    if (emTelaCheia()) doc.exitFullscreen?.().catch(() => {});
+  };
 
   function gerar() {
     const m = instanciaAtiva();
@@ -84,17 +131,31 @@ export function abrirCriadorDeSvg({ svg = null, nome = 'SVG animado', aoInserir 
     toast('SVG animado salvo na pasta de Downloads.', 'ok');
   }
 
+  // Cabeçalho único: título, abas, ajuda, tela cheia e as ações. Sem rodapé — em tela inteira, cada barra a menos é palco a mais.
   const fundo = h('div', { class: 'modal-back cs-back', tabindex: '-1' },
     h('div', { class: 'modal wide cs-modal', role: 'dialog', 'aria-label': 'Criador de SVG animado' },
-      h('header', {}, h('b', {}, 'Criador de SVG animado'), abas, btn({ ic: 'x', title: 'Fechar', onClick: fechar, cls: 'icon' })),
-      corpo,
-      h('footer', {}, btn({ label: 'Cancelar', onClick: fechar }), btn({ label: 'Baixar .svg', ic: 'download', onClick: baixar }), btn({ label: 'Inserir na página', ic: 'check', cls: 'primary', onClick: inserir }))));
+      h('header', {},
+        h('b', {}, 'Criador de SVG animado'), abas,
+        btn({ ic: 'help', label: 'Como animar', title: 'Tutorial passo a passo (F1)', cls: 'cs-ajuda', onClick: () => ajudar() }),
+        bTelaCheia,
+        h('span', { class: 'cs-sep' }),
+        h('div', { class: 'cs-acoes', 'data-ajuda': 'entregar' },
+          btn({ label: 'Baixar .svg', ic: 'download', onClick: baixar }),
+          btn({ label: 'Inserir na página', ic: 'check', cls: 'primary', onClick: inserir })),
+        btn({ ic: 'x', title: 'Fechar (Esc)', cls: 'icon', onClick: fechar })),
+      corpo));
   fundo.addEventListener('keydown', (e) => {                    // na janela (não no documento): o evento para aqui e não chega aos atalhos do editor
     e.stopPropagation();
-    if (e.key === 'Escape' && !e.defaultPrevented) { e.preventDefault(); fechar(); }
+    if (e.defaultPrevented) return;
+    const campo = e.target.matches?.('input,select,textarea');
+    if (e.key === 'Escape') { e.preventDefault(); fechar(); }
+    else if (e.key === 'F1') { e.preventDefault(); ajudar(); }
+    else if (!campo && (e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); alternarTelaCheia(); }
   });
   doc.body.append(fundo);
   ativar(MODOS[0]?.id);
   fundo.focus();
+  if (queriaTelaCheia()) fundo.requestFullscreen?.().catch(() => {});   // a pessoa já escolheu tela cheia antes; se o navegador recusar, segue na janela
+  sincronizarTelaCheia();
   return { fechar: sair };
 }

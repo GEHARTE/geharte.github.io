@@ -98,6 +98,8 @@ body.resizing{user-select:none}
 #rail button:hover{background:var(--p2);color:var(--tx)}
 #rail button.on{background:var(--sel);color:#fff}
 #props{flex:1;overflow-y:auto;min-height:0}
+/* a folha rola como a biblioteca e as propriedades: .pnl-body corta o que passa, quem rola é o conteúdo */
+#p-folha{flex:1;min-height:0;overflow-y:auto;padding-bottom:20px}
 #layerspane{flex:1;min-height:0}
 
 /* soltos sobre o canvas */
@@ -154,6 +156,30 @@ body.pnl-window .pnl{position:absolute;inset:0;width:auto;height:auto;border:0;b
 .cell .pv svg{max-width:100%;max-height:100%;width:auto;height:100%}
 .cell.shapes .pv svg,.grid.shapes .pv svg{width:100%;height:100%}
 .cell.bgcell .pv{background:#14121f;border-radius:6px}
+
+/* ---------- folha de design (editor/folha.js) ----------
+   O kit visual do projeto: cores com papel e aviso de contraste, fontes na própria fonte, formas e desenhos da identidade. */
+.fd-topo{padding:10px 14px 4px;display:flex;flex-direction:column;gap:6px}
+.fd-topo .hint{margin:0}
+.fd-sel-folha{width:100%;background:var(--p2);border:1px solid var(--line);border-radius:8px;color:var(--tx);padding:7px 9px;font:inherit}
+.fd-cores{display:flex;flex-direction:column;gap:4px;padding:0 14px}
+.fd-cor{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;width:100%;padding:5px 7px;background:transparent;border:1px solid transparent;border-radius:9px;color:var(--tx);font:inherit;text-align:left;cursor:pointer}
+.fd-cor:hover{background:var(--p2);border-color:var(--line)}
+.fd-chip{width:22px;height:22px;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25),0 0 0 1px var(--line),0 0 0 2px var(--p1)}
+.fd-cor-nome{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fd-cor-hex{color:var(--dim);font:11px ui-monospace,Menlo,Consolas,monospace}
+.fd-cor[data-papel=marca] .fd-cor-nome,.fd-cor[data-papel=acento] .fd-cor-nome{font-weight:600}
+.fd-sel{grid-column:2/-1;justify-self:start;font-size:10.5px;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--dim)}
+.fd-sel.fd-aaa,.fd-sel.fd-aa{color:#5fd39b;border-color:#2c6b4d}
+.fd-sel.fd-grande{color:#e8a33d;border-color:#6b4f20}
+.fd-sel.fd-baixo{color:#ff7a8f;border-color:#6b2c38}
+.fd-fontes{display:flex;flex-direction:column;gap:6px;padding:0 14px}
+.fd-fonte{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;padding:8px 10px;background:var(--p2);border:1px solid var(--line);border-radius:9px;color:var(--tx);cursor:pointer;text-align:left}
+.fd-fonte:hover{border-color:var(--sel);background:var(--p3)}
+.fd-fonte b{font-size:17px;line-height:1.2;font-weight:600}
+.fd-fonte span{font:11px var(--f,inherit);color:var(--dim)}
+.fd-rodape{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.fd-rodape .hint{margin:0}
 .cell img{width:100%;height:100%;object-fit:cover;border-radius:6px}
 .pad{padding:12px 14px}
 .tpls{display:grid;gap:10px;padding:0 14px}

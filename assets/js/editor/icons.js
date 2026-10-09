@@ -55,6 +55,9 @@ const P = {
   panels: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M9 11h12"/>',
   rotate: '<rect x="8" y="9" width="8" height="6" rx="1"/><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5"/>',
   keyboard: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
+  expand: '<path d="M9 4H4v5M15 4h5v5M15 20h5v-5M9 20H4v-5"/>',
+  shrink: '<path d="M4 9h5V4M20 9h-5V4M20 15h-5v5M4 15h5v5"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9.3 9.2A2.8 2.8 0 0 1 12 7.3c1.6 0 2.7 1 2.7 2.4 0 1.2-.7 1.8-1.6 2.4-.8.5-1.1.9-1.1 1.8M12 17h.01" stroke-width="2"/>',
 };
 
 export const icon = (name, size = 16) =>

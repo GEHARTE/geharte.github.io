@@ -17,6 +17,7 @@ const BOX = { w: 290, h: 420 };
 const DEFAULTS = {
   rail:   { title: 'Ferramentas',  side: 'left',  col: 'rail',  w: 52,  box: { w: 150, h: 290 } },
   els:    { title: 'Elementos',    side: 'left',  col: 'lib',   w: 272, box: { w: 290, h: 520 } },
+  folha:  { title: 'Folha de design', side: 'left', col: 'lib', w: 272, collapsed: true, box: { w: 300, h: 560 } },
   svg:    { title: 'SVG animado',  side: 'left',  col: 'lib',   w: 272, collapsed: true, box: BOX },
   media:  { title: 'Mídia',        side: 'left',  col: 'lib',   w: 272, collapsed: true, box: BOX },
   drive:  { title: 'Drive',        side: 'left',  col: 'lib',   w: 272, collapsed: true, box: BOX },
@@ -31,7 +32,7 @@ export const LAYOUT_V = 2;
 export const chaveLayout = (slug) => `gehrarte.layout.${slug}`;
 export const chaveSync = (slug) => `gehrarte.layout.sync.${slug}`;
 // Painéis que antes eram abas da "Biblioteca" (layout v1 guardava o painel único `lib`)
-export const LIB_IDS = ['els', 'svg', 'media', 'drive', 'tpl'];
+export const LIB_IDS = ['els', 'folha', 'svg', 'media', 'drive', 'tpl'];
 // Celular: cada botão da gaveta mostra um grupo (a biblioteca vira uma sanfona)
 export const DRAWER_GROUPS = { lib: LIB_IDS, layers: ['layers'], props: ['props'] };
 const orderOf = (id) => { const i = PANEL_IDS.indexOf(id); return i < 0 ? 999 : i; };

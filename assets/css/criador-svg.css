@@ -1,10 +1,18 @@
 /* Criador de SVG animado (editor/criador-svg.js e editor/criador-svg-rig.js).
    Arquivo próprio: não mexe no editor.css. Usa as variáveis do editor (--p1 --p2 --p3 --line --tx --dim --sel --accent) e o padrão
    de janela dele (.modal-back / .modal). Todas as classes começam com cs- para não colidir com nada. */
-.modal.cs-modal{width:min(1320px,97vw);height:calc(var(--vv-h,100dvh) - 40px);max-height:none}
-.modal.cs-modal header{gap:12px}
+/* ---------- tela inteira ----------
+   Animar é olhar o desenho se mexer: a janela toma a tela toda e não há rodapé (as ações moram no cabeçalho). O botão de tela
+   cheia (Fullscreen API) ainda recupera a altura das barras do navegador. */
+.modal-back.cs-back{padding:0;display:block;overflow:hidden}
+.modal-back.cs-back:fullscreen{left:0;top:0;width:100%;height:100%}
+.modal.cs-modal{width:100%;height:var(--vv-h,100dvh);max-height:none;border:0;border-radius:0;box-shadow:none}
+.modal-back.cs-back:fullscreen .modal.cs-modal{height:100%}
+.modal.cs-modal header{gap:8px;padding:7px 12px;flex-wrap:wrap;justify-content:flex-start}
 .modal.cs-modal header b{white-space:nowrap}
 .cs-abas{margin-right:auto}
+.cs-acoes{display:flex;gap:6px;align-items:center}
+.btn.cs-ajuda{color:var(--tx)}
 .modal-b.cs-corpo{flex:1;min-height:0;padding:0;overflow:hidden;gap:0}
 .cs-modo{flex:1;min-height:0;display:flex;flex-direction:column}.cs-modo[hidden]{display:none}
 
@@ -64,7 +72,12 @@
 .cs-marca{display:inline-flex;align-items:center;gap:5px;color:var(--tx)}
 
 /* barra de tempo e linha do tempo */
-.cs-baixo{flex:none;border-top:1px solid var(--line);display:flex;flex-direction:column;min-height:0;max-height:min(40%,300px)}
+.cs-baixo{flex:none;display:flex;flex-direction:column;min-height:92px;height:34%;max-height:none;overflow:hidden}
+/* alça entre a prévia e a linha do tempo (a altura vem do JS, em px, e fica guardada no navegador) */
+.cs-alca{flex:none;height:7px;cursor:row-resize;background:var(--line);position:relative;touch-action:none}
+.cs-alca::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46px;height:3px;border-radius:2px;background:var(--dim);opacity:.5}
+.cs-alca:hover::after,.cs-alca.on::after,.cs-alca:focus-visible::after{opacity:1;background:var(--sel)}
+.cs-alca:focus-visible{outline:2px solid var(--sel);outline-offset:-2px}
 .cs-transp{display:flex;align-items:center;gap:8px;padding:6px 12px;flex-wrap:wrap}
 .cs-tempo-txt{font:600 12px ui-monospace,Menlo,Consolas,monospace;color:var(--dim);min-width:112px}
 .cs-lh{position:relative;overflow:auto;flex:1;min-height:70px;border-top:1px solid var(--line);background:#14131a;--rot:150px}
@@ -102,6 +115,34 @@
   .cs-meio{flex-direction:column;overflow:auto}
   .cs-pecas,.cs-props{width:auto;border:0;border-bottom:1px solid var(--line);max-height:none}
   .cs-palco{min-height:260px;flex:none}
-  .cs-baixo{max-height:none}
+  .cs-baixo{height:auto;max-height:none}
+  .cs-alca{display:none}
 }
 @media (prefers-reduced-motion:reduce){.cs-palco *{scroll-behavior:auto}}
+
+
+/* ---------- tutorial guiado (editor/criador-svg-ajuda.js) ----------
+   Não bloqueia a tela: o escurecimento e o anel são pointer-events:none, então a pessoa lê o passo e experimenta no mesmo instante.
+   Só o cartão recebe clique. As posições vêm de core/tour.js (em pixels, relativas à janela do criador). */
+.cs-tour-back{position:absolute;inset:0;z-index:40;pointer-events:none}
+.cs-tour-foco{position:absolute;border-radius:10px;box-shadow:0 0 0 9999px rgba(8,7,12,.56),0 0 0 2px var(--sel,#4f8cff),0 0 18px rgba(79,140,255,.5);transition:left .18s ease,top .18s ease,width .18s ease,height .18s ease}
+.cs-tour-foco[hidden]{display:block;width:0;height:0;left:50%;top:50%;box-shadow:0 0 0 9999px rgba(8,7,12,.56)}
+.cs-tour{position:absolute;z-index:41;width:min(372px,calc(100% - 24px));display:flex;flex-direction:column;gap:7px;
+  background:var(--p1,#1b1a22);border:1px solid var(--line,#34333f);border-radius:12px;padding:12px 14px 11px;
+  box-shadow:0 22px 60px rgba(0,0,0,.6);color:var(--tx,#ebe9f4);font-size:13px;outline:none;transition:left .18s ease,top .18s ease}
+.cs-tour:focus-visible{border-color:var(--sel,#4f8cff)}
+.cs-tour header{display:flex;align-items:center;gap:8px;padding:0;border:0}
+.cs-tour-marca{font:700 10px var(--f,inherit);letter-spacing:.1em;text-transform:uppercase;color:var(--accent,#e4572e)}
+.cs-tour-conta{margin-left:auto;color:var(--dim,#9a97ab);font-size:11.5px;font-variant-numeric:tabular-nums}
+.btn.cs-tour-x{width:26px;height:26px;padding:0}
+.cs-tour-tit{font-size:15px;line-height:1.25}
+.cs-tour-txt{margin:0;line-height:1.5}
+.cs-tour-dica{margin:0;padding:7px 9px;border-radius:8px;background:var(--p2,#24232d);border-left:2px solid var(--accent,#e4572e);color:var(--dim,#9a97ab);line-height:1.45;font-size:12px}
+.cs-tour-dica[hidden]{display:none}
+.cs-tour footer{display:flex;align-items:center;gap:6px;padding:0;border:0;margin-top:2px}
+.cs-tour-pontos{display:flex;gap:4px;align-items:center}
+.cs-tour-ponto{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:var(--p3,#2e2d3a);cursor:pointer;transition:background .15s,transform .15s}
+.cs-tour-ponto:hover{background:var(--dim,#9a97ab)}
+.cs-tour-ponto.on{background:var(--accent,#e4572e);transform:scale(1.4)}
+@media (max-width:620px){.cs-tour{width:calc(100% - 20px)}}
+@media (prefers-reduced-motion:reduce){.cs-tour,.cs-tour-foco,.cs-tour-ponto{transition:none}}
