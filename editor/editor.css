@@ -33,12 +33,17 @@ code{background:var(--p3);padding:1px 5px;border-radius:4px;font-size:11.5px}
 .dados-sec{margin:14px 0 6px;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
 .dados-ok{color:#4ade80}.dados-aviso{color:#f0b429}
 .tools-nav{display:flex;gap:4px;margin:0 6px 0 4px}
-.tn{white-space:nowrap;font:600 11.5px var(--f);padding:5px 11px;border-radius:99px;border:0;background:var(--p3);color:#7d7a8c;cursor:not-allowed}
+/* As ferramentas do ArtAtk na barra de cima. A classe base é de botão QUE FUNCIONA: o cinza de "em breve" é do :disabled —
+   antes estava no .tn, e por isso o Animador, que abre de verdade, parecia desligado. */
+.tn{white-space:nowrap;font:600 11.5px var(--f);padding:5px 11px;border-radius:99px;border:1px solid transparent;background:var(--p3);color:var(--tx);cursor:pointer}
+.tn:hover:not(:disabled):not(.on){background:var(--p2);border-color:var(--line)}
+.tn:focus-visible{outline:2px solid var(--sel);outline-offset:1px}
+.tn:disabled{color:#7d7a8c;cursor:not-allowed}
 .tn.on{background:var(--tx);color:#17161d;cursor:default}
 @media (max-width:1600px){.who{display:none}}
 @media (max-width:1500px){#btn-anim span{display:none}#title{width:150px}}
 @media (max-width:1400px){#btn-inventory span{display:none}#btn-inventory{padding:0 9px}}
-@media (max-width:1300px){.tn:not(.on){display:none}#savestate{display:none}}
+@media (max-width:1300px){.tn:disabled{display:none}#savestate{display:none}}
 #title{background:transparent;border:1px solid transparent;color:var(--tx);font:600 14px var(--f);padding:6px 8px;border-radius:7px;width:220px}
 #title:hover{border-color:var(--line)} #title:focus{outline:none;border-color:var(--sel);background:var(--p2)}
 #savestate{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px} #savestate.ok{color:var(--ok)} #savestate.err{color:var(--err)}

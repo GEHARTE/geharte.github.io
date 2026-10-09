@@ -18,9 +18,8 @@ import { initFolhaPanel } from './folha.js';
 import { instalar as vigiarAreaVisivel } from '../core/janelas.js';
 import { trava, retomar, aplicarNoAr } from './publicacao.js';
 import { insertImageFile, insertSvg } from './tools.js';
-import { exportProject, exportHtml, buildProject, importProject, openPublish, openPreview } from './publish.js';
+import { exportProject, importProject, openPublish, openPreview } from './publish.js';
 import { goToDocuments } from './nav.js';
-import { saveCopyToDrive } from './drive.js';
 import { initAbas } from './abas.js';
 import { openExportPdf } from './pdf.js';
 import { abrirOpcoes } from './opcoes.js';
@@ -247,38 +246,8 @@ function wireTop() {
   const syncTool = () => toolBtns.forEach((b) => b.classList.toggle('on', b.dataset.tool === S.tool));
   on('tool', syncTool); syncTool();
 
-  // Opções (logo depois da logo): novo arquivo, salvar em PDF e onde ficam os dados
+  // Opções (logo depois da logo): o único menu do editor — arquivo, réguas e grade, exportações e os dados da pessoa
   $('#btn-opcoes').onclick = (e) => abrirOpcoes(e.currentTarget);
-
-  // menu ⋯
-  $('#btn-more').onclick = (e) => {
-    const old = $('#menu'); if (old) { old.remove(); return; }
-    const imp = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: () => imp.files[0] && importProject(imp.files[0]) });
-    const item = (ic, label, fn) => h('button', { html: icon(ic) + `<span>${label}</span>`, onclick: () => { m.remove(); fn(); } });
-    const verPublicada = async () => {
-      if (!S.doc.publishedAt) return toast('Esta página ainda não foi publicada.', 'err');
-      // página do site: o próprio caminho dela; perfil/artigo: o visualizador
-      window.open(S.doc.kind === 'pagina' ? BASE + S.siteEntry.caminho.replace(/index\.html$/, '') : `${BASE}perfil.html?${viewerQuery(S.slug, S.doc)}`, '_blank');
-    };
-    const m = h('div', { id: 'menu', class: 'popover menu' },
-      S.host.capacidades.publicar ? item('eye', 'Ver página publicada', verPublicada) : null,
-      item('stack', 'Arquivos', () => goToDocuments()),
-      item('layers', reguasVisiveis() ? 'Ocultar réguas (Alt+R)' : 'Mostrar réguas (Alt+R)', () => alternarReguas()),
-      item('layers', gradeAtual().visivel ? 'Ocultar grade (Alt+G)' : 'Mostrar grade (Alt+G)', () => alternarGrade()),
-      item('download', 'Exportar PDF…', openExportPdf),
-      item('image', 'Exportar como imagem (PNG)…', openExportPng),
-      item('download', 'Exportar projeto (.json)', exportProject),
-      item('code', S.doc.kind === 'site' ? 'Exportar site em HTML (.html)' : 'Exportar página em HTML (.html)', async () => { try { toast('Montando o arquivo HTML…'); const r = await exportHtml(); toast(`HTML salvo na pasta de Downloads (${r.paginas} ${r.paginas > 1 ? 'páginas' : 'página'}, ${(r.bytes / 1024).toFixed(0)} KB).`, 'ok'); } catch (e) { toast(e.message || String(e), 'err'); } }),
-      item('upload', 'Importar projeto…', () => imp.click()), imp,
-      S.host.capacidades.drive ? item('cloud', 'Salvar cópia no Drive', async () => {
-        try { toast('Salvando no seu Drive…'); const nome = await saveCopyToDrive(await buildProject()); toast(`Cópia salva no Drive: ${nome}`, 'ok'); } catch (e) { toast(e.message, 'err'); }
-      }) : null,
-      S.host.sair ? [h('hr'), item('x', 'Sair', () => S.host.sair())] : null);
-    document.body.append(m);
-    const r = e.currentTarget.getBoundingClientRect();
-    Object.assign(m.style, { top: r.bottom + 6 + 'px', right: innerWidth - r.right + 'px' });
-    setTimeout(() => document.addEventListener('pointerdown', function away(ev) { if (!m.contains(ev.target)) { m.remove(); document.removeEventListener('pointerdown', away, true); } }, true));
-  };
 }
 
 // ---------- atalhos ----------

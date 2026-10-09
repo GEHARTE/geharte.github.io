@@ -1,5 +1,9 @@
-// Botão "Opções" (logo depois da logo, na barra de cima): o que se faz com o ARQUIVO e onde ficam os dados da pessoa.
-//   Novo arquivo · Salvar em PDF · Exportar/Importar projeto · Salvar cópia no Drive · Onde ficam os meus dados
+// Botão "Opções" (logo depois da logo, na barra de cima): TUDO que se faz com o arquivo, o que se mostra na tela e onde
+// ficam os dados da pessoa.
+//   Novo arquivo · Arquivos · Ver publicada · Réguas e grade · PDF, imagem, HTML e projeto · Importar · Drive · Meus dados
+//
+// Era um menu de dois: este e um "⋯" no canto direito que repetia metade dos itens e tinha a outra metade escondida. Agora é
+// um só — se a pessoa procura o que fazer com o arquivo, procura num lugar.
 // "Onde ficam os meus dados" mostra, sem jargão, o que está neste navegador (rascunhos, imagens, preferências, disposição dos
 // painéis), o que está fora (Drive, site publicado) e se o navegador protege tudo isso de uma limpeza automática.
 import { h } from '../core/dom.js';
@@ -9,10 +13,14 @@ import { chaveLayout, chaveSync } from './dock-layout.js';
 import { S } from './state.js';
 import { popMenu } from './dock.js';
 import { modal, btn, toast } from './ui.js';
-import { goToNovoArquivo } from './nav.js';
+import { goToNovoArquivo, goToDocuments } from './nav.js';
 import { openExportPdf } from './pdf.js';
-import { exportProject, importProject, buildProject } from './publish.js';
+import { openExportPng } from './png.js';
+import { exportProject, exportHtml, importProject, buildProject } from './publish.js';
 import { saveCopyToDrive } from './drive.js';
+import { reguasVisiveis, alternarReguas, gradeAtual, alternarGrade } from './reguas.js';
+import { viewerQuery } from '../core/model.js';
+import { BASE } from '../core/util.js';
 
 const lerLS = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
 const tamanhoJson = (o) => { try { return JSON.stringify(o).length; } catch { return 0; } };
@@ -63,12 +71,33 @@ function importar() {
   document.body.append(inp); inp.click();
 }
 
+// Abre a página publicada: a do site pelo caminho dela; perfil e artigo pelo visualizador.
+function verPublicada() {
+  if (!S.doc.publishedAt) return toast('Esta página ainda não foi publicada.', 'err');
+  const alvo = S.doc.kind === 'pagina' ? BASE + S.siteEntry.caminho.replace(/index\.html$/, '') : `${BASE}perfil.html?${viewerQuery(S.slug, S.doc)}`;
+  window.open(alvo, '_blank');
+}
+async function exportarHtml() {
+  try {
+    toast('Montando o arquivo HTML…');
+    const r = await exportHtml();
+    toast(`HTML salvo na pasta de Downloads (${r.paginas} ${r.paginas > 1 ? 'páginas' : 'página'}, ${(r.bytes / 1024).toFixed(0)} KB).`, 'ok');
+  } catch (e) { toast(e.message || String(e), 'err'); }
+}
+
 export function abrirOpcoes(ancora) {
   const conta = S.host?.preferencias && lerLS(chaveSync(S.slug)) === '1';
   popMenu(ancora, [
     { label: 'Novo arquivo…', icon: 'plus', onClick: goToNovoArquivo },
-    { label: 'Salvar em PDF…', icon: 'download', onClick: openExportPdf },
+    { label: 'Arquivos', icon: 'stack', onClick: () => goToDocuments() },
+    ...(S.host?.capacidades.publicar ? [{ label: 'Ver página publicada', icon: 'eye', onClick: verPublicada }] : []),
     '-',
+    { label: reguasVisiveis() ? 'Ocultar réguas' : 'Mostrar réguas', icon: 'layers', hint: 'Alt+R', onClick: alternarReguas },
+    { label: gradeAtual().visivel ? 'Ocultar grade' : 'Mostrar grade', icon: 'grip', hint: 'Alt+G', onClick: alternarGrade },
+    '-',
+    { label: 'Salvar em PDF…', icon: 'download', onClick: openExportPdf },
+    { label: 'Exportar como imagem (PNG)…', icon: 'image', onClick: openExportPng },
+    { label: S.doc?.kind === 'site' ? 'Exportar site em HTML (.html)' : 'Exportar página em HTML (.html)', icon: 'code', onClick: exportarHtml },
     { label: 'Exportar projeto (.json)', icon: 'download', onClick: () => exportProject() },
     { label: 'Importar projeto…', icon: 'upload', onClick: importar },
     ...(S.host?.capacidades.drive ? [{ label: 'Salvar cópia no Drive', icon: 'cloud', onClick: copiarParaDrive }] : []),
@@ -78,5 +107,6 @@ export function abrirOpcoes(ancora) {
     { label: 'Disposição dos painéis', icon: 'panels', hint: conta ? 'neste navegador e na conta' : 'neste navegador', onClick: abrirDadosLocais },
     { label: 'Preferências do editor', icon: 'wand', hint: 'neste navegador', onClick: abrirDadosLocais },
     { label: 'Onde ficam os meus dados…', icon: 'eye', onClick: abrirDadosLocais },
+    ...(S.host?.sair ? ['-', { label: 'Sair', icon: 'x', onClick: () => S.host.sair() }] : []),
   ]);
 }

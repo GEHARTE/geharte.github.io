@@ -35,35 +35,25 @@
   <main id="conteudo">
     <p class="carregando" id="carregando">Carregando os arquivos…</p>
 
-    <!-- 1. Por onde começar: "Novo arquivo em branco" e, ao lado, os últimos arquivos editados (no máximo 3) -->
-    <section class="dsec" id="sec-recentes" aria-labelledby="h-rec">
-      <header class="dsec-h"><h2 id="h-rec">Recentes</h2><p>Comece um arquivo em branco ou continue de onde parou: os últimos que você editou.</p></header>
-      <div class="dgrid recentes" id="g-recentes"></div>
+    <!-- 1. A faixa de começar: Meu espaço (em destaque), Novo arquivo e os últimos editados — numa linha só -->
+    <section class="dsec dsec-faixa" id="sec-comecar" aria-labelledby="h-comecar">
+      <header class="dsec-h"><h2 id="h-comecar">Começar</h2><p id="sub-comecar">O seu espaço, um arquivo novo e o que você editou por último.</p></header>
+      <div class="dfaixa" id="g-comecar" role="list"></div>
     </section>
 
-    <!-- 2. O que já está postado no site (editável só por quem tem permissão: hoje, a equipe de desenvolvimento) -->
-    <section class="dsec" id="sec-site" hidden aria-labelledby="h-site">
+    <!-- 2. O que está guardado NESTE computador (até ser exportado ou publicado) -->
+    <section class="dsec" id="sec-computador" hidden aria-labelledby="h-comp">
+      <header class="dsec-h"><h2 id="h-comp">No seu computador</h2><p id="sub-comp">Os arquivos e projetos que você criou: ficam neste navegador até você exportar ou publicar. Os seus materiais no Drive também aparecem aqui.</p></header>
+      <div class="dgrid" id="g-computador"></div>
+    </section>
+
+    <!-- 3. O que está no ar NESTA plataforma (Gehrarte, MUVVI…), com quem pode editar o quê -->
+    <section class="dsec" id="sec-publicadas" hidden aria-labelledby="h-pub">
       <header class="dsec-h">
-        <h2 id="h-site">Páginas do site</h2>
-        <p id="sub-site">O que já está postado no site. Só quem tem permissão de edição pode alterar estas páginas; Publicar leva a mudança ao site público.</p>
+        <h2 id="h-pub">Páginas publicadas</h2>
+        <p id="sub-pub"></p>
       </header>
-      <div class="dgrid" id="g-site"></div>
-    </section>
-
-    <section class="dsec" id="sec-equipe" hidden aria-labelledby="h-eq">
-      <header class="dsec-h"><h2 id="h-eq">Perfis da equipe no ar</h2><p>As páginas de perfil publicadas pelas outras pessoas — só para ver.</p></header>
-      <div class="dgrid" id="g-equipe"></div>
-    </section>
-
-    <!-- 3. O que a PESSOA criou (fica neste navegador até ser exportado ou publicado) -->
-    <section class="dsec" id="sec-meu" hidden aria-labelledby="h-meu">
-      <header class="dsec-h"><h2 id="h-meu">Meu espaço</h2><p>Sua página de perfil e os seus materiais no Drive.</p></header>
-      <div class="dgrid" id="g-meu"></div>
-    </section>
-
-    <section class="dsec" id="sec-artigos" hidden aria-labelledby="h-art">
-      <header class="dsec-h"><h2 id="h-art">Todos os meus arquivos</h2><p>Tudo o que você criou, guardado neste navegador — inclusive o que não aparece nos recentes.</p></header>
-      <div class="dgrid" id="g-artigos"></div>
+      <div class="dgrid" id="g-publicadas"></div>
     </section>
 
     <p class="vazio" id="vazio" hidden>Nenhum arquivo encontrado para essa busca.</p>

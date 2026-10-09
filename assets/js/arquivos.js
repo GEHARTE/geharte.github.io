@@ -8,6 +8,7 @@
 import { h } from './core/dom.js';
 import { loadUsers, loadConfig } from './core/auth.js';
 import { carregarHost } from './core/host.js';
+import { permissao, resumoDaPlataforma } from './core/permissoes.js';
 import { Store } from './core/store.js';
 import { renderArtboardRecortado, usedFonts } from './core/render.js';
 import { larguraFinal } from './core/gabarito.js';
@@ -99,19 +100,20 @@ function cartao(c) {
     ? `${c.quem ? c.quem + ' · ' : ''}${fmtWhen(c.quando)}`
     : c.estado === 'original' ? 'Código do site — ninguém publicou pelo editor' : '—';
 
-  const el = h('article', { class: `cartao tipo-${c.tipo}`, 'data-busca': semAcento([c.titulo, c.funcao, c.arquivo, c.quem, STATE_LABEL[c.estado], KINDS[c.tipo]].join(' ')) },
+  const el = h('article', { class: `cartao tipo-${c.tipo}${c.destaque ? ' destaque' : ''}${c.compacto ? ' compacto' : ''}`, 'data-busca': semAcento([c.titulo, c.funcao, c.arquivo, c.quem, STATE_LABEL[c.estado], KINDS[c.tipo]].join(' ')) },
     capa,
     h('div', { class: 'corpo' },
       h('div', { class: 'tit' }, h('h3', {}, abrir ? h('a', { href: abrir }, c.titulo) : c.titulo), mais),
       h('div', { class: 'chips' }, h('span', { class: `chip tipo-${c.tipo}` }, KINDS[c.tipo]), h('span', { class: `chip st-${c.estado}` }, STATE_LABEL[c.estado]),
-        c.somenteLeitura ? h('span', { class: 'chip so-ler' }, 'Só leitura') : null),
+        c.somenteLeitura ? h('span', { class: 'chip so-ler', title: c.motivo || '' }, 'Só leitura') : null),
       h('dl', {},
         c.funcao ? linha('O que é', c.funcao) : null,
+        c.somenteLeitura && c.motivo ? linha('Quem edita', c.motivo) : null,
         linha('Publicada em', onde),
         linha('Publicada por', por),
         linha('Arquivo', h('code', {}, c.arquivo), c.fonte ? h('code', { class: 'fonte', title: 'Onde ficam os dados editáveis' }, c.fonte) : null))),
     h('footer', {},
-      abrir ? h('a', { class: 'dbtn primario', href: abrir }, 'Abrir no editor') : null,
+      abrir ? h('a', { class: 'dbtn primario', href: abrir }, c.destaque ? 'Abrir o meu espaço' : 'Abrir no editor') : null,
       c.verUrl && c.estado !== 'inventario' ? h('a', { class: 'dbtn', href: c.verUrl, target: '_blank', rel: 'noopener' }, 'Ver no site ↗') : null));
   return el;
 }
@@ -140,10 +142,14 @@ async function main() {
   const [users, cfg, reg, locais, imagens, indice] = await Promise.all([
     cap.perfisDaEquipe ? loadUsers().catch(() => []) : [], loadConfig(), cap.paginasDoSite ? loadRegistry() : [], Store.listDocs(slug), carregaImagensLocais(slug), cap.perfisDaEquipe ? getJson('indice.json') : null,
   ]);
-  const podeSite = !!sess.podeSite && cap.paginasDoSite;
   const host = siteHost(cfg) || location.host;
   const urlTexto = (u) => u.replace(/^https?:\/\//, '');
-  const secoes = { recentes: [], site: [], meu: [], artigos: [], equipe: [] };
+  // A tela tem três partes: a FAIXA de começar (o meu espaço, um arquivo novo e os recentes, numa linha só),
+  // o que está NO COMPUTADOR e o que está PUBLICADO nesta plataforma (com quem pode editar o quê).
+  const secoes = { espaco: [], recentes: [], computador: [], publicadas: [] };
+  const marca = H.marca?.nome || '';
+  // a regra de edição vive em core/permissoes.js; aqui só se pergunta a ela
+  const podeMexer = (tipo, dono, donoNome) => permissao({ tipo, dono, donoNome }, sess, cap);
 
   // ----- páginas do site -----
   await Promise.all(reg.map(async (p) => {
@@ -155,20 +161,21 @@ async function main() {
     const dir = pageDir(p.id);
     const fake = { kind: 'pagina', id };
     const verUrl = aberto(p.caminho.replace(/index\.html$/, ''));
-    secoes.site.push({ ordem: reg.indexOf(p), c: {
+    const perm = podeMexer('pagina');
+    secoes.publicadas.push({ ordem: reg.indexOf(p), c: {
       id, tipo: 'pagina', titulo: p.titulo, funcao: p.funcao, arquivo: p.caminho, fonte: `${dir}page.json`, host,
       ...pub, doc, assetUrl: (a) => (local?.doc?.assets?.[a] ? imagens.get(a) : null) || remotoUrl(dir, remote || modelo)(a) || imagens.get(a),
       verUrl, urlTexto: urlTexto(publicUrl(cfg, p.caminho)),
-      editor: podeSite ? `../editor/?doc=${id}` : null, somenteLeitura: !podeSite,
+      editor: perm.pode ? `../editor/?doc=${id}` : null, somenteLeitura: !perm.pode, motivo: perm.motivo,
       menu: [
-        ...(podeSite ? [{ label: 'Abrir no editor', fn: () => { location.href = `../editor/?doc=${id}`; } }] : []),
+        ...(perm.pode ? [{ label: 'Abrir no editor', fn: () => { location.href = `../editor/?doc=${id}`; } }] : []),
         { label: 'Ver no site', href: verUrl },
         { label: 'Copiar endereço', fn: () => navigator.clipboard?.writeText(publishedUrl(cfg, slug, fake, p)) },
-        ...(local && podeSite ? [{ label: 'Descartar o meu rascunho local', perigo: true, fn: () => descartar(local, `o seu rascunho local de “${p.titulo}”`, 'A versão no ar não é afetada; da próxima vez você começa dela.') }] : []),
+        ...(local && perm.pode ? [{ label: 'Descartar o meu rascunho local', perigo: true, fn: () => descartar(local, `o seu rascunho local de “${p.titulo}”`, 'A versão no ar não é afetada; da próxima vez você começa dela.') }] : []),
       ],
     } });
   }));
-  secoes.site.sort((a, b) => a.ordem - b.ordem);
+
 
   // ----- meu perfil -----
   const meuLocal = locais.find((d) => d.id === PROFILE_ID) || null;
@@ -178,7 +185,8 @@ async function main() {
     const dir = publishDir(slug, fake);
     const pub = publicacao({ local: meuLocal, remote: meuRemoto?.publishedAt ? meuRemoto : null });
     const verUrl = aberto(`perfil.html?u=${encodeURIComponent(slug)}`);
-    secoes.meu.push({ ordem: 0, c: {
+    secoes.espaco.push({ ordem: 0, c: {
+      destaque: true,
       id: PROFILE_ID, tipo: 'perfil', titulo: meuLocal?.doc?.title || meuRemoto?.title || `Página de ${sess.nome}`, arquivo: `${dir}page.json`, host,
       funcao: 'A sua página pessoal na equipe, montada do jeito que você quiser: texto, imagem, desenho e animação. Aparece em “Páginas da equipe” na home do blog.',
       ...pub, doc: meuLocal?.doc || meuRemoto, assetUrl: (a) => (meuLocal?.doc?.assets?.[a] ? imagens.get(a) : null) || remotoUrl(dir, meuRemoto)(a) || imagens.get(a),
@@ -218,8 +226,9 @@ async function main() {
           { label: 'Excluir do meu navegador', perigo: true, fn: () => descartar(local, `“${local.doc.title || 'sem título'}”`, pub.quando ? 'A versão publicada no site não é afetada.' : 'Ela nunca foi publicada: não existe outra cópia. Isto não pode ser desfeito.') }] : []),
       ] };
   };
-  artigosLocais.forEach((l, i) => secoes.artigos.push({ ordem: i, c: artigoCartao({ id: l.id, local: l, remote: null }) }));
-  remotosArt.forEach(({ a, doc }, i) => doc && secoes.artigos.push({ ordem: 1000 + i, c: artigoCartao({ id: a.id, local: null, remote: doc }) }));
+  artigosLocais.forEach((l, i) => secoes.computador.push({ ordem: i, c: artigoCartao({ id: l.id, local: l, remote: null }) }));
+  // artigos meus publicados noutro navegador: estão no ar, não neste computador
+  remotosArt.forEach(({ a, doc }, i) => doc && secoes.publicadas.push({ ordem: 500 + i, c: artigoCartao({ id: a.id, local: null, remote: doc }) }));
 
   // ----- perfis da equipe (só ver) -----
   await Promise.all(users.filter((u) => u.slug !== slug).map(async (u) => {
@@ -227,17 +236,18 @@ async function main() {
     if (!doc?.publishedAt) return;
     const dir = `perfis/${u.slug}/`;
     const verUrl = aberto(`perfil.html?u=${encodeURIComponent(u.slug)}`);
-    secoes.equipe.push({ ordem: u.nome, c: {
+    const perm = podeMexer('perfil', u.slug, u.nome);
+    secoes.publicadas.push({ ordem: `z-${u.nome}`, c: {
       tipo: 'perfil', titulo: doc.title || `Página de ${u.nome}`, arquivo: `${dir}page.json`, host, funcao: `Página de perfil de ${u.nome}.`,
       ...publicacao({ local: null, remote: doc }), doc, assetUrl: remotoUrl(dir, doc), verUrl, urlTexto: urlTexto(publicUrl(cfg, `perfil.html?u=${u.slug}`)),
-      editor: null, somenteLeitura: true, menu: [{ label: 'Ver no site', href: verUrl }],
+      editor: null, somenteLeitura: true, motivo: perm.motivo, menu: [{ label: 'Ver no site', href: verUrl }],
     } });
   }));
-  secoes.equipe.sort((a, b) => String(a.ordem).localeCompare(String(b.ordem), 'pt-BR'));
+  secoes.publicadas.sort((a, b) => String(a.ordem).padStart(6, '0').localeCompare(String(b.ordem).padStart(6, '0'), 'pt-BR'));
 
   // ----- recentes: os últimos arquivos editados (rascunhos deste navegador), de qualquer tipo -----
   // É um atalho: o mesmo arquivo continua na sua seção (páginas do site, meu espaço, todos os meus arquivos).
-  const cartaoDoId = new Map([...secoes.site, ...secoes.meu, ...secoes.artigos].map((x) => [x.c.id, x.c]));
+  const cartaoDoId = new Map([...secoes.publicadas, ...secoes.espaco, ...secoes.computador].map((x) => [x.c.id, x.c]));
   [...locais].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).map((l) => cartaoDoId.get(l.id)).filter(Boolean)
     .slice(0, MAX_RECENTES).forEach((c) => secoes.recentes.push({ c }));
 
@@ -247,16 +257,24 @@ async function main() {
     $(grid).replaceChildren(...antes, ...itens, ...extra);
     $(`#sec-${chave}`).hidden = !(itens.length || extra.length || antes.length);
   };
-  pinta('recentes', '#g-recentes', [], [azulejoNovoArquivo(slug)]);
-  pinta('site', '#g-site');
-  $('#sub-site').textContent = podeSite
-    ? $('#sub-site').textContent
-    : 'O que já está postado no site. Só quem tem permissão de edição pode alterar estas páginas; você pode ver como cada uma está.';
-  pinta('meu', '#g-meu', cap.drive ? [cartaoDrive(slug, cfg)] : []);
-  pinta('artigos', '#g-artigos');
+
+  // A faixa de começar, numa linha só: o meu espaço primeiro (em destaque), depois o arquivo novo, depois os recentes.
+  const faixa = [
+    ...secoes.espaco.map((x) => cartao(x.c)),
+    azulejoNovoArquivo(slug),
+    ...secoes.recentes.map((x) => cartao({ ...x.c, destaque: false, compacto: true })),
+  ];
+  $('#g-comecar').replaceChildren(...faixa);
+  $('#sub-comecar').textContent = secoes.espaco.length
+    ? 'O seu espaço, um arquivo novo e o que você editou por último.'
+    : 'Comece um arquivo em branco ou continue de onde parou.';
+
+  pinta('computador', '#g-computador', cap.drive ? [cartaoDrive(slug, cfg)] : []);
+  pinta('publicadas', '#g-publicadas');
+  $('#sub-pub').textContent = resumoDaPlataforma(marca, sess, cap);
+
   // vindo do editor (Opções › Novo arquivo): já abre o diálogo
   if (new URLSearchParams(location.search).has('novo')) { history.replaceState(null, '', location.pathname); abrirNovoArquivo(slug); }
-  pinta('equipe', '#g-equipe');
   $('#carregando').hidden = true;
   filtra();
 }

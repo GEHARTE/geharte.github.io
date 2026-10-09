@@ -74,6 +74,35 @@ code{font:11.5px/1.4 'JetBrains Mono',ui-monospace,monospace;background:var(--bg
 .dgrid.recentes{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media (max-width:1100px){.dgrid.recentes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
+/* A faixa de começar: UMA linha, sempre. O meu espaço vem primeiro e maior; o resto rola para o lado quando não cabe
+   (em vez de quebrar em várias linhas e empurrar o resto da página para baixo). */
+.dfaixa{display:flex;gap:20px;align-items:flex-start;overflow-x:auto;overflow-y:hidden;padding:2px 2px 10px;scroll-snap-type:x proximity}
+.dfaixa > *{flex:0 0 272px;scroll-snap-align:start}
+.dfaixa > .cartao.destaque{flex:0 0 380px}
+.dfaixa > .cartao.novo{min-height:260px;align-self:stretch;max-height:340px}
+.dfaixa::-webkit-scrollbar{height:9px}
+.dfaixa::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+.dfaixa::-webkit-scrollbar-thumb:hover{background:var(--dim)}
+
+/* O meu espaço: é o cartão da própria pessoa, e tem de se ver que é diferente dos outros. Na faixa ele é um ATALHO, não a
+   ficha inteira — só o que é dele, quando mudou e o botão de abrir. */
+.cartao.destaque{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 10px 30px rgba(0,0,0,.10)}
+/* Na faixa, o cartão é um atalho: a capa não pode tomar metade da tela, e "o que é" cabe em duas linhas. */
+.dfaixa > .cartao .capa{max-height:172px;overflow:hidden}
+.dfaixa > .cartao.compacto .capa{max-height:150px}
+.dfaixa > .cartao dd{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cartao.destaque .tit h3{font-size:19px}
+.dfaixa > .cartao.destaque dl .row:nth-child(n+3){display:none}
+.dfaixa > .cartao.destaque .corpo{padding-bottom:4px}
+/* Nos recentes, menos ainda: capa, nome e estado. A ficha completa está na seção do arquivo. */
+.cartao.compacto dl,.cartao.compacto footer{display:none}
+.cartao.compacto .capa{aspect-ratio:16/10}
+.cartao.compacto .corpo{padding-bottom:12px}
+@media (max-width:760px){
+  .dfaixa > *{flex:0 0 86%}
+  .dfaixa > .cartao.destaque{flex:0 0 92%}
+}
+
 /* ---------- cartão ---------- */
 .cartao{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:box-shadow .15s,border-color .15s;min-width:0}
 .cartao:hover,.cartao:focus-within{box-shadow:var(--sombra-alta);border-color:var(--linha-forte)}
